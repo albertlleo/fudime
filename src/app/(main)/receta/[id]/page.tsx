@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import RecipeActions from './recipe-actions'
-import type { RecipeWithCreator } from '@/lib/types'
+import Comments from './comments'
+import type { RecipeWithCreator, CommentWithUser } from '@/lib/types'
 
 export default async function RecetaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -19,16 +20,22 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
 
   const r = recipe as RecipeWithCreator
 
-  const [{ data: likeRow }, { data: saveRow }, { count: likeCount }] = await Promise.all([
+  const [{ data: likeRow }, { data: saveRow }, { count: likeCount }, { data: commentsData }] = await Promise.all([
     supabase.from('likes').select('recipe_id').eq('user_id', user!.id).eq('recipe_id', id).maybeSingle(),
     supabase.from('saves').select('recipe_id').eq('user_id', user!.id).eq('recipe_id', id).maybeSingle(),
     supabase.from('likes').select('*', { count: 'exact', head: true }).eq('recipe_id', id),
+    supabase
+      .from('comments')
+      .select('*, users!user_id(id, display_name, avatar_url)')
+      .eq('recipe_id', id)
+      .order('created_at', { ascending: true }),
   ])
 
   const tags: string[] = Array.isArray((r as any).tags) ? (r as any).tags : []
+  const comments = (commentsData ?? []) as CommentWithUser[]
 
   return (
-    <div className="min-h-dvh pb-16 overflow-y-auto bg-stone-950 text-white">
+    <div className="min-h-dvh pb-20 overflow-y-auto bg-stone-950 text-white">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 pt-12 pb-4">
         <Link
@@ -43,7 +50,7 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Video */}
-      <div className="relative w-full max-h-[65vh] bg-black flex items-center">
+      <div className="relative w-full bg-black flex items-center">
         <video
           src={r.video_url}
           poster={r.thumbnail_url ?? undefined}
@@ -67,7 +74,7 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
               {tags.map(tag => (
                 <Link
                   key={tag}
-                  href={`/buscar?q=${encodeURIComponent(tag)}`}
+                  href={`/buscar?q=${encodeURIComponent('#' + tag)}`}
                   className="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs text-stone-300 transition-colors"
                 >
                   #{tag}
@@ -88,21 +95,29 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
           )}
           <div>
             <p className="text-white font-semibold text-sm">@{r.users.display_name}</p>
-            {r.users.validated_at && (
-              <p className="text-amber-400 text-xs">Creador verificado</p>
-            )}
+            {r.users.validated_at && <p className="text-amber-400 text-xs">Creador verificado</p>}
           </div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-stone-500 ml-auto">
             <path d="M9 18l6-6-6-6" />
           </svg>
         </Link>
 
-        {/* Actions */}
+        {/* Like / save */}
         <RecipeActions
           recipeId={id}
           isLiked={!!likeRow}
           isSaved={!!saveRow}
           likeCount={likeCount ?? 0}
+        />
+
+        {/* Divider */}
+        <div className="border-t border-white/10" />
+
+        {/* Comments */}
+        <Comments
+          recipeId={id}
+          initialComments={comments}
+          currentUserId={user!.id}
         />
       </div>
     </div>

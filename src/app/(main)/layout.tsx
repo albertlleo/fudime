@@ -8,10 +8,20 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   if (!user) redirect('/login')
 
+  let notifCount = 0
+  try {
+    const { count } = await supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('read', false)
+    notifCount = count ?? 0
+  } catch {}
+
   return (
     <div className="relative h-dvh overflow-hidden">
       {children}
-      <BottomNav />
+      <BottomNav notifCount={notifCount} />
     </div>
   )
 }

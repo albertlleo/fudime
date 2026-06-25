@@ -63,3 +63,32 @@ export interface RecipeWithCreator extends Recipe {
   user_has_liked?: boolean
   user_has_saved?: boolean
 }
+
+export interface Comment {
+  id: string
+  recipe_id: string
+  user_id: string
+  content: string
+  created_at: string
+}
+
+export interface CommentWithUser extends Comment {
+  users: Pick<User, 'id' | 'display_name' | 'avatar_url'>
+}
+
+export type NotificationType = 'like' | 'follow' | 'comment'
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: NotificationType
+  actor_id: string
+  recipe_id: string | null
+  read: boolean
+  created_at: string
+}
+
+export interface NotificationWithDetails extends Notification {
+  actor: Pick<User, 'id' | 'display_name' | 'avatar_url'>
+  recipe: Pick<Recipe, 'id' | 'title' | 'thumbnail_url'> | null
+}

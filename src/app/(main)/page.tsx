@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Feed from '@/components/feed'
+import { PAGE_SIZE } from '@/app/(main)/constants'
 import type { RecipeWithCreator } from '@/lib/types'
 
 export default async function FeedPage() {
@@ -11,7 +12,7 @@ export default async function FeedPage() {
     .select('*, users!creator_id(id, display_name, avatar_url, validated_at)')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
-    .limit(20)
+    .limit(PAGE_SIZE)
 
   const recipeList = (recipes ?? []) as RecipeWithCreator[]
   const recipeIds = recipeList.map(r => r.id)

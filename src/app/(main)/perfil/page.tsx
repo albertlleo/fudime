@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import { signOutAction } from './actions'
 import MyRecipeGrid from '@/components/my-recipe-grid'
 import type { User, Recipe } from '@/lib/types'
@@ -110,6 +111,44 @@ export default async function PerfilPage() {
       </div>
 
       <MyRecipeGrid recipes={recipeList} />
+
+      {/* Notifications link */}
+      <div className="mx-6 mb-4">
+        {authUser?.email === process.env.ADMIN_EMAIL && (
+          <Link
+            href="/admin"
+            className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3.5 mb-3 hover:bg-amber-100 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-amber-600">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              <span className="text-amber-700 text-sm font-semibold">Panel Admin</span>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-amber-500">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </Link>
+        )}
+      </div>
+
+      {/* Notifications block */}
+      <div className="mx-6 mb-4">
+        <Link
+          href="/notificaciones"
+          className="flex items-center justify-between bg-white rounded-2xl px-4 py-3.5 shadow-sm hover:bg-stone-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-stone-500">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
+            </svg>
+            <span className="text-stone-700 text-sm font-medium">Notificaciones</span>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-stone-400">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
+      </div>
 
       {/* Account info */}
       <div className="mx-6 bg-white rounded-2xl divide-y divide-stone-200 mb-6 shadow-sm">
