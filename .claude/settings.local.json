@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s https://jwbtvsoumeavehgdnhau.supabase.co/rest/v1/rpc/version -H 'apikey: sb_publishable_WZgDs1C051ITntuUKcziKg_ZURq8yqA' -H 'Authorization: Bearer sb_publishable_WZgDs1C051ITntuUKcziKg_ZURq8yqA' -X POST)",
+      "Bash(curl -s 'https://jwbtvsoumeavehgdnhau.supabase.co/rest/v1/profiles?select=id&limit=1' -H 'apikey: sb_publishable_WZgDs1C051ITntuUKcziKg_ZURq8yqA' -H 'Authorization: Bearer sb_publishable_WZgDs1C051ITntuUKcziKg_ZURq8yqA')",
+      "Bash(curl *)",
+      "Bash(chmod +x /Users/albertlleo/Documents/fudime/scripts/keep-alive.sh)",
+      "Bash(/Users/albertlleo/Documents/fudime/scripts/keep-alive.sh)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 -c \"import json,sys; users=json.load\\(sys.stdin\\).get\\('users',[]\\); [print\\(u['id'], u['email']\\) for u in users]\")",
+      "Bash(npx playwright *)",
+      "Read(//Applications/**)",
+      "Bash(node -e \"require\\('@playwright/test'\\)\")",
+      "Bash(npm install *)",
+      "Bash(npm init *)",
+      "Bash(node fudime-verify.mjs)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('confirmed:', d.get\\('email_confirmed_at', 'NOT SET'\\)\\)\")",
+      "Bash(node -e \"const c = require\\('cloudinary'\\); console.log\\(Object.keys\\(c\\)\\)\")",
+      "Bash(node -e \"const {v2} = require\\('cloudinary'\\); console.log\\('v2 ok'\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('role:', d[0]['role'], '| validated_at:', d[0]['validated_at']\\)\")",
+      "Bash(node *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('OK:', d.get\\('secure_url',''\\)\\) if 'secure_url' in d else print\\('ERROR:', d.get\\('error',{}\\).get\\('message',''\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('OK — public_id:', d.get\\('public_id',''\\)\\) if 'secure_url' in d else print\\('ERROR:', d.get\\('error',{}\\).get\\('message','unknown'\\)\\)\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 *)",
+      "Bash(supabase --version)",
+      "Bash(psql --version)",
+      "Read(//Users/albertlleo/.supabase/**)",
+      "Read(//Users/albertlleo/**)",
+      "Bash(npx supabase@latest --version)",
+      "Bash(npx supabase@latest db execute --help)",
+      "Bash(npx supabase@latest db --help)",
+      "Bash(npx supabase@latest *)"
+    ]
+  }
+}
