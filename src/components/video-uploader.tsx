@@ -25,6 +25,11 @@ export default function VideoUploader() {
       setUpload({ status: 'error', message: 'El archivo debe ser un vídeo.' })
       return
     }
+    const MAX_MB = 100
+    if (file.size > MAX_MB * 1024 * 1024) {
+      setUpload({ status: 'error', message: `El vídeo pesa más de ${MAX_MB} MB. Recórtalo o baja la calidad antes de subir.` })
+      return
+    }
 
     setUpload({ status: 'uploading', progress: 0 })
 
@@ -133,7 +138,7 @@ export default function VideoUploader() {
             <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.89L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
           </svg>
           <p className="text-stone-500 text-sm font-medium">Toca para seleccionar vídeo</p>
-          <p className="text-stone-600 text-xs mt-1">o arrastra aquí</p>
+          <p className="text-stone-600 text-xs mt-1">o arrastra aquí · máx. 100 MB</p>
           {upload.status === 'error' && (
             <p className="text-red-400 text-xs mt-3 px-4 text-center">{upload.message}</p>
           )}
