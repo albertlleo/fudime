@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import type { UserRole } from '@/lib/types'
 
@@ -54,12 +55,6 @@ export async function registerAction(
     return { error: 'No se pudo crear el usuario.' }
   }
 
-  // If email confirmation is required, no session is available yet.
-  // The DB row will be created via a trigger or on first login.
-  if (!authData.session) {
-    redirect('/login?confirm=1')
-  }
-
   let instagramUrl: string | null = null
   let tiktokUrl: string | null = null
   if (socialUrl) {
@@ -70,7 +65,9 @@ export async function registerAction(
     }
   }
 
-  const { error: insertError } = await supabase.from('users').insert({
+  // Use admin client so the insert works even before email confirmation
+  const admin = createAdminClient()
+  const { error: insertError } = await admin.from('users').insert({
     id: authData.user.id,
     email,
     display_name: displayName,
@@ -82,6 +79,11 @@ export async function registerAction(
 
   if (insertError) {
     return { error: 'Error al guardar el perfil. Intenta de nuevo.' }
+  }
+
+  // Email confirmation required — redirect to login with info banner
+  if (!authData.session) {
+    redirect('/login?confirm=1')
   }
 
   redirect('/')
