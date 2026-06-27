@@ -1,33 +1,21 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import PendingCreators from './pending-creators'
-import type { User } from '@/lib/types'
+import AllUsers from './all-users'
 
 export default async function AdminPage() {
   const admin = createAdminClient()
 
-  const { data: pending } = await admin
-    .from('users')
-    .select('*')
-    .eq('role', 'creator')
-    .is('validated_at', null)
-    .order('created_at', { ascending: true })
-
-  const { data: validated } = await admin
-    .from('users')
-    .select('id, display_name, email, validated_at, created_at')
-    .eq('role', 'creator')
-    .not('validated_at', 'is', null)
-    .order('validated_at', { ascending: false })
-    .limit(10)
-
-  const { count: totalRecipes } = await admin
-    .from('recipes')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'published')
-
-  const { count: totalUsers } = await admin
-    .from('users')
-    .select('*', { count: 'exact', head: true })
+  const [
+    { data: pending },
+    { data: allUsers },
+    { count: totalRecipes },
+    { count: totalUsers },
+  ] = await Promise.all([
+    admin.from('users').select('*').eq('role', 'creator').is('validated_at', null).order('created_at', { ascending: true }),
+    admin.from('users').select('*').order('created_at', { ascending: false }).limit(50),
+    admin.from('recipes').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+    admin.from('users').select('*', { count: 'exact', head: true }),
+  ])
 
   return (
     <div className="px-4 py-6 max-w-2xl mx-auto">
@@ -54,26 +42,11 @@ export default async function AdminPage() {
           </span>
         )}
       </h2>
+      <PendingCreators creators={(pending ?? []) as any[]} />
 
-      <PendingCreators creators={(pending ?? []) as User[]} />
-
-      {/* Recently validated */}
-      {(validated?.length ?? 0) > 0 && (
-        <>
-          <h2 className="text-base font-bold text-stone-900 mb-3 mt-8">Validados recientemente</h2>
-          <div className="bg-white rounded-2xl divide-y divide-stone-100 shadow-sm">
-            {validated!.map((u: any) => (
-              <div key={u.id} className="px-4 py-3 flex items-center justify-between">
-                <div>
-                  <p className="text-stone-900 text-sm font-medium">{u.display_name}</p>
-                  <p className="text-stone-400 text-xs">{u.email}</p>
-                </div>
-                <span className="text-green-600 text-xs font-medium">✓ Validado</span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      {/* All users */}
+      <h2 className="text-base font-bold text-stone-900 mb-3 mt-8">Todos los usuarios</h2>
+      <AllUsers users={(allUsers ?? []) as any[]} />
     </div>
   )
 }

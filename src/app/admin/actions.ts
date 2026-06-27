@@ -53,7 +53,41 @@ export async function rejectCreator(creatorId: string): Promise<{ error?: string
   const admin = createAdminClient()
   const { error } = await admin
     .from('users')
-    .update({ role: 'consumer' })
+    .update({ role: 'consumer', validated_at: null })
+    .eq('id', creatorId)
+
+  if (error) return { error: error.message }
+  return {}
+}
+
+export async function promoteToCreator(userId: string): Promise<{ error?: string }> {
+  try {
+    await assertAdmin()
+  } catch {
+    return { error: 'No autorizado' }
+  }
+
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('users')
+    .update({ role: 'creator', validated_at: new Date().toISOString() })
+    .eq('id', userId)
+
+  if (error) return { error: error.message }
+  return {}
+}
+
+export async function revokeCreator(creatorId: string): Promise<{ error?: string }> {
+  try {
+    await assertAdmin()
+  } catch {
+    return { error: 'No autorizado' }
+  }
+
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('users')
+    .update({ role: 'consumer', validated_at: null })
     .eq('id', creatorId)
 
   if (error) return { error: error.message }
