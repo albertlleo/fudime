@@ -65,9 +65,10 @@ export async function registerAction(
     }
   }
 
-  // Use admin client so the insert works even before email confirmation
+  // Upsert so we overwrite any row a Supabase trigger may have already created
+  // (triggers default to role='consumer'; upsert ensures the chosen role wins)
   const admin = createAdminClient()
-  const { error: insertError } = await admin.from('users').insert({
+  const { error: upsertError } = await admin.from('users').upsert({
     id: authData.user.id,
     email,
     display_name: displayName,
@@ -75,9 +76,9 @@ export async function registerAction(
     instagram_url: instagramUrl,
     tiktok_url: tiktokUrl,
     validated_at: null,
-  })
+  }, { onConflict: 'id' })
 
-  if (insertError) {
+  if (upsertError) {
     return { error: 'Error al guardar el perfil. Intenta de nuevo.' }
   }
 
