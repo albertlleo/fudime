@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { toggleLike, toggleSave, fetchMoreRecipes, fetchTrendingRecipes } from '@/app/(main)/actions'
+import { toggleLike, toggleSave, fetchMoreRecipes, fetchTrendingRecipes, fetchFollowingRecipes } from '@/app/(main)/actions'
 import { PAGE_SIZE } from '@/app/(main)/constants'
 import type { RecipeWithCreator } from '@/lib/types'
 
@@ -14,7 +14,7 @@ interface FeedProps {
 }
 
 export default function Feed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap }: FeedProps) {
-  const [mode, setMode] = useState<'recent' | 'trending'>('recent')
+  const [mode, setMode] = useState<'recent' | 'trending' | 'following'>('recent')
   const [switching, setSwitching] = useState(false)
   const [recipes, setRecipes] = useState(initialRecipes)
   const [liked, setLiked] = useState(() => new Set(likedIds))
@@ -27,11 +27,18 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
   const loadingRef = useRef(false)
   const cursorRef = useRef<string | null>(initialRecipes.at(-1)?.published_at ?? null)
 
-  async function switchMode(newMode: 'recent' | 'trending') {
+  async function switchMode(newMode: 'recent' | 'trending' | 'following') {
     if (newMode === mode || switching) return
     setSwitching(true)
     if (newMode === 'trending') {
       const result = await fetchTrendingRecipes()
+      setRecipes(result.recipes)
+      setLiked(new Set(result.likedIds))
+      setSaved(new Set(result.savedIds))
+      setCounts(result.likeCountMap)
+      setHasMore(false)
+    } else if (newMode === 'following') {
+      const result = await fetchFollowingRecipes()
       setRecipes(result.recipes)
       setLiked(new Set(result.likedIds))
       setSaved(new Set(result.savedIds))
@@ -77,29 +84,38 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
     return () => observer.disconnect()
   }, [hasMore])
 
-  if (recipes.length === 0) {
-    return (
-      <div className="h-dvh flex flex-col items-center justify-center text-center px-8 pb-16">
+  const emptyContent = recipes.length === 0 ? (
+    mode === 'following' ? (
+      <div className="h-dvh snap-start snap-always flex flex-col items-center justify-center text-center px-8 pb-16 bg-stone-950">
+        <span className="text-5xl mb-4">👨‍🍳</span>
+        <h2 className="text-xl font-bold text-white mb-2">Aún no sigues a nadie</h2>
+        <p className="text-stone-400 text-sm mb-6">Sigue a creadores para ver sus recetas aquí</p>
+        <button onClick={() => switchMode('recent')} className="px-5 py-2.5 bg-amber-500 text-black font-semibold rounded-xl text-sm">
+          Ver recetas
+        </button>
+      </div>
+    ) : (
+      <div className="h-dvh snap-start snap-always flex flex-col items-center justify-center text-center px-8 pb-16 bg-stone-950">
         <span className="text-5xl mb-4">🍳</span>
-        <h2 className="text-xl font-bold text-amber-50 mb-2">El feed está vacío</h2>
-        <p className="text-stone-400 text-sm">Pronto habrá recetas aquí. ¡Sé el primero en subir una!</p>
+        <h2 className="text-xl font-bold text-white mb-2">El feed está vacío</h2>
+        <p className="text-stone-400 text-sm">Pronto habrá recetas aquí.</p>
       </div>
     )
-  }
+  ) : null
 
   return (
     <div className="relative h-dvh">
       {/* Mode tabs */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 flex bg-black/40 backdrop-blur-sm rounded-full p-0.5 gap-0.5">
-        {(['recent', 'trending'] as const).map(m => (
+        {([['recent', 'Para ti'], ['following', 'Siguiendo'], ['trending', '🔥']] as const).map(([m, label]) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
               mode === m ? 'bg-white text-stone-900' : 'text-white/80 hover:text-white'
             }`}
           >
-            {m === 'recent' ? 'Para ti' : '🔥 Tendencias'}
+            {label}
           </button>
         ))}
       </div>
@@ -112,6 +128,7 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
       )}
 
     <div className="h-dvh overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
+      {emptyContent}
       {recipes.map((recipe) => (
         <VideoCard
           key={recipe.id}

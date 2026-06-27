@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import BottomNav from '@/components/bottom-nav'
+import Onboarding from '@/components/onboarding'
+import InstallPrompt from '@/components/install-prompt'
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -22,6 +24,8 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     <div className="relative h-dvh overflow-hidden">
       {children}
       <BottomNav notifCount={notifCount} />
+      <Onboarding />
+      <InstallPrompt />
     </div>
   )
 }

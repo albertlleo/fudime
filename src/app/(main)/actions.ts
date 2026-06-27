@@ -77,6 +77,55 @@ export async function toggleFollow(creatorId: string): Promise<void> {
   }
 }
 
+export async function fetchFollowingRecipes(): Promise<{
+  recipes: RecipeWithCreator[]
+  likedIds: string[]
+  savedIds: string[]
+  likeCountMap: Record<string, number>
+}> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { recipes: [], likedIds: [], savedIds: [], likeCountMap: {} }
+
+  const { data: follows } = await supabase
+    .from('follows')
+    .select('following_id')
+    .eq('follower_id', user.id)
+
+  const followingIds = (follows ?? []).map((f: any) => f.following_id)
+  if (followingIds.length === 0) return { recipes: [], likedIds: [], savedIds: [], likeCountMap: {} }
+
+  const { data: recipes } = await supabase
+    .from('recipes')
+    .select('*, users!creator_id(id, display_name, avatar_url, validated_at)')
+    .eq('status', 'published')
+    .in('creator_id', followingIds)
+    .order('published_at', { ascending: false })
+    .limit(50)
+
+  const list = (recipes ?? []) as RecipeWithCreator[]
+  const ids = list.map(r => r.id)
+  if (ids.length === 0) return { recipes: [], likedIds: [], savedIds: [], likeCountMap: {} }
+
+  const [{ data: likes }, { data: saves }, { data: allLikes }] = await Promise.all([
+    supabase.from('likes').select('recipe_id').eq('user_id', user.id).in('recipe_id', ids),
+    supabase.from('saves').select('recipe_id').eq('user_id', user.id).in('recipe_id', ids),
+    supabase.from('likes').select('recipe_id').in('recipe_id', ids),
+  ])
+
+  const likeCountMap = (allLikes ?? []).reduce<Record<string, number>>((acc, l) => {
+    acc[l.recipe_id] = (acc[l.recipe_id] ?? 0) + 1
+    return acc
+  }, {})
+
+  return {
+    recipes: list,
+    likedIds: (likes ?? []).map(l => l.recipe_id),
+    savedIds: (saves ?? []).map(s => s.recipe_id),
+    likeCountMap,
+  }
+}
+
 export async function fetchTrendingRecipes(): Promise<{
   recipes: RecipeWithCreator[]
   likedIds: string[]

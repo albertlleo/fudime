@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import RecipeGrid from '@/components/recipe-grid'
 import FollowButton from './follow-button'
+import ShareCreator from './share-creator'
 import type { User, RecipeWithCreator } from '@/lib/types'
 
 export default async function CreadorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -47,14 +48,15 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="min-h-dvh pb-16 overflow-y-auto">
-      {/* Back */}
-      <div className="px-4 pt-12 pb-2">
+      {/* Back + Share */}
+      <div className="px-4 pt-12 pb-2 flex items-center justify-between">
         <Link href="/" className="inline-flex items-center gap-1.5 text-stone-500 hover:text-stone-700 text-sm transition-colors">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
           Volver
         </Link>
+        <ShareCreator name={creator.display_name} id={id} />
       </div>
 
       {/* Header */}

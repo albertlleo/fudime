@@ -16,10 +16,10 @@ export default async function PerfilPage() {
 
   const user = profile as User
 
-  const [{ count: savesCount }, { count: likesCount }, { data: recipes }] = await Promise.all([
-    supabase.from('saves').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
-    supabase.from('likes').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
+  const [{ data: recipes }, { count: followersCount }, { count: followingCount }] = await Promise.all([
     supabase.from('recipes').select('*').eq('creator_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id),
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
   ])
 
   const recipeList = (recipes ?? []) as Recipe[]
@@ -97,17 +97,17 @@ export default async function PerfilPage() {
       {/* Stats */}
       <div className="mx-6 bg-white rounded-2xl p-4 grid grid-cols-3 divide-x divide-stone-200 mb-6 shadow-sm">
         <div className="flex flex-col items-center px-2">
-          <span className="text-stone-900 font-bold text-lg">{savesCount ?? 0}</span>
-          <span className="text-stone-500 text-xs mt-0.5">Guardados</span>
-        </div>
-        <div className="flex flex-col items-center px-2">
-          <span className="text-stone-900 font-bold text-lg">{likesCount ?? 0}</span>
-          <span className="text-stone-500 text-xs mt-0.5">Likes</span>
-        </div>
-        <div className="flex flex-col items-center px-2">
           <span className="text-stone-900 font-bold text-lg">{publishedCount}</span>
           <span className="text-stone-500 text-xs mt-0.5">Recetas</span>
         </div>
+        <Link href="/perfil/seguidores" className="flex flex-col items-center px-2 hover:opacity-70 transition-opacity">
+          <span className="text-stone-900 font-bold text-lg">{followersCount ?? 0}</span>
+          <span className="text-stone-500 text-xs mt-0.5">Seguidores</span>
+        </Link>
+        <Link href="/perfil/siguiendo" className="flex flex-col items-center px-2 hover:opacity-70 transition-opacity">
+          <span className="text-stone-900 font-bold text-lg">{followingCount ?? 0}</span>
+          <span className="text-stone-500 text-xs mt-0.5">Siguiendo</span>
+        </Link>
       </div>
 
       <MyRecipeGrid recipes={recipeList} />
