@@ -10,6 +10,15 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: 'FUDIME',
   description: 'Recetas en vídeo que usarás de verdad',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'FUDIME',
+  },
+  icons: {
+    apple: '/apple-touch-icon.png',
+    icon: '/icon-192.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
