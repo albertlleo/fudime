@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { toggleLike, toggleSave, fetchMoreRecipes, fetchTrendingRecipes, fetchFollowingRecipes } from '@/app/(main)/actions'
 import { PAGE_SIZE } from '@/app/(main)/constants'
+import CommentSheet from '@/components/comment-sheet'
 import type { RecipeWithCreator } from '@/lib/types'
 
 interface FeedProps {
@@ -13,11 +14,12 @@ interface FeedProps {
   userId: string
 }
 
-export default function Feed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap }: FeedProps) {
+export default function Feed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, userId }: FeedProps) {
   const [mode, setMode] = useState<'recent' | 'trending' | 'following'>('recent')
   const [switching, setSwitching] = useState(false)
   const [recipes, setRecipes] = useState(initialRecipes)
   const [liked, setLiked] = useState(() => new Set(likedIds))
+  const [commentRecipeId, setCommentRecipeId] = useState<string | null>(null)
   const [saved, setSaved] = useState(() => new Set(savedIds))
   const [counts, setCounts] = useState<Record<string, number>>(() => ({ ...likeCountMap }))
   const [muted, setMuted] = useState(true)
@@ -127,6 +129,12 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
         </div>
       )}
 
+    <CommentSheet
+      recipeId={commentRecipeId}
+      userId={userId || null}
+      onClose={() => setCommentRecipeId(null)}
+    />
+
     <div className="h-dvh overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
       {emptyContent}
       {recipes.map((recipe) => (
@@ -138,6 +146,7 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
           likeCount={counts[recipe.id] ?? 0}
           muted={muted}
           onToggleMute={() => setMuted(v => !v)}
+          onComment={() => setCommentRecipeId(recipe.id)}
           onLike={() => {
             const wasLiked = liked.has(recipe.id)
             setLiked(prev => {
@@ -197,11 +206,12 @@ interface VideoCardProps {
   likeCount: number
   muted: boolean
   onToggleMute: () => void
+  onComment: () => void
   onLike: () => void
   onSave: () => void
 }
 
-function VideoCard({ recipe, isLiked, isSaved, likeCount, muted, onToggleMute, onLike, onSave }: VideoCardProps) {
+function VideoCard({ recipe, isLiked, isSaved, likeCount, muted, onToggleMute, onComment, onLike, onSave }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [descExpanded, setDescExpanded] = useState(false)
@@ -289,6 +299,13 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, muted, onToggleMute, o
             <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
           </svg>
           <span className="text-[10px] font-medium drop-shadow">Guardar</span>
+        </button>
+
+        <button onClick={onComment} className="flex flex-col items-center gap-1 text-white transition-transform active:scale-90">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+          </svg>
+          <span className="text-[10px] font-medium drop-shadow">Comentar</span>
         </button>
 
         <button onClick={handleShare} className="flex flex-col items-center gap-1 text-white transition-transform active:scale-90">

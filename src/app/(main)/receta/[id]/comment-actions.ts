@@ -3,6 +3,16 @@
 import { createClient } from '@/lib/supabase/server'
 import type { CommentWithUser } from '@/lib/types'
 
+export async function fetchComments(recipeId: string): Promise<CommentWithUser[]> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('comments')
+    .select('*, users!user_id(id, display_name, avatar_url)')
+    .eq('recipe_id', recipeId)
+    .order('created_at', { ascending: true })
+  return (data ?? []) as CommentWithUser[]
+}
+
 export async function addComment(recipeId: string, content: string): Promise<{
   comment?: CommentWithUser
   error?: string
