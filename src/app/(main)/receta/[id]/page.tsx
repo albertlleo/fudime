@@ -20,37 +20,37 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
 
   const r = recipe as RecipeWithCreator
 
-  const [{ data: likeRow }, { data: saveRow }, { count: likeCount }, { data: commentsData }] = await Promise.all([
-    supabase.from('likes').select('recipe_id').eq('user_id', user!.id).eq('recipe_id', id).maybeSingle(),
-    supabase.from('saves').select('recipe_id').eq('user_id', user!.id).eq('recipe_id', id).maybeSingle(),
+  const [likeRow, saveRow, likeCountResult, commentsData] = await Promise.all([
+    user ? supabase.from('likes').select('recipe_id').eq('user_id', user.id).eq('recipe_id', id).maybeSingle() : Promise.resolve({ data: null }),
+    user ? supabase.from('saves').select('recipe_id').eq('user_id', user.id).eq('recipe_id', id).maybeSingle() : Promise.resolve({ data: null }),
     supabase.from('likes').select('*', { count: 'exact', head: true }).eq('recipe_id', id),
-    supabase
-      .from('comments')
-      .select('*, users!user_id(id, display_name, avatar_url)')
-      .eq('recipe_id', id)
-      .order('created_at', { ascending: true }),
+    supabase.from('comments').select('*, users!user_id(id, display_name, avatar_url)').eq('recipe_id', id).order('created_at', { ascending: true }),
   ])
 
   const tags: string[] = Array.isArray((r as any).tags) ? (r as any).tags : []
-  const comments = (commentsData ?? []) as CommentWithUser[]
+  const comments = ((commentsData as any).data ?? []) as CommentWithUser[]
+  const likeCount = (likeCountResult as any).count ?? 0
+
+  const creatorInitial = r.users.display_name[0].toUpperCase()
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto bg-stone-950 text-white">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-12 pb-4">
-        <Link
-          href="/"
-          className="w-9 h-9 flex-shrink-0 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-        </Link>
-        <h1 className="text-base font-semibold truncate">{r.title}</h1>
-      </div>
+    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
 
-      {/* Video */}
-      <div className="relative w-full bg-black flex items-center">
+      {/* Dark video hero */}
+      <div className="relative bg-black">
+        {/* Back button overlay */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 pt-12 pb-3"
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)' }}>
+          <Link href="/"
+            className="w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+          </Link>
+          <span className="text-white font-semibold text-sm truncate drop-shadow">{r.title}</span>
+        </div>
+
         <video
           src={r.video_url}
           poster={r.thumbnail_url ?? undefined}
@@ -58,25 +58,26 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
           playsInline
           autoPlay
           muted
-          className="w-full max-h-[65vh] object-contain"
+          className="w-full"
+          style={{ maxHeight: '60vh', objectFit: 'contain' }}
         />
       </div>
 
-      {/* Info */}
-      <div className="px-4 py-5 space-y-5">
+      {/* Cream content */}
+      <div className="px-5 py-5 space-y-5">
+
+        {/* Title + tags */}
         <div>
-          <h2 className="text-xl font-bold">{r.title}</h2>
+          <h1 className="text-2xl font-black leading-tight" style={{ color: 'var(--brown-900)' }}>{r.title}</h1>
           {r.description && (
-            <p className="text-stone-400 text-sm mt-2 leading-relaxed">{r.description}</p>
+            <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--brown-500)' }}>{r.description}</p>
           )}
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-3">
               {tags.map(tag => (
-                <Link
-                  key={tag}
-                  href={`/buscar?q=${encodeURIComponent('#' + tag)}`}
-                  className="px-2.5 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs text-stone-300 transition-colors"
-                >
+                <Link key={tag} href={`/categoria/${encodeURIComponent(tag)}`}
+                  className="px-3 py-1 rounded-full text-xs font-semibold transition-colors"
+                  style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
                   #{tag}
                 </Link>
               ))}
@@ -85,19 +86,25 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* Creator */}
-        <Link href={`/creador/${r.users.id}`} className="flex items-center gap-3">
+        <Link href={`/creador/${r.users.id}`}
+          className="flex items-center gap-3 p-3.5 rounded-2xl transition-colors"
+          style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
           {r.users.avatar_url ? (
-            <img src={r.users.avatar_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+            <img src={r.users.avatar_url} alt="" className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-black font-bold text-sm flex-shrink-0">
-              {r.users.display_name[0].toUpperCase()}
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black text-black flex-shrink-0"
+              style={{ background: 'var(--amber)' }}>
+              {creatorInitial}
             </div>
           )}
-          <div>
-            <p className="text-white font-semibold text-sm">@{r.users.display_name}</p>
-            {r.users.validated_at && <p className="text-amber-400 text-xs">Creador verificado</p>}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm" style={{ color: 'var(--brown-900)' }}>@{r.users.display_name}</p>
+            {r.users.validated_at && (
+              <p className="text-xs" style={{ color: '#d97706' }}>✦ Creador verificado</p>
+            )}
           </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-stone-500 ml-auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+            className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--brown-300)' }}>
             <path d="M9 18l6-6-6-6" />
           </svg>
         </Link>
@@ -105,19 +112,20 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
         {/* Like / save */}
         <RecipeActions
           recipeId={id}
-          isLiked={!!likeRow}
-          isSaved={!!saveRow}
-          likeCount={likeCount ?? 0}
+          isLiked={!!likeRow?.data}
+          isSaved={!!saveRow?.data}
+          likeCount={likeCount}
+          isLoggedIn={!!user}
         />
 
         {/* Divider */}
-        <div className="border-t border-white/10" />
+        <div style={{ borderTop: '1px solid var(--brown-100)' }} />
 
         {/* Comments */}
         <Comments
           recipeId={id}
           initialComments={comments}
-          currentUserId={user!.id}
+          currentUserId={user?.id ?? null}
         />
       </div>
     </div>

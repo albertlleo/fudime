@@ -21,7 +21,7 @@ export default function Comments({
 }: {
   recipeId: string
   initialComments: CommentWithUser[]
-  currentUserId: string
+  currentUserId: string | null
 }) {
   const [comments, setComments] = useState(initialComments)
   const [text, setText] = useState('')
@@ -30,7 +30,7 @@ export default function Comments({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!text.trim() || submitting) return
+    if (!text.trim() || submitting || !currentUserId) return
     setSubmitting(true)
     const result = await addComment(recipeId, text.trim())
     if (result.comment) {
@@ -46,36 +46,46 @@ export default function Comments({
   }
 
   return (
-    <div className="mt-6">
-      <h3 className="text-white font-semibold text-sm mb-4">
+    <div>
+      <h3 className="font-bold text-sm mb-4" style={{ color: 'var(--brown-900)' }}>
         {comments.length > 0 ? `${comments.length} comentario${comments.length !== 1 ? 's' : ''}` : 'Comentarios'}
       </h3>
 
       {comments.length === 0 && (
-        <p className="text-stone-500 text-sm mb-4">Sé el primero en comentar</p>
+        <p className="text-sm mb-4" style={{ color: 'var(--brown-300)' }}>
+          Sé el primero en comentar
+        </p>
       )}
 
-      <div className="space-y-4 mb-6">
+      <div className="space-y-4 mb-5">
         {comments.map(comment => (
           <div key={comment.id} className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-black font-bold text-xs flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-black font-bold text-xs flex-shrink-0 overflow-hidden"
+              style={{ background: 'var(--amber)' }}>
               {comment.users.avatar_url ? (
-                <img src={comment.users.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                <img src={comment.users.avatar_url} alt="" className="w-full h-full object-cover" />
               ) : (
                 comment.users.display_name[0].toUpperCase()
               )}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-2">
-                <span className="text-white text-xs font-semibold">{comment.users.display_name}</span>
-                <span className="text-stone-500 text-[10px]">{timeAgo(comment.created_at)}</span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--brown-700)' }}>
+                  {comment.users.display_name}
+                </span>
+                <span className="text-[10px]" style={{ color: 'var(--brown-300)' }}>
+                  {timeAgo(comment.created_at)}
+                </span>
               </div>
-              <p className="text-stone-300 text-sm mt-0.5 leading-relaxed">{comment.content}</p>
+              <p className="text-sm mt-0.5 leading-relaxed" style={{ color: 'var(--brown-500)' }}>
+                {comment.content}
+              </p>
             </div>
-            {comment.user_id === currentUserId && (
+            {currentUserId && comment.user_id === currentUserId && (
               <button
                 onClick={() => handleDelete(comment.id)}
-                className="text-stone-600 hover:text-red-400 transition-colors flex-shrink-0 self-start mt-1"
+                className="flex-shrink-0 self-start mt-0.5 transition-colors"
+                style={{ color: 'var(--brown-300)' }}
                 aria-label="Eliminar comentario"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
@@ -87,25 +97,36 @@ export default function Comments({
         ))}
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSubmit} className="flex gap-2 pb-4">
-        <input
-          ref={inputRef}
-          type="text"
-          value={text}
-          onChange={e => setText(e.target.value)}
-          maxLength={300}
-          placeholder="Añade un comentario..."
-          className="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white placeholder-stone-500 text-sm focus:outline-none focus:border-amber-500 transition-colors"
-        />
-        <button
-          type="submit"
-          disabled={!text.trim() || submitting}
-          className="px-4 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-semibold text-sm rounded-xl transition-colors flex-shrink-0"
-        >
-          {submitting ? '...' : 'Enviar'}
-        </button>
-      </form>
+      {currentUserId ? (
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            ref={inputRef}
+            type="text"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            maxLength={300}
+            placeholder="Añade un comentario..."
+            className="input-cream flex-1"
+          />
+          <button
+            type="submit"
+            disabled={!text.trim() || submitting}
+            className="px-4 py-2.5 font-semibold text-sm rounded-2xl transition-opacity flex-shrink-0"
+            style={{
+              background: 'var(--amber)',
+              color: '#000',
+              opacity: !text.trim() || submitting ? 0.4 : 1,
+            }}
+          >
+            {submitting ? '...' : 'Enviar'}
+          </button>
+        </form>
+      ) : (
+        <p className="text-sm text-center py-3" style={{ color: 'var(--brown-300)' }}>
+          <a href="/login" style={{ color: 'var(--brown-700)', fontWeight: 600 }}>Inicia sesión</a>
+          {' '}para comentar
+        </p>
+      )}
     </div>
   )
 }

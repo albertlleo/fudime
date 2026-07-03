@@ -17,7 +17,6 @@ export default function VideoUploader() {
   const [tagsInput, setTagsInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const isDragging = useRef(false)
   const [dragOver, setDragOver] = useState(false)
 
   const uploadFile = useCallback(async (file: File) => {
@@ -25,9 +24,8 @@ export default function VideoUploader() {
       setUpload({ status: 'error', message: 'El archivo debe ser un vídeo.' })
       return
     }
-    const MAX_MB = 100
-    if (file.size > MAX_MB * 1024 * 1024) {
-      setUpload({ status: 'error', message: `El vídeo pesa más de ${MAX_MB} MB. Recórtalo o baja la calidad antes de subir.` })
+    if (file.size > 100 * 1024 * 1024) {
+      setUpload({ status: 'error', message: 'El vídeo pesa más de 100 MB. Recórtalo o baja la calidad antes de subir.' })
       return
     }
 
@@ -46,38 +44,25 @@ export default function VideoUploader() {
       xhr.open('POST', `https://api.cloudinary.com/v1_1/${sig.cloudName}/video/upload`)
 
       xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
+        if (e.lengthComputable)
           setUpload({ status: 'uploading', progress: Math.round((e.loaded / e.total) * 100) })
-        }
       }
 
       xhr.onload = () => {
         if (xhr.status === 200) {
           const res = JSON.parse(xhr.responseText)
           const thumbUrl = res.secure_url.replace('/upload/', '/upload/so_auto,w_400,h_600,c_fill,f_jpg/')
-          setUpload({
-            status: 'done',
-            videoUrl: res.secure_url,
-            thumbnailUrl: thumbUrl,
-            duration: res.duration ? Math.round(res.duration) : null,
-          })
+          setUpload({ status: 'done', videoUrl: res.secure_url, thumbnailUrl: thumbUrl, duration: res.duration ? Math.round(res.duration) : null })
           resolve()
         } else {
           let msg = 'Error al subir el vídeo.'
-          try {
-            const err = JSON.parse(xhr.responseText)
-            if (err?.error?.message) msg = err.error.message
-          } catch {}
+          try { const err = JSON.parse(xhr.responseText); if (err?.error?.message) msg = err.error.message } catch {}
           setUpload({ status: 'error', message: msg })
           reject()
         }
       }
 
-      xhr.onerror = () => {
-        setUpload({ status: 'error', message: 'Error de red al conectar con Cloudinary.' })
-        reject()
-      }
-
+      xhr.onerror = () => { setUpload({ status: 'error', message: 'Error de red al conectar con Cloudinary.' }); reject() }
       xhr.send(formData)
     }).catch(() => {})
   }, [])
@@ -97,31 +82,19 @@ export default function VideoUploader() {
     setSubmitting(true)
     setSubmitError(null)
 
-    const tags = tagsInput
-      .split(',')
-      .map(t => t.trim().toLowerCase().replace(/\s+/g, '-'))
-      .filter(Boolean)
+    const tags = tagsInput.split(',').map(t => t.trim().toLowerCase().replace(/\s+/g, '-')).filter(Boolean)
 
     const result = await createRecipe({
-      title,
-      description,
-      videoUrl: upload.videoUrl,
-      thumbnailUrl: upload.thumbnailUrl,
-      durationSeconds: upload.duration,
-      tags,
-      publish,
+      title, description, videoUrl: upload.videoUrl,
+      thumbnailUrl: upload.thumbnailUrl, durationSeconds: upload.duration, tags, publish,
     })
 
-    if (result?.error) {
-      setSubmitError(result.error)
-      setSubmitting(false)
-      return
-    }
+    if (result?.error) { setSubmitError(result.error); setSubmitting(false) }
   }
 
   return (
-    <div className="min-h-dvh pb-24 px-4 pt-8 overflow-y-auto">
-      <h1 className="text-xl font-bold text-stone-900 mb-6">Subir receta</h1>
+    <div className="min-h-dvh pb-24 px-5 pt-14 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+      <h1 className="text-2xl font-black mb-6" style={{ color: 'var(--brown-900)' }}>Subir receta</h1>
 
       {/* Video picker */}
       {upload.status === 'idle' || upload.status === 'error' ? (
@@ -130,123 +103,127 @@ export default function VideoUploader() {
           onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          className={`border-2 border-dashed rounded-2xl h-52 flex flex-col items-center justify-center cursor-pointer transition-colors mb-6 ${
-            dragOver ? 'border-amber-500 bg-amber-500/10' : 'border-stone-300 hover:border-stone-300'
-          }`}
+          className="rounded-3xl h-52 flex flex-col items-center justify-center cursor-pointer transition-all mb-6"
+          style={{
+            border: `2px dashed ${dragOver ? 'var(--amber)' : 'var(--brown-300)'}`,
+            background: dragOver ? '#fffbeb' : '#fff',
+          }}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10 text-stone-500 mb-3">
-            <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.89L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-          </svg>
-          <p className="text-stone-500 text-sm font-medium">Toca para seleccionar vídeo</p>
-          <p className="text-stone-600 text-xs mt-1">o arrastra aquí · máx. 100 MB</p>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-3"
+            style={{ background: 'var(--cream)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
+              className="w-7 h-7" style={{ color: 'var(--brown-500)' }}>
+              <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.89L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+            </svg>
+          </div>
+          <p className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>Toca para seleccionar vídeo</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--brown-300)' }}>o arrastra aquí · máx. 100 MB</p>
           {upload.status === 'error' && (
-            <p className="text-red-400 text-xs mt-3 px-4 text-center">{upload.message}</p>
+            <p className="text-xs mt-3 px-6 text-center" style={{ color: '#dc2626' }}>{upload.message}</p>
           )}
         </div>
+
       ) : upload.status === 'uploading' ? (
-        <div className="bg-white rounded-2xl p-6 mb-6">
+        <div className="rounded-3xl p-6 mb-6" style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-stone-900 text-sm font-medium">Subiendo vídeo...</p>
-            <p className="text-stone-500 text-sm font-bold">{upload.progress}%</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>Subiendo vídeo...</p>
+            <p className="text-sm font-black" style={{ color: 'var(--amber)' }}>{upload.progress}%</p>
           </div>
-          <div className="w-full bg-stone-100 rounded-full h-2">
-            <div
-              className="bg-amber-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${upload.progress}%` }}
-            />
+          <div className="w-full rounded-full h-2" style={{ background: 'var(--brown-100)' }}>
+            <div className="h-2 rounded-full transition-all duration-300"
+              style={{ width: `${upload.progress}%`, background: 'var(--amber)' }} />
           </div>
         </div>
+
       ) : (
-        <div className="bg-white rounded-2xl p-4 mb-6 flex items-center gap-3">
-          <div className="w-16 h-20 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0">
+        <div className="rounded-3xl p-4 mb-6 flex items-center gap-4"
+          style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
+          <div className="w-16 h-20 rounded-xl overflow-hidden flex-shrink-0"
+            style={{ background: 'var(--cream)' }}>
             {upload.thumbnailUrl && (
               <img src={upload.thumbnailUrl} alt="" className="w-full h-full object-cover" />
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-green-400 text-sm font-semibold flex items-center gap-1.5">
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 14l-4-4 1.414-1.414L11 13.172l4.586-4.586L17 10l-6 6z"/></svg>
+            <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: '#16a34a' }}>
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+                <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 14l-4-4 1.414-1.414L11 13.172l4.586-4.586L17 10l-6 6z"/>
+              </svg>
               Vídeo subido
             </p>
             {upload.duration && (
-              <p className="text-stone-500 text-xs mt-0.5">{Math.floor(upload.duration / 60)}:{String(upload.duration % 60).padStart(2, '0')} min</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--brown-500)' }}>
+                {Math.floor(upload.duration / 60)}:{String(upload.duration % 60).padStart(2, '0')} min
+              </p>
             )}
           </div>
-          <button
-            onClick={() => { setUpload({ status: 'idle' }); setTitle(''); setDescription('') }}
-            className="text-stone-600 hover:text-stone-500 transition-colors"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          <button onClick={() => { setUpload({ status: 'idle' }); setTitle(''); setDescription('') }}
+            className="transition-colors flex-shrink-0" style={{ color: 'var(--brown-300)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
           </button>
         </div>
       )}
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="video/*"
-        className="hidden"
-        onChange={(e) => handleFile(e.target.files?.[0])}
-      />
+      <input ref={fileInputRef} type="file" accept="video/*" className="hidden"
+        onChange={(e) => handleFile(e.target.files?.[0])} />
 
       {/* Form */}
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">
-            Título <span className="text-red-400">*</span>
+          <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+            Título <span style={{ color: '#dc2626' }}>*</span>
           </label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={80}
-            placeholder="¿Qué receta es?"
-            className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-amber-500 transition-colors text-sm"
-          />
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)}
+            maxLength={80} placeholder="¿Qué receta es?" className="input-cream" />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">
-            Etiquetas
-            <span className="text-stone-400 font-normal ml-1">(separadas por coma)</span>
+          <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+            Etiquetas{' '}
+            <span className="font-normal" style={{ color: 'var(--brown-300)' }}>(separadas por coma)</span>
           </label>
-          <input
-            type="text"
-            value={tagsInput}
-            onChange={(e) => setTagsInput(e.target.value)}
-            placeholder="pasta, italiana, fácil..."
-            className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-amber-500 transition-colors text-sm"
-          />
+          <input type="text" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)}
+            placeholder="pasta, italiana, fácil..." className="input-cream" />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-stone-600 mb-1.5">Descripción</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={300}
-            rows={3}
-            placeholder="Ingredientes principales, trucos, notas..."
-            className="w-full bg-white border border-stone-200 rounded-xl px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-amber-500 transition-colors text-sm resize-none"
-          />
+          <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+            Descripción
+          </label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)}
+            maxLength={300} rows={3} placeholder="Ingredientes principales, trucos, notas..."
+            className="input-cream resize-none" />
         </div>
 
         {submitError && (
-          <p className="text-red-400 text-sm">{submitError}</p>
+          <p className="text-sm" style={{ color: '#dc2626' }}>{submitError}</p>
         )}
 
         <div className="flex gap-3 pt-2">
           <button
             onClick={() => handleSubmit(false)}
             disabled={upload.status !== 'done' || !title.trim() || submitting}
-            className="flex-1 bg-stone-100 hover:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed text-stone-900 font-medium rounded-xl py-3 text-sm transition-colors"
+            className="flex-1 font-medium rounded-2xl py-3.5 text-sm transition-colors"
+            style={{
+              background: '#fff',
+              border: '1.5px solid var(--brown-100)',
+              color: 'var(--brown-700)',
+              opacity: upload.status !== 'done' || !title.trim() || submitting ? 0.4 : 1,
+            }}
           >
             Guardar borrador
           </button>
           <button
             onClick={() => handleSubmit(true)}
             disabled={upload.status !== 'done' || !title.trim() || submitting}
-            className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-semibold rounded-xl py-3 text-sm transition-colors"
+            className="flex-1 font-semibold rounded-2xl py-3.5 text-sm transition-colors"
+            style={{
+              background: 'var(--amber)',
+              color: '#000',
+              opacity: upload.status !== 'done' || !title.trim() || submitting ? 0.4 : 1,
+            }}
           >
             {submitting ? 'Publicando...' : 'Publicar'}
           </button>
