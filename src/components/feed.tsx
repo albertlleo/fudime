@@ -11,14 +11,16 @@ interface FeedProps {
   likedIds: string[]
   savedIds: string[]
   likeCountMap: Record<string, number>
+  commentCountMap: Record<string, number>
   userId: string
 }
 
-export default function Feed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, userId }: FeedProps) {
+export default function Feed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId }: FeedProps) {
   const [mode, setMode] = useState<'recent' | 'trending' | 'following'>('recent')
   const [switching, setSwitching] = useState(false)
   const [recipes, setRecipes] = useState(initialRecipes)
   const [liked, setLiked] = useState(() => new Set(likedIds))
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>(() => ({ ...commentCountMap }))
   const [commentRecipeId, setCommentRecipeId] = useState<string | null>(null)
   const [saved, setSaved] = useState(() => new Set(savedIds))
   const [counts, setCounts] = useState<Record<string, number>>(() => ({ ...likeCountMap }))
@@ -133,6 +135,9 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
       recipeId={commentRecipeId}
       userId={userId || null}
       onClose={() => setCommentRecipeId(null)}
+      onCountChange={(recipeId, delta) =>
+        setCommentCounts(prev => ({ ...prev, [recipeId]: Math.max(0, (prev[recipeId] ?? 0) + delta) }))
+      }
     />
 
     <div className="h-dvh overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
@@ -146,6 +151,7 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
           likeCount={counts[recipe.id] ?? 0}
           muted={muted}
           onToggleMute={() => setMuted(v => !v)}
+          commentCount={commentCounts[recipe.id] ?? 0}
           onComment={() => setCommentRecipeId(recipe.id)}
           onLike={() => {
             const wasLiked = liked.has(recipe.id)
@@ -204,6 +210,7 @@ interface VideoCardProps {
   isLiked: boolean
   isSaved: boolean
   likeCount: number
+  commentCount: number
   muted: boolean
   onToggleMute: () => void
   onComment: () => void
@@ -211,7 +218,7 @@ interface VideoCardProps {
   onSave: () => void
 }
 
-function VideoCard({ recipe, isLiked, isSaved, likeCount, muted, onToggleMute, onComment, onLike, onSave }: VideoCardProps) {
+function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, onToggleMute, onComment, onLike, onSave }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [descExpanded, setDescExpanded] = useState(false)
@@ -305,7 +312,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, muted, onToggleMute, o
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
-          <span className="text-[10px] font-medium drop-shadow">Comentar</span>
+          <span className="text-[10px] font-medium drop-shadow">{commentCount > 0 ? commentCount.toLocaleString() : 'Comentar'}</span>
         </button>
 
         <button onClick={handleShare} className="flex flex-col items-center gap-1 text-white transition-transform active:scale-90">

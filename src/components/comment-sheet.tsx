@@ -18,9 +18,10 @@ interface Props {
   recipeId: string | null
   userId: string | null
   onClose: () => void
+  onCountChange: (recipeId: string, delta: number) => void
 }
 
-export default function CommentSheet({ recipeId, userId, onClose }: Props) {
+export default function CommentSheet({ recipeId, userId, onClose, onCountChange }: Props) {
   const [comments, setComments] = useState<CommentWithUser[]>([])
   const [loading, setLoading] = useState(false)
   const [text, setText] = useState('')
@@ -49,6 +50,7 @@ export default function CommentSheet({ recipeId, userId, onClose }: Props) {
     if (result.comment) {
       setComments(prev => [...prev, result.comment!])
       setText('')
+      if (recipeId) onCountChange(recipeId, +1)
       setTimeout(() => listRef.current?.scrollTo({ top: 99999, behavior: 'smooth' }), 50)
     } else if (result.error) {
       setSubmitError(result.error)
@@ -59,6 +61,7 @@ export default function CommentSheet({ recipeId, userId, onClose }: Props) {
   async function handleDelete(commentId: string) {
     await deleteComment(commentId)
     setComments(prev => prev.filter(c => c.id !== commentId))
+    if (recipeId) onCountChange(recipeId, -1)
   }
 
   return (
