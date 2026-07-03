@@ -218,11 +218,23 @@ interface VideoCardProps {
   onSave: () => void
 }
 
+function fmtCount(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace('.0', '') + 'M'
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace('.0', '') + 'K'
+  return String(n)
+}
+
 function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, onToggleMute, onComment, onLike, onSave }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [descExpanded, setDescExpanded] = useState(false)
   const [shareToast, setShareToast] = useState(false)
+  const [likeAnim, setLikeAnim] = useState(false)
+
+  function handleLike() {
+    if (!isLiked) { setLikeAnim(true); setTimeout(() => setLikeAnim(false), 400) }
+    onLike()
+  }
 
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted
@@ -292,35 +304,53 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
         )}
       </div>
 
-      {/* Right actions */}
-      <div className="absolute bottom-20 right-3 flex flex-col items-center gap-5 pb-2">
-        <button onClick={onLike} className={`flex flex-col items-center gap-1 transition-transform active:scale-90 ${isLiked ? 'text-red-500' : 'text-white'}`}>
-          <svg viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={isLiked ? 0 : 2} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-          </svg>
-          <span className="text-[10px] font-medium drop-shadow">{likeCount > 0 ? likeCount.toLocaleString() : 'Me gusta'}</span>
+      {/* Right actions — TikTok style */}
+      <div className="absolute bottom-24 right-3 flex flex-col items-center gap-6">
+
+        {/* Like */}
+        <button onClick={handleLike} className="flex flex-col items-center gap-1.5 active:opacity-80">
+          <div className={`transition-transform duration-200 ${likeAnim ? 'scale-[1.4]' : 'scale-100'}`}>
+            <svg viewBox="0 0 24 24" fill={isLiked ? '#ff2d55' : 'none'} stroke={isLiked ? '#ff2d55' : 'white'}
+              strokeWidth={isLiked ? 0 : 1.8} strokeLinecap="round" strokeLinejoin="round"
+              className="w-9 h-9 drop-shadow-lg">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg>
+          </div>
+          <span className="text-white text-xs font-bold drop-shadow-md" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+            {fmtCount(likeCount)}
+          </span>
         </button>
 
-        <button onClick={onSave} className={`flex flex-col items-center gap-1 transition-transform active:scale-90 ${isSaved ? 'text-amber-500' : 'text-white'}`}>
-          <svg viewBox="0 0 24 24" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={isSaved ? 0 : 2} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
-          </svg>
-          <span className="text-[10px] font-medium drop-shadow">Guardar</span>
-        </button>
-
-        <button onClick={onComment} className="flex flex-col items-center gap-1 text-white transition-transform active:scale-90">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+        {/* Comment */}
+        <button onClick={onComment} className="flex flex-col items-center gap-1.5 active:opacity-80">
+          <svg viewBox="0 0 24 24" fill="white" className="w-9 h-9 drop-shadow-lg">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
-          <span className="text-[10px] font-medium drop-shadow">{commentCount > 0 ? commentCount.toLocaleString() : 'Comentar'}</span>
+          <span className="text-white text-xs font-bold drop-shadow-md" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+            {fmtCount(commentCount)}
+          </span>
         </button>
 
-        <button onClick={handleShare} className="flex flex-col items-center gap-1 text-white transition-transform active:scale-90">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+        {/* Save */}
+        <button onClick={onSave} className="flex flex-col items-center gap-1.5 active:opacity-80">
+          <svg viewBox="0 0 24 24" fill={isSaved ? '#f59e0b' : 'white'} className="w-9 h-9 drop-shadow-lg">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
+          </svg>
+          <span className="text-white text-xs font-bold drop-shadow-md" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+            {isSaved ? 'Guardado' : 'Guardar'}
+          </span>
+        </button>
+
+        {/* Share */}
+        <button onClick={handleShare} className="flex flex-col items-center gap-1.5 active:opacity-80">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"
+            className="w-9 h-9 drop-shadow-lg">
             <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
             <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" />
           </svg>
-          <span className="text-[10px] font-medium drop-shadow">Compartir</span>
+          <span className="text-white text-xs font-bold drop-shadow-md" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+            Compartir
+          </span>
         </button>
       </div>
 
