@@ -25,6 +25,7 @@ export default function CommentSheet({ recipeId, userId, onClose }: Props) {
   const [loading, setLoading] = useState(false)
   const [text, setText] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const visible = !!recipeId
@@ -43,11 +44,14 @@ export default function CommentSheet({ recipeId, userId, onClose }: Props) {
     e.preventDefault()
     if (!text.trim() || submitting || !recipeId || !userId) return
     setSubmitting(true)
+    setSubmitError(null)
     const result = await addComment(recipeId, text.trim())
     if (result.comment) {
       setComments(prev => [...prev, result.comment!])
       setText('')
       setTimeout(() => listRef.current?.scrollTo({ top: 99999, behavior: 'smooth' }), 50)
+    } else if (result.error) {
+      setSubmitError(result.error)
     }
     setSubmitting(false)
   }
@@ -61,7 +65,7 @@ export default function CommentSheet({ recipeId, userId, onClose }: Props) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 transition-opacity duration-300"
+        className="fixed inset-0 z-[60] transition-opacity duration-300"
         style={{
           background: 'rgba(0,0,0,0.5)',
           opacity: visible ? 1 : 0,
@@ -72,7 +76,7 @@ export default function CommentSheet({ recipeId, userId, onClose }: Props) {
 
       {/* Sheet */}
       <div
-        className="fixed left-0 right-0 bottom-0 z-50 flex flex-col transition-transform duration-300 ease-out"
+        className="fixed left-0 right-0 bottom-0 z-[70] flex flex-col transition-transform duration-300 ease-out"
         style={{
           height: '70dvh',
           borderRadius: '20px 20px 0 0',
@@ -150,6 +154,9 @@ export default function CommentSheet({ recipeId, userId, onClose }: Props) {
 
         {/* Input */}
         <div className="flex-shrink-0 px-5 py-3" style={{ borderTop: '1px solid var(--brown-100)' }}>
+          {submitError && (
+            <p className="text-xs mb-2 text-center" style={{ color: '#dc2626' }}>{submitError}</p>
+          )}
           {userId ? (
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
