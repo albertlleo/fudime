@@ -227,13 +227,34 @@ function fmtCount(n: number): string {
 function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, onToggleMute, onComment, onLike, onSave }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const lastTapRef = useRef<number>(0)
   const [descExpanded, setDescExpanded] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [likeAnim, setLikeAnim] = useState(false)
+  const [doubleTapHeart, setDoubleTapHeart] = useState<{ x: number; y: number; key: number } | null>(null)
 
   function handleLike() {
     if (!isLiked) { setLikeAnim(true); setTimeout(() => setLikeAnim(false), 400) }
     onLike()
+  }
+
+  function handleVideoTap(e: React.MouseEvent<HTMLDivElement>) {
+    const now = Date.now()
+    const delta = now - lastTapRef.current
+    if (delta < 300 && delta > 0) {
+      // Double tap
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      setDoubleTapHeart({ x, y, key: now })
+      if (!isLiked) {
+        setLikeAnim(true)
+        setTimeout(() => setLikeAnim(false), 400)
+        onLike()
+      }
+      setTimeout(() => setDoubleTapHeart(null), 900)
+    }
+    lastTapRef.current = now
   }
 
   useEffect(() => {
@@ -275,7 +296,8 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
   const hasDesc = !!recipe.description
 
   return (
-    <div ref={containerRef} className="h-dvh snap-start snap-always relative flex-shrink-0 bg-stone-950">
+    <div ref={containerRef} className="h-dvh snap-start snap-always relative flex-shrink-0 bg-stone-950"
+      onClick={handleVideoTap}>
       <video
         ref={videoRef}
         src={recipe.video_url}
@@ -288,8 +310,25 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
 
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
+      {/* Double-tap heart */}
+      {doubleTapHeart && (
+        <div
+          key={doubleTapHeart.key}
+          className="pointer-events-none absolute z-20"
+          style={{
+            left: doubleTapHeart.x - 48,
+            top: doubleTapHeart.y - 48,
+            animation: 'dtHeart 0.85s ease-out forwards',
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="#ff2d55" className="w-24 h-24 drop-shadow-2xl">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+          </svg>
+        </div>
+      )}
+
       {/* Bottom info */}
-      <div className="absolute bottom-20 left-0 right-16 px-4 pb-2">
+      <div className="absolute bottom-20 left-0 right-16 px-4 pb-2" onClick={e => e.stopPropagation()}>
         <p className="text-white font-semibold text-base leading-snug mb-1">{recipe.title}</p>
         <a href={`/creador/${creator.id}`} className="text-stone-300 text-sm font-medium hover:text-white transition-colors">
           @{creator.display_name}
@@ -305,7 +344,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
       </div>
 
       {/* Right actions — TikTok style */}
-      <div className="absolute bottom-24 right-3 flex flex-col items-center gap-6">
+      <div className="absolute bottom-24 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
 
         {/* Like */}
         <button onClick={handleLike} className="flex flex-col items-center gap-1.5 active:opacity-80">
