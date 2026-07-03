@@ -88,26 +88,35 @@ export default function BottomNav({ notifCount = 0 }: { notifCount?: number }) {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-amber-50/90 backdrop-blur-md border-t border-stone-200 flex items-center justify-around z-50 pb-safe">
-      {tabs.map(({ href, label, icon, iconFilled }) => {
-        const active = pathname === href
-        const isProfile = href === '/perfil'
-        return (
-          <Link
-            key={href}
-            href={href}
-            className={`relative flex flex-col items-center gap-0.5 px-3 py-2 transition-colors ${
-              active ? 'text-amber-500' : 'text-stone-500 hover:text-stone-700'
-            }`}
-          >
-            {active ? iconFilled : icon}
-            <span className="text-[10px] font-medium leading-none">{label}</span>
-            {isProfile && notifCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-            )}
-          </Link>
-        )
-      })}
+    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe"
+      style={{
+        background: 'rgba(250,247,242,0.92)',
+        backdropFilter: 'blur(16px)',
+        borderTop: '1px solid var(--brown-100)',
+      }}>
+      <div className="flex items-center justify-around h-16">
+        {tabs.map(({ href, label, icon, iconFilled }) => {
+          const active = pathname === href
+          const isProfile = href === '/perfil'
+          return (
+            <Link
+              key={href}
+              href={href}
+              className="relative flex flex-col items-center gap-0.5 px-3 py-2 transition-colors"
+              style={{ color: active ? 'var(--amber)' : 'var(--brown-300)' }}
+            >
+              {active ? iconFilled : icon}
+              <span className="text-[10px] font-semibold leading-none"
+                style={{ color: active ? 'var(--brown-700)' : 'var(--brown-300)' }}>
+                {label}
+              </span>
+              {isProfile && notifCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
+              )}
+            </Link>
+          )
+        })}
+      </div>
     </nav>
   )
 }

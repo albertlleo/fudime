@@ -1,8 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fffbeb;
-  --foreground: #1c1917;
+  --cream:     #faf7f2;
+  --cream-2:   #f2ebe0;
+  --brown-900: #1c1410;
+  --brown-700: #44342a;
+  --brown-500: #7a5c4e;
+  --brown-300: #c4a99e;
+  --brown-100: #f0e8e3;
+  --amber:     #f59e0b;
+  --terracotta:#c2440e;
+
+  --background: var(--cream);
+  --foreground: var(--brown-900);
 }
 
 @theme inline {
@@ -12,8 +22,25 @@
   --font-mono: var(--font-geist-mono);
 }
 
+* { -webkit-tap-highlight-color: transparent; }
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
+
+/* Input base styles */
+.input-cream {
+  width: 100%;
+  background: #ffffff;
+  border: 1.5px solid var(--brown-100);
+  border-radius: 14px;
+  padding: 13px 16px;
+  color: var(--brown-900);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input-cream::placeholder { color: var(--brown-300); }
+.input-cream:focus { border-color: var(--amber); }

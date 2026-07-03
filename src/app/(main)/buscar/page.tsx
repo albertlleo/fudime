@@ -6,6 +6,11 @@ import type { RecipeWithCreator, User } from '@/lib/types'
 
 const POPULAR_TAGS = ['pasta', 'pollo', 'vegano', 'postre', 'rápido', 'ensalada', 'arroz', 'sopas', 'snacks', 'smoothie']
 
+const TAG_EMOJIS: Record<string, string> = {
+  pasta: '🍝', pollo: '🍗', vegano: '🥗', postre: '🍰', rápido: '⚡',
+  ensalada: '🥙', arroz: '🍚', sopas: '🍲', snacks: '🍿', smoothie: '🥤',
+}
+
 export default async function BuscarPage({
   searchParams,
 }: {
@@ -14,10 +19,8 @@ export default async function BuscarPage({
   const { q } = await searchParams
   const supabase = await createClient()
   const searchTerm = q?.trim() ?? ''
-
   const isTag = searchTerm.startsWith('#')
 
-  // Recipes query
   let recipeQuery = supabase
     .from('recipes')
     .select('*, users!creator_id(id, display_name, avatar_url, validated_at)')
@@ -32,7 +35,6 @@ export default async function BuscarPage({
     recipeQuery = recipeQuery.ilike('title', `%${searchTerm}%`)
   }
 
-  // Creators query — only when there's a non-tag search term
   const creatorsPromise = searchTerm && !isTag
     ? supabase
         .from('users')
@@ -42,7 +44,6 @@ export default async function BuscarPage({
         .limit(6)
     : Promise.resolve({ data: [] })
 
-  // Popular tags
   let popularTags: string[] = POPULAR_TAGS
   try {
     const { data } = await (supabase as any).rpc('get_popular_tags', { p_limit: 12 })
@@ -50,33 +51,41 @@ export default async function BuscarPage({
   } catch {}
 
   const [{ data: recipes }, { data: creators }] = await Promise.all([recipeQuery, creatorsPromise])
-
   const creatorList = (creators ?? []) as Pick<User, 'id' | 'display_name' | 'avatar_url' | 'validated_at'>[]
+  const totalResults = (recipes?.length ?? 0) + creatorList.length
 
   return (
-    <div className="min-h-dvh pb-16 overflow-y-auto">
-      <div className="px-4 pt-10 pb-2">
-        <h1 className="text-xl font-bold text-stone-900 mb-3">Buscar</h1>
+    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+
+      {/* Header */}
+      <div className="px-5 pt-14 pb-4">
+        <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>Buscar</h1>
         <SearchInput defaultValue={q ?? ''} />
-        {q && !isTag && (
-          <p className="text-stone-500 text-xs mt-2">
-            {(recipes?.length ?? 0) + creatorList.length} resultado{(recipes?.length ?? 0) + creatorList.length !== 1 ? 's' : ''} para &ldquo;{q}&rdquo;
+        {searchTerm && !isTag && (
+          <p className="text-xs mt-2" style={{ color: 'var(--brown-500)' }}>
+            {totalResults} resultado{totalResults !== 1 ? 's' : ''} para &ldquo;{q}&rdquo;
           </p>
         )}
       </div>
 
-      {/* Popular tags — only when no search */}
+      {/* Categories — only when no search */}
       {!searchTerm && (
-        <div className="px-4 pb-4">
-          <p className="text-stone-500 text-xs font-medium uppercase tracking-wide mb-2">Categorías</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="px-5 mb-6">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-300)' }}>
+            Categorías
+          </p>
+          <div className="grid grid-cols-2 gap-2">
             {popularTags.map(tag => (
               <Link
                 key={tag}
                 href={`/categoria/${encodeURIComponent(tag)}`}
-                className="px-3 py-1.5 bg-stone-100 hover:bg-amber-100 hover:text-amber-800 text-stone-700 text-sm rounded-full transition-colors"
+                className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
+                style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
               >
-                #{tag}
+                <span className="text-xl leading-none">{TAG_EMOJIS[tag] ?? '🍴'}</span>
+                <span className="text-sm font-semibold capitalize" style={{ color: 'var(--brown-700)' }}>
+                  {tag}
+                </span>
               </Link>
             ))}
           </div>
@@ -85,41 +94,44 @@ export default async function BuscarPage({
 
       {/* Creator results */}
       {creatorList.length > 0 && (
-        <div className="px-4 mb-2">
-          <p className="text-stone-500 text-xs font-medium uppercase tracking-wide mb-2">Creadores</p>
-          <div className="bg-white rounded-2xl divide-y divide-stone-100 shadow-sm">
-            {creatorList.map(creator => {
+        <div className="px-5 mb-5">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-300)' }}>
+            Creadores
+          </p>
+          <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
+            {creatorList.map((creator, i) => {
               const initials = creator.display_name
                 .split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
               return (
                 <Link
                   key={creator.id}
                   href={`/creador/${creator.id}`}
-                  className="flex items-center gap-3 px-4 py-3 hover:bg-stone-50 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-stone-50"
+                  style={i > 0 ? { borderTop: '1px solid var(--brown-100)' } : {}}
                 >
                   {creator.avatar_url ? (
                     <img src={creator.avatar_url} alt={creator.display_name}
-                      className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                      className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-black font-bold text-sm flex-shrink-0">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black text-black flex-shrink-0"
+                      style={{ background: 'var(--amber)' }}>
                       {initials}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-stone-900 font-medium text-sm">{creator.display_name}</span>
+                      <span className="font-semibold text-sm truncate" style={{ color: 'var(--brown-900)' }}>
+                        {creator.display_name}
+                      </span>
                       {creator.validated_at && (
-                        <svg viewBox="0 0 24 24" fill="none" className="w-3.5 h-3.5 flex-shrink-0">
-                          <circle cx="12" cy="12" r="12" fill="#F59E0B" />
-                          <path d="M7 12.5l3.5 3.5 6.5-7" stroke="black" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 flex-shrink-0">
+                          <circle cx="8" cy="8" r="8" fill="#F59E0B" />
+                          <path d="M4.5 8.3l2.3 2.3 4.3-4.6" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       )}
                     </div>
-                    <span className="text-stone-400 text-xs">Ver perfil</span>
+                    <span className="text-xs" style={{ color: 'var(--brown-500)' }}>Ver perfil →</span>
                   </div>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-stone-300 flex-shrink-0">
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
                 </Link>
               )
             })}
@@ -127,17 +139,19 @@ export default async function BuscarPage({
         </div>
       )}
 
-      {/* Recipe results */}
+      {/* Recipe label */}
       {searchTerm && (recipes?.length ?? 0) > 0 && (
-        <div className="px-4 mb-1">
-          <p className="text-stone-500 text-xs font-medium uppercase tracking-wide mb-2">Recetas</p>
+        <div className="px-5 mb-2">
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--brown-300)' }}>
+            Recetas
+          </p>
         </div>
       )}
 
       <RecipeGrid
         recipes={(recipes ?? []) as RecipeWithCreator[]}
         emptyIcon="🔍"
-        emptyTitle={searchTerm ? (creatorList.length > 0 ? 'Sin recetas' : 'Sin resultados') : 'Busca una receta'}
+        emptyTitle={searchTerm ? (creatorList.length > 0 ? 'Sin recetas' : 'Sin resultados') : 'Explora'}
         emptyText={
           searchTerm
             ? creatorList.length > 0

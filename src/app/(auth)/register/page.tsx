@@ -6,35 +6,26 @@ import { registerAction } from '../actions'
 import type { UserRole } from '@/lib/types'
 
 function RoleCard({
-  value,
-  selected,
-  onSelect,
-  title,
-  description,
-  icon,
+  value, selected, onSelect, title, description, emoji,
 }: {
-  value: UserRole
-  selected: boolean
-  onSelect: (v: UserRole) => void
-  title: string
-  description: string
-  icon: React.ReactNode
+  value: UserRole; selected: boolean; onSelect: (v: UserRole) => void
+  title: string; description: string; emoji: string
 }) {
   return (
     <button
       type="button"
       onClick={() => onSelect(value)}
-      className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-center ${
-        selected
-          ? 'border-amber-500 bg-amber-500/10'
-          : 'border-stone-300 bg-stone-100 hover:border-stone-300'
-      }`}
+      className="flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl text-center transition-all"
+      style={{
+        border: selected ? '2px solid var(--amber)' : '2px solid var(--brown-100)',
+        background: selected ? '#fffbeb' : '#fff',
+      }}
     >
-      <span className="text-2xl">{icon}</span>
-      <span className={`font-semibold text-sm ${selected ? 'text-amber-500' : 'text-stone-700'}`}>
+      <span className="text-2xl">{emoji}</span>
+      <span className="font-semibold text-sm" style={{ color: selected ? '#92400e' : 'var(--brown-700)' }}>
         {title}
       </span>
-      <span className="text-stone-500 text-xs leading-relaxed">{description}</span>
+      <span className="text-xs leading-relaxed" style={{ color: 'var(--brown-500)' }}>{description}</span>
     </button>
   )
 }
@@ -56,49 +47,37 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="w-full max-w-sm">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-stone-900 tracking-tight">FUDIME</h1>
-        <p className="text-stone-500 mt-1 text-sm">Recetas en vídeo que usarás de verdad</p>
+    <div className="w-full" style={{ maxWidth: 390 }}>
+      {/* Brand */}
+      <div className="text-center mb-7">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-3xl mb-3 text-xl font-black text-black"
+          style={{ background: 'var(--amber)' }}>
+          F
+        </div>
+        <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--brown-900)' }}>FUDIME</h1>
+        <p className="mt-1 text-sm" style={{ color: 'var(--brown-500)' }}>Recetas en vídeo que usarás de verdad</p>
       </div>
 
-      <div className="bg-white border border-stone-200 rounded-2xl p-6">
-        <h2 className="text-xl font-semibold text-stone-900 mb-6">Crea tu cuenta</h2>
+      {/* Card */}
+      <div className="rounded-3xl p-6 shadow-sm" style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
+        <h2 className="text-xl font-bold mb-5" style={{ color: 'var(--brown-900)' }}>Crea tu cuenta</h2>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 mb-4">
-            <p className="text-red-400 text-sm">{error}</p>
+          <div className="rounded-2xl p-3.5 mb-4" style={{ background: '#fff5f5', border: '1.5px solid #fca5a5' }}>
+            <p className="text-sm" style={{ color: '#991b1b' }}>{error}</p>
           </div>
         )}
 
         <div className="mb-5">
-          <p className="text-sm font-medium text-stone-600 mb-3">¿Cómo usarás FUDIME?</p>
+          <p className="text-sm font-medium mb-3" style={{ color: 'var(--brown-700)' }}>¿Cómo usarás FUDIME?</p>
           <div className="flex gap-3">
             <RoleCard
-              value="consumer"
-              selected={role === 'consumer'}
-              onSelect={setRole}
-              icon={
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={role === 'consumer' ? 'text-amber-400' : 'text-stone-500'}>
-                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                </svg>
-              }
-              title="Descubrir recetas"
-              description="Encuentra e inspírate con recetas de creadores"
+              value="consumer" selected={role === 'consumer'} onSelect={setRole}
+              emoji="🍽️" title="Descubrir" description="Explora recetas de creadores"
             />
             <RoleCard
-              value="creator"
-              selected={role === 'creator'}
-              onSelect={setRole}
-              icon={
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={role === 'creator' ? 'text-amber-400' : 'text-stone-500'}>
-                  <path d="m22 8-6 4 6 4V8Z"/>
-                  <rect width="14" height="12" x="2" y="6" rx="2" ry="2"/>
-                </svg>
-              }
-              title="Crear contenido"
-              description="Publica tus recetas en vídeo para la comunidad"
+              value="creator" selected={role === 'creator'} onSelect={setRole}
+              emoji="🎬" title="Crear" description="Publica tus recetas en vídeo"
             />
           </div>
         </div>
@@ -107,66 +86,39 @@ export default function RegisterPage() {
           <input type="hidden" name="role" value={role} />
 
           <div>
-            <label htmlFor="display_name" className="block text-sm font-medium text-stone-600 mb-1.5">
+            <label htmlFor="display_name" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
               Nombre
             </label>
-            <input
-              id="display_name"
-              name="display_name"
-              type="text"
-              required
-              autoComplete="name"
-              placeholder="Tu nombre o apodo"
-              className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-amber-500 transition-colors text-sm"
-            />
+            <input id="display_name" name="display_name" type="text" required autoComplete="name"
+              placeholder="Tu nombre o apodo" className="input-cream" />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-stone-600 mb-1.5">
+            <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
               Email
             </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="tu@email.com"
-              className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-amber-500 transition-colors text-sm"
-            />
+            <input id="email" name="email" type="email" required autoComplete="email"
+              placeholder="tu@email.com" className="input-cream" />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-stone-600 mb-1.5">
+            <label htmlFor="password" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
               Contraseña
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              autoComplete="new-password"
-              minLength={6}
-              placeholder="Mínimo 6 caracteres"
-              className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-amber-500 transition-colors text-sm"
-            />
+            <input id="password" name="password" type="password" required autoComplete="new-password"
+              minLength={6} placeholder="Mínimo 6 caracteres" className="input-cream" />
           </div>
 
           {role === 'creator' && (
             <div>
-              <label htmlFor="social_url" className="block text-sm font-medium text-stone-600 mb-1.5">
-                Instagram o TikTok
-                <span className="text-stone-500 font-normal ml-1">(para validación)</span>
+              <label htmlFor="social_url" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
+                Instagram o TikTok{' '}
+                <span className="font-normal" style={{ color: 'var(--brown-500)' }}>(para validación)</span>
               </label>
-              <input
-                id="social_url"
-                name="social_url"
-                type="url"
-                placeholder="https://instagram.com/tuusuario"
-                className="w-full bg-stone-100 border border-stone-300 rounded-xl px-4 py-2.5 text-stone-900 placeholder-stone-400 focus:outline-none focus:border-amber-500 transition-colors text-sm"
-              />
-              <p className="text-stone-600 text-xs mt-1.5">
-                Necesitamos validar tu cuenta antes de que puedas publicar.
+              <input id="social_url" name="social_url" type="url"
+                placeholder="https://instagram.com/tuusuario" className="input-cream" />
+              <p className="text-xs mt-1.5" style={{ color: 'var(--brown-500)' }}>
+                Validamos tu cuenta antes de que puedas publicar.
               </p>
             </div>
           )}
@@ -174,16 +126,21 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full bg-amber-500 hover:bg-amber-400 disabled:bg-amber-500/50 disabled:cursor-not-allowed text-black font-semibold rounded-xl py-2.5 transition-colors text-sm mt-2"
+            className="w-full font-semibold rounded-2xl py-3.5 text-sm mt-1 transition-opacity"
+            style={{
+              background: isPending ? 'rgba(245,158,11,0.5)' : 'var(--amber)',
+              color: '#000',
+              opacity: isPending ? 0.7 : 1,
+            }}
           >
             {isPending ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
         </form>
       </div>
 
-      <p className="text-center text-stone-500 text-sm mt-4">
+      <p className="text-center text-sm mt-5" style={{ color: 'var(--brown-500)' }}>
         ¿Ya tienes cuenta?{' '}
-        <Link href="/login" className="text-stone-500 hover:text-amber-400 font-medium transition-colors">
+        <Link href="/login" className="font-semibold" style={{ color: 'var(--brown-900)' }}>
           Inicia sesión
         </Link>
       </p>
