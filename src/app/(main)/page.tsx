@@ -18,11 +18,11 @@ export default async function FeedPage() {
   const recipeIds = recipeList.map(r => r.id)
 
   const [{ data: likes }, { data: saves }, { data: allLikes }, { data: allComments }] = await Promise.all([
-    recipeIds.length > 0
-      ? supabase.from('likes').select('recipe_id').eq('user_id', user!.id).in('recipe_id', recipeIds)
+    recipeIds.length > 0 && user
+      ? supabase.from('likes').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds)
       : Promise.resolve({ data: [] }),
-    recipeIds.length > 0
-      ? supabase.from('saves').select('recipe_id').eq('user_id', user!.id).in('recipe_id', recipeIds)
+    recipeIds.length > 0 && user
+      ? supabase.from('saves').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds)
       : Promise.resolve({ data: [] }),
     recipeIds.length > 0
       ? supabase.from('likes').select('recipe_id').in('recipe_id', recipeIds)
@@ -49,7 +49,7 @@ export default async function FeedPage() {
       savedIds={(saves ?? []).map(s => s.recipe_id)}
       likeCountMap={likeCountMap}
       commentCountMap={commentCountMap}
-      userId={user!.id}
+      userId={user?.id ?? null}
     />
   )
 }

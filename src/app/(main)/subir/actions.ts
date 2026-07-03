@@ -4,6 +4,20 @@ import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
+export async function getImageUploadSignature(): Promise<{
+  signature: string
+  timestamp: number
+  folder: string
+  cloudName: string
+  apiKey: string
+}> {
+  const timestamp = Math.round(Date.now() / 1000)
+  const folder = 'fudime/avatars'
+  const toSign = `folder=${folder}&timestamp=${timestamp}${process.env.CLOUDINARY_API_SECRET!}`
+  const signature = crypto.createHash('sha1').update(toSign).digest('hex')
+  return { signature, timestamp, folder, cloudName: process.env.CLOUDINARY_CLOUD_NAME!, apiKey: process.env.CLOUDINARY_API_KEY! }
+}
+
 export async function getUploadSignature(): Promise<{
   signature: string
   timestamp: number
@@ -13,18 +27,9 @@ export async function getUploadSignature(): Promise<{
 }> {
   const timestamp = Math.round(Date.now() / 1000)
   const folder = 'fudime/recipes'
-
-  // Cloudinary signature: SHA1(sorted_params_string + api_secret)
   const toSign = `folder=${folder}&timestamp=${timestamp}${process.env.CLOUDINARY_API_SECRET!}`
   const signature = crypto.createHash('sha1').update(toSign).digest('hex')
-
-  return {
-    signature,
-    timestamp,
-    folder,
-    cloudName: process.env.CLOUDINARY_CLOUD_NAME!,
-    apiKey: process.env.CLOUDINARY_API_KEY!,
-  }
+  return { signature, timestamp, folder, cloudName: process.env.CLOUDINARY_CLOUD_NAME!, apiKey: process.env.CLOUDINARY_API_KEY! }
 }
 
 export async function createRecipe(data: {

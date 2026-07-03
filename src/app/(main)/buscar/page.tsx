@@ -50,8 +50,18 @@ export default async function BuscarPage({
     if (data && data.length > 0) popularTags = data.map((r: any) => r.tag as string)
   } catch {}
 
-  const [{ data: recipes }, { data: creators }] = await Promise.all([recipeQuery, creatorsPromise])
+  const trendingPromise = !searchTerm
+    ? supabase
+        .from('recipes')
+        .select('*, users!creator_id(id, display_name, avatar_url, validated_at)')
+        .eq('status', 'published')
+        .order('likes_count', { ascending: false })
+        .limit(8)
+    : Promise.resolve({ data: [] })
+
+  const [{ data: recipes }, { data: creators }, { data: trendingRaw }] = await Promise.all([recipeQuery, creatorsPromise, trendingPromise])
   const creatorList = (creators ?? []) as Pick<User, 'id' | 'display_name' | 'avatar_url' | 'validated_at'>[]
+  const trendingList = (trendingRaw ?? []) as RecipeWithCreator[]
   const totalResults = (recipes?.length ?? 0) + creatorList.length
 
   return (
@@ -139,7 +149,24 @@ export default async function BuscarPage({
         </div>
       )}
 
-      {/* Recipe label */}
+      {/* Trending — only when no search */}
+      {!searchTerm && trendingList.length > 0 && (
+        <div className="mb-1">
+          <div className="px-5 mb-3">
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--brown-300)' }}>
+              🔥 Tendencias
+            </p>
+          </div>
+          <RecipeGrid
+            recipes={trendingList}
+            emptyIcon="🍴"
+            emptyTitle="Sin recetas"
+            emptyText=""
+          />
+        </div>
+      )}
+
+      {/* Recipe label for search results */}
       {searchTerm && (recipes?.length ?? 0) > 0 && (
         <div className="px-5 mb-2">
           <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--brown-300)' }}>
@@ -148,18 +175,18 @@ export default async function BuscarPage({
         </div>
       )}
 
-      <RecipeGrid
-        recipes={(recipes ?? []) as RecipeWithCreator[]}
-        emptyIcon="🔍"
-        emptyTitle={searchTerm ? (creatorList.length > 0 ? 'Sin recetas' : 'Sin resultados') : 'Explora'}
-        emptyText={
-          searchTerm
-            ? creatorList.length > 0
+      {searchTerm && (
+        <RecipeGrid
+          recipes={(recipes ?? []) as RecipeWithCreator[]}
+          emptyIcon="🔍"
+          emptyTitle={creatorList.length > 0 ? 'Sin recetas' : 'Sin resultados'}
+          emptyText={
+            creatorList.length > 0
               ? `No hay recetas con "${searchTerm}"`
               : `No hay recetas ni creadores con "${searchTerm}"`
-            : 'Escribe un nombre o explora por categoría'
-        }
-      />
+          }
+        />
+      )}
     </div>
   )
 }

@@ -12,7 +12,7 @@ interface FeedProps {
   savedIds: string[]
   likeCountMap: Record<string, number>
   commentCountMap: Record<string, number>
-  userId: string
+  userId: string | null
 }
 
 export default function Feed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId }: FeedProps) {
