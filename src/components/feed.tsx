@@ -330,8 +330,16 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
       {/* Bottom info */}
       <div className="absolute bottom-20 left-0 right-16 px-4 pb-2" onClick={e => e.stopPropagation()}>
         <p className="text-white font-semibold text-base leading-snug mb-1">{recipe.title}</p>
-        <a href={`/creador/${creator.id}`} className="text-stone-300 text-sm font-medium hover:text-white transition-colors">
-          @{creator.display_name}
+        <a href={`/creador/${creator.id}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+          {creator.avatar_url ? (
+            <img src={creator.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-white/30" />
+          ) : (
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black text-black flex-shrink-0 border border-white/30"
+              style={{ background: 'var(--amber)' }}>
+              {creator.display_name[0].toUpperCase()}
+            </div>
+          )}
+          <span className="text-stone-300 text-sm font-medium">@{creator.display_name}</span>
         </a>
         {hasDesc && (
           <button onClick={() => setDescExpanded(v => !v)} className="text-left mt-1 w-full">
