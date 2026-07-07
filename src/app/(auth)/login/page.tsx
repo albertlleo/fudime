@@ -75,10 +75,7 @@ export default function LoginPage() {
     <div className="w-full" style={{ maxWidth: 390 }}>
       {/* Brand */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl mb-4 text-2xl font-black text-black"
-          style={{ background: 'var(--amber)' }}>
-          F
-        </div>
+        <img src="/logo_fudime.png" alt="FUDIME" className="w-16 h-16 rounded-3xl mb-4 inline-block" />
         <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--brown-900)' }}>FUDIME</h1>
         <p className="mt-1 text-sm" style={{ color: 'var(--brown-500)' }}>Recetas en vídeo que usarás de verdad</p>
       </div>

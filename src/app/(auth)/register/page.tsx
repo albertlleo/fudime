@@ -50,10 +50,7 @@ export default function RegisterPage() {
     <div className="w-full" style={{ maxWidth: 390 }}>
       {/* Brand */}
       <div className="text-center mb-7">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-3xl mb-3 text-xl font-black text-black"
-          style={{ background: 'var(--amber)' }}>
-          F
-        </div>
+        <img src="/logo_fudime.png" alt="FUDIME" className="w-14 h-14 rounded-3xl mb-3 inline-block" />
         <h1 className="text-3xl font-black tracking-tight" style={{ color: 'var(--brown-900)' }}>FUDIME</h1>
         <p className="mt-1 text-sm" style={{ color: 'var(--brown-500)' }}>Recetas en vídeo que usarás de verdad</p>
       </div>

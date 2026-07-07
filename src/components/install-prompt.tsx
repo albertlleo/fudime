@@ -46,7 +46,7 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-40 bg-stone-900 text-white rounded-2xl p-4 shadow-xl flex items-start gap-3">
-      <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-black font-bold text-lg flex-shrink-0">F</div>
+      <img src="/logo_fudime.png" alt="FUDIME" className="w-10 h-10 rounded-xl flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm">Añadir FUDIME al inicio</p>
         {show === 'ios' ? (
