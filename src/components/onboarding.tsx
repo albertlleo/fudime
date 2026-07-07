@@ -43,6 +43,11 @@ export default function Onboarding() {
   return (
     <div className="fixed inset-0 z-50 bg-stone-950/90 backdrop-blur-sm flex items-end">
       <div className="w-full bg-white rounded-t-3xl p-8 pb-10">
+        {/* Brand */}
+        <div className="flex justify-center mb-6">
+          <img src="/logo_fudime.png" alt="FUDIME" className="w-14 h-14 rounded-2xl" />
+        </div>
+
         {/* Dots */}
         <div className="flex justify-center gap-1.5 mb-8">
           {SLIDES.map((_, i) => (
