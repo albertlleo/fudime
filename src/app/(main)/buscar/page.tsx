@@ -39,19 +39,21 @@ const TIMES = [
 export default async function BuscarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; diet?: string; tiempo?: string }>
+  searchParams: Promise<{ q?: string; diet?: string; tiempo?: string; sort?: string }>
 }) {
-  const { q, diet, tiempo } = await searchParams
+  const { q, diet, tiempo, sort } = await searchParams
   const supabase = await createClient()
   const searchTerm = q?.trim() ?? ''
   const isTag = searchTerm.startsWith('#')
+
+  const isTrending = sort === 'trending'
 
   let recipeQuery = supabase
     .from('recipes')
     .select('*, users!creator_id(id, display_name, avatar_url, validated_at)')
     .eq('status', 'published')
-    .order('published_at', { ascending: false })
-    .limit(40)
+    .order(isTrending ? 'likes_count' : 'published_at', { ascending: false })
+    .limit(isTrending ? 40 : 40)
 
   if (isTag) {
     const tag = searchTerm.slice(1).toLowerCase()
@@ -89,26 +91,33 @@ export default async function BuscarPage({
   const creatorList = (creators ?? []) as Pick<User, 'id' | 'display_name' | 'avatar_url' | 'validated_at'>[]
   const trendingList = (trendingRaw ?? []) as RecipeWithCreator[]
   const totalResults = (recipes?.length ?? 0) + creatorList.length
-  const isFiltered = !!(searchTerm || diet || tiempo)
-  const filterLabel = diet ? DIETS.find(d => d.key === diet)?.label : tiempo ? TIMES.find(t => t.key === tiempo)?.label : null
+  const isFiltered = !!(searchTerm || diet || tiempo || isTrending)
+  const filterLabel = isTrending ? 'Más populares'
+    : diet ? DIETS.find(d => d.key === diet)?.label
+    : tiempo ? TIMES.find(t => t.key === tiempo)?.label
+    : null
 
   return (
     <div className="h-dvh overflow-y-auto pb-20" style={{ background: 'var(--cream)' }}>
 
       {/* Header */}
       <div className="px-5 pt-14 pb-4">
-        <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>Buscar</h1>
+        <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>
+          {isTrending ? '🔥 Tendencias' : 'Buscar'}
+        </h1>
         <SearchInput defaultValue={q ?? ''} />
-        {(searchTerm || filterLabel) && (
+        {isFiltered && (
           <div className="flex items-center justify-between mt-2">
             <p className="text-xs" style={{ color: 'var(--brown-500)' }}>
-              {filterLabel
+              {isTrending
+                ? `🔥 ${totalResults} receta${totalResults !== 1 ? 's' : ''} más populares`
+                : filterLabel
                 ? `Filtrando por "${filterLabel}" · ${totalResults} receta${totalResults !== 1 ? 's' : ''}`
                 : `${totalResults} resultado${totalResults !== 1 ? 's' : ''} para "${q}"`}
             </p>
-            {filterLabel && (
+            {(filterLabel || isTrending) && (
               <Link href="/buscar" className="text-xs font-semibold" style={{ color: 'var(--terracotta)' }}>
-                Quitar filtro
+                Volver
               </Link>
             )}
           </div>
