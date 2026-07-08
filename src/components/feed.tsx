@@ -361,30 +361,54 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
       </div>
 
       {/* Ingredients modal */}
-      {showIngredients && (
-        <div
-          className="absolute inset-0 z-[80] bg-white flex flex-col"
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 pt-12 pb-3 border-b border-stone-200 bg-amber-50">
-            <h2 className="text-stone-800 font-semibold text-base">Ingredientes y paso a paso</h2>
-            <button
-              onClick={() => setShowIngredients(false)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-stone-200 active:bg-stone-300 transition-colors"
-              aria-label="Cerrar"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-stone-700">
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-          {/* Scrollable body */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
-            <p className="text-stone-900 text-sm leading-relaxed whitespace-pre-wrap">{recipe.description}</p>
-          </div>
+      {/* Ingredients bottom sheet — same format as comment sheet */}
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-[60] transition-opacity duration-300"
+        style={{
+          background: 'rgba(0,0,0,0.5)',
+          opacity: showIngredients ? 1 : 0,
+          pointerEvents: showIngredients ? 'auto' : 'none',
+        }}
+        onClick={() => setShowIngredients(false)}
+      />
+      {/* Sheet */}
+      <div
+        className="fixed left-0 right-0 bottom-0 z-[70] flex flex-col transition-transform duration-300 ease-out"
+        style={{
+          height: '70dvh',
+          borderRadius: '20px 20px 0 0',
+          background: 'var(--cream)',
+          transform: showIngredients ? 'translateY(0)' : 'translateY(100%)',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
         </div>
-      )}
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
+          style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <h3 className="font-black text-base" style={{ color: 'var(--brown-900)' }}>
+            Ingredientes y paso a paso
+          </h3>
+          <button onClick={() => setShowIngredients(false)}
+            className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: 'var(--brown-100)' }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
+              className="w-4 h-4" style={{ color: 'var(--brown-500)' }}>
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto px-5 py-4" style={{ overscrollBehavior: 'contain' }}>
+          <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--brown-900)' }}>
+            {recipe.description}
+          </p>
+        </div>
+      </div>
 
       {/* Right actions — TikTok style */}
       <div className="absolute bottom-24 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
