@@ -229,6 +229,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
   const containerRef = useRef<HTMLDivElement>(null)
   const lastTapRef = useRef<number>(0)
   const [descExpanded, setDescExpanded] = useState(false)
+  const [showIngredients, setShowIngredients] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [likeAnim, setLikeAnim] = useState(false)
   const [doubleTapHeart, setDoubleTapHeart] = useState<{ x: number; y: number; key: number } | null>(null)
@@ -270,6 +271,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
       videoRef.current.pause()
       videoRef.current.currentTime = 0
       setDescExpanded(false)
+      setShowIngredients(false)
     }
   }, [])
 
@@ -329,8 +331,8 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
 
       {/* Bottom info */}
       <div className="absolute bottom-20 left-0 right-16 px-4 pb-2" onClick={e => e.stopPropagation()}>
-        <p className="text-white font-semibold text-base leading-snug mb-1">{recipe.title}</p>
-        <a href={`/creador/${creator.id}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+        {/* 1. Creator link */}
+        <a href={`/creador/${creator.id}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity mb-1">
           {creator.avatar_url ? (
             <img src={creator.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-white/30" />
           ) : (
@@ -341,15 +343,48 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
           )}
           <span className="text-stone-300 text-sm font-medium">@{creator.display_name}</span>
         </a>
+        {/* 2. Recipe title */}
+        <p className="text-white font-semibold text-base leading-snug mb-2">{recipe.title}</p>
+        {/* 3. Ingredientes y paso a paso button */}
         {hasDesc && (
-          <button onClick={() => setDescExpanded(v => !v)} className="text-left mt-1 w-full">
-            <p className={`text-stone-400 text-xs leading-relaxed ${descExpanded ? '' : 'line-clamp-2'}`}>
-              {recipe.description}
-            </p>
-            {!descExpanded && <span className="text-stone-500 text-xs">ver más</span>}
+          <button
+            onClick={() => setShowIngredients(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium active:opacity-70 transition-opacity"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+            </svg>
+            Ingredientes y paso a paso
           </button>
         )}
       </div>
+
+      {/* Ingredients modal */}
+      {showIngredients && (
+        <div
+          className="absolute inset-0 z-[80] bg-white flex flex-col"
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-4 pt-12 pb-3 border-b border-stone-200 bg-amber-50">
+            <h2 className="text-stone-800 font-semibold text-base">Ingredientes y paso a paso</h2>
+            <button
+              onClick={() => setShowIngredients(false)}
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-stone-200 active:bg-stone-300 transition-colors"
+              aria-label="Cerrar"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-stone-700">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
+            <p className="text-stone-900 text-sm leading-relaxed whitespace-pre-wrap">{recipe.description}</p>
+          </div>
+        </div>
+      )}
 
       {/* Right actions — TikTok style */}
       <div className="absolute bottom-24 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
@@ -357,9 +392,9 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
         {/* Like */}
         <button onClick={handleLike} className="flex flex-col items-center gap-1.5 active:opacity-80">
           <div className={`transition-transform duration-200 ${likeAnim ? 'scale-[1.4]' : 'scale-100'}`}>
-            <svg viewBox="0 0 24 24" fill={isLiked ? '#ff2d55' : 'none'} stroke={isLiked ? '#ff2d55' : 'white'}
-              strokeWidth={isLiked ? 0 : 1.8} strokeLinecap="round" strokeLinejoin="round"
-              className="w-9 h-9 drop-shadow-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke={isLiked ? '#ff2d55' : 'white'}
+              strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+              className="w-7 h-7 drop-shadow-lg">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
           </div>
@@ -370,7 +405,8 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
 
         {/* Comment */}
         <button onClick={onComment} className="flex flex-col items-center gap-1.5 active:opacity-80">
-          <svg viewBox="0 0 24 24" fill="white" className="w-9 h-9 drop-shadow-lg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+            className="w-7 h-7 drop-shadow-lg">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
           <span className="text-white text-xs font-bold drop-shadow-md" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
@@ -380,7 +416,8 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
 
         {/* Save */}
         <button onClick={onSave} className="flex flex-col items-center gap-1.5 active:opacity-80">
-          <svg viewBox="0 0 24 24" fill={isSaved ? '#f59e0b' : 'white'} className="w-9 h-9 drop-shadow-lg">
+          <svg viewBox="0 0 24 24" fill="none" stroke={isSaved ? '#f59e0b' : 'white'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+            className="w-7 h-7 drop-shadow-lg">
             <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
           </svg>
           <span className="text-white text-xs font-bold drop-shadow-md" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
@@ -390,8 +427,8 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
 
         {/* Share */}
         <button onClick={handleShare} className="flex flex-col items-center gap-1.5 active:opacity-80">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"
-            className="w-9 h-9 drop-shadow-lg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+            className="w-7 h-7 drop-shadow-lg">
             <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
             <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" />
           </svg>

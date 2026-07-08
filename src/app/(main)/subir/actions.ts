@@ -39,6 +39,8 @@ export async function createRecipe(data: {
   thumbnailUrl: string
   durationSeconds: number | null
   tags: string[]
+  diet: string[]
+  cookTime: string | null
   publish: boolean
 }): Promise<{ error?: string }> {
   const supabase = await createClient()
@@ -55,6 +57,8 @@ export async function createRecipe(data: {
     thumbnail_url: data.thumbnailUrl || null,
     duration_seconds: data.durationSeconds,
     tags: data.tags,
+    diet: data.diet,
+    cook_time: data.cookTime,
     status: data.publish ? 'published' : 'draft',
     published_at: data.publish ? now : null,
   })

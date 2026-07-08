@@ -26,6 +26,8 @@ export interface Recipe {
   published_at: string | null
   created_at: string
   tags: string[]
+  diet: string[]
+  cook_time: string | null
 }
 
 export interface Follow {
