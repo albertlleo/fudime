@@ -36,7 +36,7 @@ function VideoCard({
   }, [])
 
   return (
-    <div ref={containerRef} className="relative aspect-[9/16] bg-stone-100 overflow-hidden">
+    <div ref={containerRef} className="relative aspect-[3/4] bg-stone-100 overflow-hidden">
       <video
         ref={videoRef}
         src={recipe.video_url}
@@ -112,7 +112,7 @@ export default function MyRecipeGrid({ recipes: initial }: { recipes: Recipe[] }
         <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide px-6 mb-3">
           Mis recetas
         </h2>
-        <div className="grid grid-cols-2 gap-0.5">
+        <div className="grid grid-cols-3 gap-0.5">
           {recipes.map((recipe) => (
             <VideoCard key={recipe.id} recipe={recipe} onDelete={setConfirming} onPublish={handlePublish} />
           ))}
