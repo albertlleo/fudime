@@ -178,7 +178,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
         emptyIcon="🍳"
         emptyTitle="Sin recetas aún"
         emptyText="Este creador no ha publicado recetas todavía"
-        makeHref={(r) => `/creador/${id}/feed?start=${r.id}`}
+        feedCreatorId={id}
       />
     </div>
   )

@@ -63,10 +63,11 @@ interface RecipeGridProps {
   emptyIcon: string
   emptyTitle: string
   emptyText: string
-  makeHref?: (recipe: RecipeWithCreator) => string
+  /** When set, recipe clicks open /creador/[feedCreatorId]/feed?start=[recipeId] */
+  feedCreatorId?: string
 }
 
-export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText, makeHref }: RecipeGridProps) {
+export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText, feedCreatorId }: RecipeGridProps) {
   if (recipes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center text-center px-8 py-20">
@@ -80,7 +81,11 @@ export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText, 
   return (
     <div className="grid grid-cols-3 gap-0.5">
       {recipes.map(recipe => (
-        <RecipeCard key={recipe.id} recipe={recipe} href={makeHref ? makeHref(recipe) : `/receta/${recipe.id}`} />
+        <RecipeCard
+          key={recipe.id}
+          recipe={recipe}
+          href={feedCreatorId ? `/creador/${feedCreatorId}/feed?start=${recipe.id}` : `/receta/${recipe.id}`}
+        />
       ))}
     </div>
   )
