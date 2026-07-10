@@ -345,7 +345,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
         </a>
         {/* 2. Recipe title */}
         <p className="text-white font-semibold text-base leading-snug mb-2">{recipe.title}</p>
-        {/* 3. Ingredientes y paso a paso button */}
+        {/* 3. INGREDIENTES Y PASO A PASO button */}
         {hasDesc && (
           <button
             onClick={() => setShowIngredients(true)}
@@ -355,7 +355,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
               <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
             </svg>
-            Ingredientes y paso a paso
+            INGREDIENTES Y PASO A PASO
           </button>
         )}
       </div>
@@ -391,7 +391,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
         <div className="flex items-center justify-between px-5 py-3 flex-shrink-0"
           style={{ borderBottom: '1px solid var(--brown-100)' }}>
           <h3 className="font-black text-base" style={{ color: 'var(--brown-900)' }}>
-            Ingredientes y paso a paso
+            INGREDIENTES Y PASO A PASO
           </h3>
           <button onClick={() => setShowIngredients(false)}
             className="w-8 h-8 rounded-full flex items-center justify-center"
@@ -416,8 +416,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
         {/* Like */}
         <button onClick={handleLike} className="flex flex-col items-center gap-1.5 active:opacity-80">
           <div className={`transition-transform duration-200 ${likeAnim ? 'scale-[1.4]' : 'scale-100'}`}>
-            <svg viewBox="0 0 24 24" fill="none" stroke={isLiked ? '#ff2d55' : 'white'}
-              strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+            <svg viewBox="0 0 24 24" fill={isLiked ? '#ff2d55' : 'white'} stroke="none"
               className="w-7 h-7 drop-shadow-lg">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
@@ -429,7 +428,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
 
         {/* Comment */}
         <button onClick={onComment} className="flex flex-col items-center gap-1.5 active:opacity-80">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+          <svg viewBox="0 0 24 24" fill="white" stroke="none"
             className="w-7 h-7 drop-shadow-lg">
             <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
@@ -440,7 +439,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
 
         {/* Save */}
         <button onClick={onSave} className="flex flex-col items-center gap-1.5 active:opacity-80">
-          <svg viewBox="0 0 24 24" fill="none" stroke={isSaved ? '#f59e0b' : 'white'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+          <svg viewBox="0 0 24 24" fill={isSaved ? '#f59e0b' : 'white'} stroke="none"
             className="w-7 h-7 drop-shadow-lg">
             <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" />
           </svg>

@@ -7,18 +7,16 @@ import type { RecipeWithCreator, User } from '@/lib/types'
 const CATEGORIES = [
   'Aperitivos', 'Entrantes', 'Ensaladas', 'Cremas y sopas', 'Platos de cuchara',
   'Pasta', 'Arroces', 'Verduras', 'Carne y aves', 'Pescado y marisco',
-  'Proteínas vegetales', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
-  'Comida internacional', 'Comida rápida', 'Bocadillos y sándwiches',
-  'Postres y dulces', 'Salsas y aliños', 'Bebidas',
+  'Plant Based', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
+  'Comida rápida', 'Postres y dulces', 'Salsas y aliños', 'Bebidas',
 ]
 
 const CAT_EMOJIS: Record<string, string> = {
   'aperitivos': '🥨', 'entrantes': '🥗', 'ensaladas': '🥙', 'cremas y sopas': '🍲',
   'platos de cuchara': '🫕', 'pasta': '🍝', 'arroces': '🍚', 'verduras': '🥦',
-  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'proteínas vegetales': '🫘',
+  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
   'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
-  'comida internacional': '🌍', 'comida rápida': '🍔', 'bocadillos y sándwiches': '🥪',
-  'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
+  'comida rápida': '🍔', 'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
 }
 
 const DIETS = [

@@ -10,18 +10,16 @@ import type { User, RecipeWithCreator } from '@/lib/types'
 const CATEGORIES = [
   'Aperitivos', 'Entrantes', 'Ensaladas', 'Cremas y sopas', 'Platos de cuchara',
   'Pasta', 'Arroces', 'Verduras', 'Carne y aves', 'Pescado y marisco',
-  'Proteínas vegetales', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
-  'Comida internacional', 'Comida rápida', 'Bocadillos y sándwiches',
-  'Postres y dulces', 'Salsas y aliños', 'Bebidas',
+  'Plant Based', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
+  'Comida rápida', 'Postres y dulces', 'Salsas y aliños', 'Bebidas',
 ]
 
 const CAT_EMOJIS: Record<string, string> = {
   'aperitivos': '🥨', 'entrantes': '🥗', 'ensaladas': '🥙', 'cremas y sopas': '🍲',
   'platos de cuchara': '🫕', 'pasta': '🍝', 'arroces': '🍚', 'verduras': '🥦',
-  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'proteínas vegetales': '🫘',
+  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
   'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
-  'comida internacional': '🌍', 'comida rápida': '🍔', 'bocadillos y sándwiches': '🥪',
-  'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
+  'comida rápida': '🍔', 'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
 }
 
 const DIETS = [
@@ -147,12 +145,12 @@ export default function ChefsPageClient({
   return (
     <div className="h-dvh flex flex-col" style={{ background: 'var(--cream)' }}>
 
-      {/* Header + tabs */}
-      <div className="flex-shrink-0 px-5 pt-14 pb-0">
+      {/* Fixed header: title + tabs + search */}
+      <div className="flex-shrink-0 px-5 pt-14 pb-3" style={{ borderBottom: '1px solid var(--brown-100)' }}>
         <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>Descubrir</h1>
 
         {/* Tab strip */}
-        <div className="flex gap-1 p-1 rounded-2xl mb-4" style={{ background: 'var(--brown-100)' }}>
+        <div className="flex gap-1 p-1 rounded-2xl mb-3" style={{ background: 'var(--brown-100)' }}>
           {(['buscar', 'chefs'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className="flex-1 py-2 text-sm font-semibold rounded-xl transition-all capitalize"
@@ -161,10 +159,45 @@ export default function ChefsPageClient({
                 color: tab === t ? 'var(--brown-900)' : 'var(--brown-500)',
                 boxShadow: tab === t ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
               }}>
-              {t === 'buscar' ? 'Buscar' : 'Chefs'}
+              {t === 'buscar' ? 'Recetas' : 'Chefs'}
             </button>
           ))}
         </div>
+
+        {/* Search input — changes per tab */}
+        {tab === 'buscar' ? (
+          <div>
+            <input
+              type="text"
+              value={searchValue}
+              onChange={e => handleSearch(e.target.value)}
+              placeholder="Buscar recetas..."
+              className="input-cream"
+            />
+            {isFiltered && (
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs" style={{ color: 'var(--brown-500)' }}>
+                  {activeLabel
+                    ? `${activeLabel} · ${searchResults.length} receta${searchResults.length !== 1 ? 's' : ''}`
+                    : `${searchResults.length} resultado${searchResults.length !== 1 ? 's' : ''} para "${searchQuery}"`
+                  }
+                </p>
+                <button onClick={() => { setSearchValue(''); router.push('/chefs') }}
+                  className="text-xs font-semibold" style={{ color: 'var(--terracotta)' }}>
+                  Quitar filtro
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <input
+            type="text"
+            value={chefQuery}
+            onChange={e => setChefQuery(e.target.value)}
+            placeholder="Buscar chef..."
+            className="input-cream"
+          />
+        )}
       </div>
 
       {/* Scrollable content */}
@@ -173,38 +206,6 @@ export default function ChefsPageClient({
         {/* ── BUSCAR TAB ──────────────────────────────────── */}
         {tab === 'buscar' && (
           <div>
-            {/* Search input */}
-            <div className="px-5 mb-5">
-              <div className="relative">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-                  strokeLinecap="round" strokeLinejoin="round"
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                  style={{ color: 'var(--brown-300)' }}>
-                  <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-                </svg>
-                <input
-                  type="search"
-                  value={searchValue}
-                  onChange={e => handleSearch(e.target.value)}
-                  placeholder="Buscar recetas..."
-                  className="input-cream pl-10"
-                />
-              </div>
-              {isFiltered && (
-                <div className="flex items-center justify-between mt-2">
-                  <p className="text-xs" style={{ color: 'var(--brown-500)' }}>
-                    {activeLabel
-                      ? `${activeLabel} · ${searchResults.length} receta${searchResults.length !== 1 ? 's' : ''}`
-                      : `${searchResults.length} resultado${searchResults.length !== 1 ? 's' : ''} para "${searchQuery}"`
-                    }
-                  </p>
-                  <button onClick={() => { setSearchValue(''); router.push('/chefs') }}
-                    className="text-xs font-semibold" style={{ color: 'var(--terracotta)' }}>
-                    Quitar filtro
-                  </button>
-                </div>
-              )}
-            </div>
 
             {/* Search / filter results */}
             {isFiltered ? (
@@ -234,6 +235,20 @@ export default function ChefsPageClient({
                     </div>
                     <div className="flex gap-3 overflow-x-auto px-5 pb-1" style={{ scrollbarWidth: 'none' }}>
                       {trending.map(r => <RecipeThumbH key={r.id} recipe={r} />)}
+                      {/* Ver más card */}
+                      <button onClick={() => router.push('/chefs?sort=trending')}
+                        className="flex-shrink-0 w-28 active:opacity-70 transition-opacity">
+                        <div className="relative w-28 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-2"
+                          style={{ aspectRatio: '9/16', background: 'var(--brown-100)' }}>
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: 'var(--brown-200, #d6cdc4)' }}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
+                              className="w-5 h-5" style={{ color: 'var(--brown-700)' }}>
+                              <path d="M9 18l6-6-6-6" />
+                            </svg>
+                          </div>
+                          <p className="text-xs font-bold text-center leading-tight px-2" style={{ color: 'var(--brown-700)' }}>Ver más</p>
+                        </div>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -299,24 +314,6 @@ export default function ChefsPageClient({
         {/* ── CHEFS TAB ───────────────────────────────────── */}
         {tab === 'chefs' && (
           <div>
-            {/* Chef search */}
-            <div className="px-5 mb-5">
-              <div className="relative">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
-                  strokeLinecap="round" strokeLinejoin="round"
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                  style={{ color: 'var(--brown-300)' }}>
-                  <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-                </svg>
-                <input
-                  type="search"
-                  value={chefQuery}
-                  onChange={e => setChefQuery(e.target.value)}
-                  placeholder="Buscar chef..."
-                  className="input-cream pl-10"
-                />
-              </div>
-            </div>
 
             {/* Following */}
             {filteredFollowing.length > 0 && (
