@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import RecipeActions from './recipe-actions'
 import Comments from './comments'
+import BackButton from '@/components/back-button'
 import type { RecipeWithCreator, CommentWithUser } from '@/lib/types'
 
 export default async function RecetaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -41,13 +41,7 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
         {/* Back button overlay */}
         <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 pt-12 pb-3"
           style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)' }}>
-          <Link href="/"
-            className="w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-              <path d="M19 12H5M12 5l-7 7 7 7" />
-            </svg>
-          </Link>
+          <BackButton fallback="/" glass />
           <span className="text-white font-semibold text-sm truncate drop-shadow">{r.title}</span>
         </div>
 

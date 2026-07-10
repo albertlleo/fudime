@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
 import RecipeGrid from '@/components/recipe-grid'
+import BackButton from '@/components/back-button'
 import type { RecipeWithCreator } from '@/lib/types'
 
 const TAG_EMOJIS: Record<string, string> = {
@@ -27,14 +27,9 @@ export default async function CategoriaPage({ params }: { params: Promise<{ tag:
   return (
     <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
       <div className="px-5 pt-14 pb-5">
-        <Link href="/buscar"
-          className="inline-flex items-center gap-1.5 text-sm font-medium mb-5 transition-colors"
-          style={{ color: 'var(--brown-500)' }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-          Buscar
-        </Link>
+        <div className="flex items-center gap-3 mb-5">
+          <BackButton fallback="/chefs" />
+        </div>
 
         <div className="flex items-center gap-3">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"

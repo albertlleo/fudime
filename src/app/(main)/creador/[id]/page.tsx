@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import RecipeGrid from '@/components/recipe-grid'
 import FollowButton from './follow-button'
 import ShareCreator from './share-creator'
+import BackButton from '@/components/back-button'
 import type { User, RecipeWithCreator } from '@/lib/types'
 
 export default async function CreadorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -47,14 +47,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
 
       {/* Back + Share */}
       <div className="px-5 pt-14 pb-2 flex items-center justify-between">
-        <Link href="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium transition-colors"
-          style={{ color: 'var(--brown-500)' }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-          Volver
-        </Link>
+        <BackButton fallback="/" />
         <ShareCreator name={creator.display_name} id={id} />
       </div>
 

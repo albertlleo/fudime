@@ -107,12 +107,13 @@ interface Props {
   searchResults: RecipeWithCreator[]
   searchQuery: string
   activeFilter: { diet?: string; tiempo?: string; sort?: string }
+  trendingChefs: Chef[]
   following: Chef[]
   discover: Chef[]
 }
 
 export default function ChefsPageClient({
-  trending, searchResults, searchQuery, activeFilter, following, discover,
+  trending, searchResults, searchQuery, activeFilter, trendingChefs, following, discover,
 }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -313,14 +314,27 @@ export default function ChefsPageClient({
 
         {/* ── CHEFS TAB ───────────────────────────────────── */}
         {tab === 'chefs' && (
-          <div>
+          <div className="pt-4">
 
-            {/* Following */}
-            {filteredFollowing.length > 0 && (
-              <div className="mb-6">
+            {/* EN TENDENCIA */}
+            {!cq && trendingChefs.length > 0 && (
+              <div className="mb-7">
                 <p className="text-xs font-semibold uppercase tracking-widest mb-4 px-5"
                   style={{ color: 'var(--brown-300)' }}>
-                  Siguiendo · {filteredFollowing.length}
+                  En tendencia
+                </p>
+                <div className="grid grid-cols-3 gap-x-2 gap-y-5 px-5">
+                  {trendingChefs.map(chef => <ChefCard key={chef.id} chef={chef} />)}
+                </div>
+              </div>
+            )}
+
+            {/* SIGUIENDO */}
+            {filteredFollowing.length > 0 && (
+              <div className="mb-7">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-4 px-5"
+                  style={{ color: 'var(--brown-300)' }}>
+                  Siguiendo
                 </p>
                 <div className="grid grid-cols-3 gap-x-2 gap-y-5 px-5">
                   {filteredFollowing.map(chef => <ChefCard key={chef.id} chef={chef} />)}
@@ -328,12 +342,12 @@ export default function ChefsPageClient({
               </div>
             )}
 
-            {/* Discover */}
+            {/* DESCUBRIR */}
             {filteredDiscover.length > 0 && (
-              <div className="mb-6">
+              <div className="mb-7">
                 <p className="text-xs font-semibold uppercase tracking-widest mb-4 px-5"
                   style={{ color: 'var(--brown-300)' }}>
-                  {cq ? 'Resultados' : 'Descubrir'} · {filteredDiscover.length}
+                  {cq ? 'Resultados' : 'Descubrir'}
                 </p>
                 <div className="grid grid-cols-3 gap-x-2 gap-y-5 px-5">
                   {filteredDiscover.map(chef => <ChefCard key={chef.id} chef={chef} />)}
@@ -341,7 +355,7 @@ export default function ChefsPageClient({
               </div>
             )}
 
-            {filteredFollowing.length === 0 && filteredDiscover.length === 0 && (
+            {filteredFollowing.length === 0 && filteredDiscover.length === 0 && trendingChefs.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20 text-center px-8">
                 <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 text-3xl"
                   style={{ background: 'var(--brown-100)' }}>👨‍🍳</div>
