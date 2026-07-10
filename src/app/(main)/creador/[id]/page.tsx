@@ -22,33 +22,52 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
 
   const creator = profile as User
 
-  const [{ data: recipes }, followersResult, followRowResult] = await Promise.all([
+  const isOwnProfile = authUser?.id === id
+
+  const [recipesRes, followersRes, followRowRes] = await Promise.allSettled([
     supabase
       .from('recipes')
       .select('*, users!creator_id(id, display_name, avatar_url, validated_at)')
       .eq('creator_id', id)
       .eq('status', 'published')
       .order('published_at', { ascending: false }),
-    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', id),
-    authUser && authUser.id !== id
+    supabase
+      .from('follows')
+      .select('id')
+      .eq('following_id', id),
+    authUser && !isOwnProfile
       ? supabase.from('follows').select('id').eq('follower_id', authUser.id).eq('following_id', id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
   ])
 
-  const followersCount = followersResult.count ?? 0
-  const isFollowing = !followersResult.error && !!followRowResult.data
-  const followsEnabled = !followersResult.error
-  const isOwnProfile = authUser?.id === id
+  if (recipesRes.status === 'rejected') console.error('[creador] recipes:', recipesRes.reason)
+  if (followersRes.status === 'rejected') console.error('[creador] followers:', followersRes.reason)
+  if (followRowRes.status === 'rejected') console.error('[creador] followRow:', followRowRes.reason)
 
-  const recipeList = (recipes ?? []) as RecipeWithCreator[]
+  const recipes = recipesRes.status === 'fulfilled' ? (recipesRes.value.data ?? []) : []
+  const followersRows = followersRes.status === 'fulfilled' ? (followersRes.value.data ?? []) : []
+  const followRowData = followRowRes.status === 'fulfilled' ? (followRowRes.value as any).data : null
+
+  const followersCount = followersRows.length
+  const isFollowing = !!followRowData
+  const recipeList = recipes as RecipeWithCreator[]
+
+  let totalSaves = 0
   const recipeIds = recipeList.map(r => r.id)
-
-  const { count: totalSaves } = recipeIds.length > 0
-    ? await supabase.from('saves').select('*', { count: 'exact', head: true }).in('recipe_id', recipeIds)
-    : { count: 0 }
+  if (recipeIds.length > 0) {
+    try {
+      const savesRes = await supabase
+        .from('saves')
+        .select('id')
+        .in('recipe_id', recipeIds)
+      totalSaves = (savesRes.data ?? []).length
+    } catch (e) {
+      console.error('[creador] saves:', e)
+    }
+  }
 
   const totalLikes = recipeList.reduce((sum, r) => sum + ((r as any).likes_count ?? 0), 0)
-  const totalReacciones = totalLikes + (totalSaves ?? 0)
+  const totalReacciones = totalLikes + totalSaves
 
   const displayName = creator.display_name ?? ''
   const initials = displayName.split(' ').map((w: string) => w[0] ?? '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'
@@ -148,9 +167,9 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
             style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }}>
             Mi perfil
           </Link>
-        ) : followsEnabled ? (
+        ) : (
           <FollowButton creatorId={id} isFollowing={isFollowing} followersCount={followersCount} />
-        ) : null}
+        )}
       </div>
 
       {/* Recipe grid — clicks open creator feed starting at the tapped recipe */}
