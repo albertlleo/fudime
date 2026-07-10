@@ -111,7 +111,7 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
     <div className="relative h-dvh">
       {/* Mode tabs */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 flex bg-black/40 backdrop-blur-sm rounded-full p-0.5 gap-0.5">
-        {([['recent', 'Para ti'], ['following', 'Siguiendo'], ['trending', '🔥']] as const).map(([m, label]) => (
+        {([['recent', 'Recomendado'], ['following', 'Siguiendo']] as const).map(([m, label]) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
