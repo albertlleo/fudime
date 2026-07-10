@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import RecipeActions from './recipe-actions'
 import Comments from './comments'
 import BackButton from '@/components/back-button'
