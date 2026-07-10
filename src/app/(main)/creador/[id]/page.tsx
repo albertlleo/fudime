@@ -50,8 +50,8 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
   const totalLikes = recipeList.reduce((sum, r) => sum + ((r as any).likes_count ?? 0), 0)
   const totalReacciones = totalLikes + (totalSaves ?? 0)
 
-  const initials = creator.display_name
-    .split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
+  const displayName = creator.display_name ?? ''
+  const initials = displayName.split(' ').map((w: string) => w[0] ?? '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'
 
   return (
     <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
@@ -59,7 +59,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
       {/* Back + Share */}
       <div className="px-5 pt-14 pb-2 flex items-center justify-between">
         <BackButton fallback="/" />
-        <ShareCreator name={creator.display_name} id={id} />
+        <ShareCreator name={displayName} id={id} />
       </div>
 
       {/* Header */}
@@ -81,7 +81,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
           <div className="flex-1 min-w-0 pt-1">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>
-                {creator.display_name}
+                {displayName}
               </h1>
               {creator.validated_at && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"

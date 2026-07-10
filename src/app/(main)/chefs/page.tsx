@@ -57,10 +57,9 @@ export default async function ChefsPage({
   }
 
   // ── Chef data ────────────────────────────────────────────────
-  const followsPromise = supabase
-    .from('follows')
-    .select('following_id')
-    .eq('follower_id', user!.id)
+  const followsPromise = user
+    ? supabase.from('follows').select('following_id').eq('follower_id', user.id)
+    : Promise.resolve({ data: [] as { following_id: string }[] })
 
   const creatorsPromise = supabase
     .from('users')
