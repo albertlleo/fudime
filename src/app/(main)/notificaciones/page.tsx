@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import Link from 'next/link'
 import MarkRead from './mark-read'
 import BackButton from '@/components/back-button'
 import type { NotificationWithDetails } from '@/lib/types'
