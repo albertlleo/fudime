@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { signOutAction } from './actions'
 import MyRecipeGrid from '@/components/my-recipe-grid'
+import VerifiedBadge from '@/components/verified-badge'
 import type { User, Recipe } from '@/lib/types'
 
 export default async function PerfilPage() {
@@ -75,11 +76,7 @@ export default async function PerfilPage() {
                 }}>
                 {user.role === 'creator' ? '✦ Creador' : 'Consumidor'}
               </span>
-              {user.role === 'creator' && (
-                <span className="text-xs" style={{ color: user.validated_at ? '#16a34a' : 'var(--brown-500)' }}>
-                  {user.validated_at ? '✓ Verificado' : '· Pendiente'}
-                </span>
-              )}
+              {user.role === 'creator' && user.validated_at && <VerifiedBadge />}
             </div>
 
             {user.bio && (

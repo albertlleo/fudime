@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import VerifiedBadge from '@/components/verified-badge'
 import type { User, RecipeWithCreator } from '@/lib/types'
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -85,12 +86,9 @@ function ChefCard({ chef }: { chef: Chef }) {
               style={{ background: 'var(--amber)' }}>{initials}</div>
         }
         {chef.validated_at && (
-          <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full flex items-center justify-center"
-            style={{ background: '#fff', border: '1px solid var(--brown-100)' }}>
-            <svg viewBox="0 0 16 16" className="w-4 h-4">
-              <circle cx="8" cy="8" r="8" fill="#F59E0B" />
-              <path d="M4.5 8.3l2.3 2.3 4.3-4.6" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+          <div className="absolute -bottom-0.5 -right-0.5 rounded-full"
+            style={{ background: '#fff', padding: '1.5px' }}>
+            <VerifiedBadge size="md" />
           </div>
         )}
       </div>

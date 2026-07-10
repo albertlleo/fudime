@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import SearchInput from '@/components/search-input'
 import RecipeGrid from '@/components/recipe-grid'
 import Link from 'next/link'
+import VerifiedBadge from '@/components/verified-badge'
 import type { RecipeWithCreator, User } from '@/lib/types'
 
 const CATEGORIES = [
@@ -241,12 +242,7 @@ export default async function BuscarPage({
                       <span className="font-semibold text-sm truncate" style={{ color: 'var(--brown-900)' }}>
                         {creator.display_name}
                       </span>
-                      {creator.validated_at && (
-                        <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 flex-shrink-0">
-                          <circle cx="8" cy="8" r="8" fill="#F59E0B" />
-                          <path d="M4.5 8.3l2.3 2.3 4.3-4.6" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
+                      {creator.validated_at && <VerifiedBadge />}
                     </div>
                     <span className="text-xs" style={{ color: 'var(--brown-500)' }}>Ver perfil →</span>
                   </div>

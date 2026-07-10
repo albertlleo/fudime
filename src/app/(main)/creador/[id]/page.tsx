@@ -5,6 +5,7 @@ import RecipeGrid from '@/components/recipe-grid'
 import FollowButton from './follow-button'
 import ShareCreator from './share-creator'
 import BackButton from '@/components/back-button'
+import VerifiedBadge from '@/components/verified-badge'
 import type { User, RecipeWithCreator } from '@/lib/types'
 
 export default async function CreadorPage({ params }: { params: Promise<{ id: string }> }) {
@@ -102,12 +103,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
               <h1 className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>
                 {displayName}
               </h1>
-              {creator.validated_at && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                  style={{ background: '#fffbeb', color: '#92400e', border: '1px solid #fcd34d' }}>
-                  ✦ Verificado
-                </span>
-              )}
+              {creator.validated_at && <VerifiedBadge size="lg" />}
             </div>
 
             {creator.bio && (

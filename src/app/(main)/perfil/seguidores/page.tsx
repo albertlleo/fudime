@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import BackButton from '@/components/back-button'
+import VerifiedBadge from '@/components/verified-badge'
 
 export default async function SeguidoresPage() {
   const supabase = await createClient()
@@ -51,12 +52,7 @@ export default async function SeguidoresPage() {
                     <span className="font-semibold text-sm truncate" style={{ color: 'var(--brown-900)' }}>
                       {u.display_name}
                     </span>
-                    {u.validated_at && (
-                      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 flex-shrink-0">
-                        <circle cx="8" cy="8" r="8" fill="#F59E0B" />
-                        <path d="M4.5 8.3l2.3 2.3 4.3-4.6" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
+                    {u.validated_at && <VerifiedBadge />}
                   </div>
                 </div>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"

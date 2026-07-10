@@ -4,6 +4,7 @@ import Link from 'next/link'
 import RecipeActions from './recipe-actions'
 import Comments from './comments'
 import BackButton from '@/components/back-button'
+import VerifiedBadge from '@/components/verified-badge'
 import type { RecipeWithCreator, CommentWithUser } from '@/lib/types'
 
 export default async function RecetaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -93,10 +94,10 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm" style={{ color: 'var(--brown-900)' }}>@{r.users.display_name}</p>
-            {r.users.validated_at && (
-              <p className="text-xs" style={{ color: '#d97706' }}>✦ Creador verificado</p>
-            )}
+            <div className="flex items-center gap-1.5">
+              <p className="font-semibold text-sm" style={{ color: 'var(--brown-900)' }}>@{r.users.display_name}</p>
+              {r.users.validated_at && <VerifiedBadge />}
+            </div>
           </div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
             className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--brown-300)' }}>
