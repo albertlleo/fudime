@@ -25,11 +25,11 @@ export default function FollowButton({
   return (
     <button
       onClick={handleToggle}
-      className={`px-8 py-2.5 rounded-xl font-semibold text-sm transition-colors ${
-        following
-          ? 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-          : 'bg-amber-500 text-black hover:bg-amber-400'
-      }`}
+      className="w-full py-2.5 rounded-2xl font-semibold text-sm transition-all active:scale-[0.98]"
+      style={following
+        ? { background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }
+        : { background: 'var(--amber)', color: '#000' }
+      }
     >
       {following ? 'Siguiendo' : 'Seguir'}
     </button>

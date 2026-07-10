@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRef, useEffect } from 'react'
 import type { RecipeWithCreator } from '@/lib/types'
 
-function RecipeCard({ recipe }: { recipe: RecipeWithCreator }) {
+function RecipeCard({ recipe, href }: { recipe: RecipeWithCreator; href: string }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -24,8 +24,8 @@ function RecipeCard({ recipe }: { recipe: RecipeWithCreator }) {
   }, [])
 
   return (
-    <Link href={`/receta/${recipe.id}`} className="block">
-      <div ref={containerRef} className="relative aspect-[9/16] bg-stone-900 overflow-hidden">
+    <Link href={href} className="block">
+      <div ref={containerRef} className="relative aspect-[3/4] bg-stone-900 overflow-hidden">
         <video
           ref={videoRef}
           src={recipe.video_url}
@@ -63,9 +63,10 @@ interface RecipeGridProps {
   emptyIcon: string
   emptyTitle: string
   emptyText: string
+  makeHref?: (recipe: RecipeWithCreator) => string
 }
 
-export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText }: RecipeGridProps) {
+export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText, makeHref }: RecipeGridProps) {
   if (recipes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center text-center px-8 py-20">
@@ -77,9 +78,9 @@ export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText }
   }
 
   return (
-    <div className="grid grid-cols-2 gap-0.5">
+    <div className="grid grid-cols-3 gap-0.5">
       {recipes.map(recipe => (
-        <RecipeCard key={recipe.id} recipe={recipe} />
+        <RecipeCard key={recipe.id} recipe={recipe} href={makeHref ? makeHref(recipe) : `/receta/${recipe.id}`} />
       ))}
     </div>
   )

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import RecipeGrid from '@/components/recipe-grid'
 import FollowButton from './follow-button'
 import ShareCreator from './share-creator'
@@ -21,7 +22,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
 
   const creator = profile as User
 
-  const [{ data: recipes }, followersResult, followRowResult] = await Promise.all([
+  const [{ data: recipes }, followersResult, followRowResult, savesResult] = await Promise.all([
     supabase
       .from('recipes')
       .select('*, users!creator_id(id, display_name, avatar_url, validated_at)')
@@ -32,12 +33,21 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
     authUser && authUser.id !== id
       ? supabase.from('follows').select('id').eq('follower_id', authUser.id).eq('following_id', id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
+    supabase
+      .from('saves')
+      .select('recipe_id, recipes!inner(creator_id)', { count: 'exact', head: true })
+      .eq('recipes.creator_id', id),
   ])
 
   const followersCount = followersResult.count ?? 0
   const isFollowing = !followersResult.error && !!followRowResult.data
   const followsEnabled = !followersResult.error
   const isOwnProfile = authUser?.id === id
+
+  const recipeList = (recipes ?? []) as RecipeWithCreator[]
+  const totalLikes = recipeList.reduce((sum, r) => sum + ((r as any).likes_count ?? 0), 0)
+  const totalSaves = savesResult.count ?? 0
+  const totalReacciones = totalLikes + totalSaves
 
   const initials = creator.display_name
     .split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
@@ -107,44 +117,48 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
 
-        {/* Stats + follow */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 flex rounded-2xl overflow-hidden"
-            style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
-            <div className="flex-1 flex flex-col items-center py-3">
-              <span className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>
-                {recipes?.length ?? 0}
-              </span>
-              <span className="text-xs font-medium" style={{ color: 'var(--brown-500)' }}>Recetas</span>
-            </div>
-            {followsEnabled && (
-              <div className="flex-1 flex flex-col items-center py-3" style={{ borderLeft: '1px solid var(--brown-100)' }}>
-                <span className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>
-                  {followersCount}
-                </span>
-                <span className="text-xs font-medium" style={{ color: 'var(--brown-500)' }}>Seguidores</span>
-              </div>
-            )}
+        {/* Stats — 3 columns */}
+        <div className="flex rounded-2xl overflow-hidden mb-3"
+          style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
+          <div className="flex-1 flex flex-col items-center py-3">
+            <span className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>
+              {recipeList.length}
+            </span>
+            <span className="text-xs font-medium" style={{ color: 'var(--brown-500)' }}>Recetas</span>
           </div>
-
-          {isOwnProfile ? (
-            <Link href="/perfil"
-              className="px-5 py-2.5 rounded-2xl text-sm font-semibold transition-colors flex-shrink-0"
-              style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }}>
-              Mi perfil
-            </Link>
-          ) : followsEnabled ? (
-            <FollowButton creatorId={id} isFollowing={isFollowing} followersCount={followersCount} />
-          ) : null}
+          <div className="flex-1 flex flex-col items-center py-3" style={{ borderLeft: '1px solid var(--brown-100)' }}>
+            <span className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>
+              {followersCount}
+            </span>
+            <span className="text-xs font-medium" style={{ color: 'var(--brown-500)' }}>Seguidores</span>
+          </div>
+          <div className="flex-1 flex flex-col items-center py-3" style={{ borderLeft: '1px solid var(--brown-100)' }}>
+            <span className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>
+              {totalReacciones}
+            </span>
+            <span className="text-xs font-medium" style={{ color: 'var(--brown-500)' }}>Reacciones</span>
+          </div>
         </div>
+
+        {/* Follow / profile button */}
+        {isOwnProfile ? (
+          <Link href="/perfil"
+            className="w-full flex items-center justify-center py-2.5 rounded-2xl text-sm font-semibold transition-colors"
+            style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }}>
+            Mi perfil
+          </Link>
+        ) : followsEnabled ? (
+          <FollowButton creatorId={id} isFollowing={isFollowing} followersCount={followersCount} />
+        ) : null}
       </div>
 
-      {/* Recipe grid */}
+      {/* Recipe grid — clicks open creator feed starting at the tapped recipe */}
       <RecipeGrid
-        recipes={(recipes ?? []) as RecipeWithCreator[]}
+        recipes={recipeList}
         emptyIcon="🍳"
         emptyTitle="Sin recetas aún"
         emptyText="Este creador no ha publicado recetas todavía"
+        makeHref={(r) => `/creador/${id}/feed?start=${r.id}`}
       />
     </div>
   )
