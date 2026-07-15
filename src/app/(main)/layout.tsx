@@ -21,10 +21,10 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   } catch {}
 
   return (
-    <div className="relative h-dvh overflow-hidden">
-      {/* Desktop: offset sidebar + center content column (Instagram style) */}
-      <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
-        <div className="w-full lg:max-w-[500px] h-full">
+    <div className="relative">
+      {/* Desktop: push content right of sidebar, center in remaining space */}
+      <div className="lg:pl-[72px] lg:flex lg:justify-center">
+        <div className="w-full lg:max-w-[500px]">
           {children}
         </div>
       </div>
