@@ -133,8 +133,8 @@ export default function BottomNav({ notifCount = 0 }: { notifCount?: number }) {
           <span className="text-lg font-black" style={{ color: 'var(--brown-900)', letterSpacing: '-1px' }}>F</span>
         </div>
 
-        {/* Nav icons */}
-        <div className="flex flex-col flex-1 items-center py-3 gap-1">
+        {/* Nav icons — centered vertically */}
+        <div className="flex flex-col flex-1 items-center justify-center gap-1">
           {items.map(({ href, label, icon, iconFilled, active }) => (
             <Link key={href} href={href}
               title={label}
