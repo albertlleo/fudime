@@ -231,7 +231,8 @@ export default function VideoUploader() {
     if (result?.error) { setSubmitError(result.error); setSubmitting(false) }
   }
 
-  const canSubmit = videoState.status === 'done' && !!title.trim() && !submitting
+  const canSubmit = videoState.status === 'done' && !!title.trim() && !!description.trim()
+    && categories.length > 0 && diet.length > 0 && !!cookTime && !submitting
 
   return (
     <div className="min-h-dvh overflow-y-auto pb-24 px-5 pt-14" style={{ background: 'var(--cream)' }}>
@@ -440,7 +441,7 @@ export default function VideoUploader() {
 
         <div>
           <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
-            Ingredientes y paso a paso
+            Ingredientes y paso a paso <span style={{ color: '#dc2626' }}>*</span>
           </label>
           <textarea value={description} onChange={e => setDescription(e.target.value)}
             rows={5} placeholder="Lista de ingredientes, pasos de la receta, trucos..."
@@ -449,7 +450,7 @@ export default function VideoUploader() {
 
         <div>
           <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--brown-700)' }}>
-            Categoría <span className="font-normal" style={{ color: 'var(--brown-300)' }}>(puedes elegir varias)</span>
+            Categoría <span style={{ color: '#dc2626' }}>*</span> <span className="font-normal" style={{ color: 'var(--brown-300)' }}>(puedes elegir varias)</span>
           </label>
           <IconGrid
             options={CATEGORIES.map(c => ({ key: c, label: c, emoji: CAT_EMOJIS[c] ?? '🍴' }))}
@@ -460,7 +461,7 @@ export default function VideoUploader() {
 
         <div>
           <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--brown-700)' }}>
-            Dieta e intolerancias
+            Dieta e intolerancias <span style={{ color: '#dc2626' }}>*</span>
           </label>
           <IconGrid
             options={DIETS.map(d => ({ key: d.key, label: d.key, emoji: d.emoji }))}
@@ -471,7 +472,7 @@ export default function VideoUploader() {
 
         <div>
           <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--brown-700)' }}>
-            Tiempo de cocinado
+            Tiempo de cocinado <span style={{ color: '#dc2626' }}>*</span>
           </label>
           <IconGrid
             options={TIMES.map(t => ({ key: t.key, label: t.label, emoji: t.emoji }))}
