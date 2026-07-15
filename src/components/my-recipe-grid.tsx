@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { deleteRecipe, publishRecipe } from '@/app/(main)/perfil/actions'
 import type { Recipe } from '@/lib/types'
 
@@ -13,6 +14,7 @@ function VideoCard({
   onDelete: (id: string) => void
   onPublish: (id: string) => void
 }) {
+  const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -35,8 +37,12 @@ function VideoCard({
     return () => observer.disconnect()
   }, [])
 
-  return (
-    <div ref={containerRef} className="relative aspect-[3/4] bg-stone-100 overflow-hidden">
+  const handleCardClick = () => {
+    if (recipe.status === 'published') router.push(`/receta/${recipe.id}`)
+  }
+
+  const inner = (
+    <>
       <video
         ref={videoRef}
         src={recipe.video_url}
@@ -60,7 +66,7 @@ function VideoCard({
             Borrador
           </div>
           <button
-            onClick={() => onPublish(recipe.id)}
+            onClick={e => { e.preventDefault(); e.stopPropagation(); onPublish(recipe.id) }}
             className="bg-amber-500/90 hover:bg-amber-500 text-black text-[10px] font-semibold px-2 py-0.5 rounded-full transition-colors"
           >
             Publicar
@@ -70,7 +76,7 @@ function VideoCard({
 
       {/* Delete button */}
       <button
-        onClick={() => onDelete(recipe.id)}
+        onClick={e => { e.preventDefault(); e.stopPropagation(); onDelete(recipe.id) }}
         className="absolute top-2 right-2 w-7 h-7 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
         aria-label="Eliminar receta"
       >
@@ -78,6 +84,14 @@ function VideoCard({
           <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
         </svg>
       </button>
+    </>
+  )
+
+  return (
+    <div ref={containerRef}
+      className="relative aspect-[3/4] bg-stone-100 overflow-hidden cursor-pointer"
+      onClick={handleCardClick}>
+      {inner}
     </div>
   )
 }
