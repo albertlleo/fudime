@@ -7,9 +7,10 @@ import type { RecipeWithCreator } from '@/lib/types'
 const CAT_EMOJIS: Record<string, string> = {
   'aperitivos': '🥨', 'entrantes': '🥗', 'ensaladas': '🥙', 'cremas y sopas': '🍲',
   'platos de cuchara': '🫕', 'pasta': '🍝', 'arroces': '🍚', 'verduras': '🥦',
-  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
+  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'proteínas vegetales': '🌿', 'plant based': '🌿',
   'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
-  'comida rápida': '🍔', 'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
+  'comida internacional': '🌍', 'comida rápida': '🍔', 'bocadillos y sándwiches': '🥪',
+  'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
 }
 
 export default async function GuardadosCategoriaPage({ params }: { params: Promise<{ tag: string }> }) {
