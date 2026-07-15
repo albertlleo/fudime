@@ -6,10 +6,18 @@ import type { RecipeWithCreator } from '@/lib/types'
 
 type Tab = 'todas' | 'categoria' | 'creador'
 
+const CAT_EMOJIS: Record<string, string> = {
+  'aperitivos': '🥨', 'entrantes': '🥗', 'ensaladas': '🥙', 'cremas y sopas': '🍲',
+  'platos de cuchara': '🫕', 'pasta': '🍝', 'arroces': '🍚', 'verduras': '🥦',
+  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
+  'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
+  'comida rápida': '🍔', 'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
+}
+
 function RecipeThumb({ recipe }: { recipe: RecipeWithCreator }) {
   return (
     <Link href={`/receta/${recipe.id}`} className="block">
-      <div className="relative aspect-[9/16] bg-stone-900 rounded-2xl overflow-hidden">
+      <div className="relative aspect-[3/4] bg-stone-900 overflow-hidden">
         {recipe.thumbnail_url ? (
           <img src={recipe.thumbnail_url} alt={recipe.title} className="w-full h-full object-cover" />
         ) : (
@@ -23,7 +31,33 @@ function RecipeThumb({ recipe }: { recipe: RecipeWithCreator }) {
   )
 }
 
-function GroupSection({ title, recipes }: { title: string; recipes: RecipeWithCreator[] }) {
+function CategoryCard({ cat, recipes }: { cat: string; recipes: RecipeWithCreator[] }) {
+  const cover = recipes[0]
+  const emoji = CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'
+  return (
+    <Link href={`/guardados/categoria/${encodeURIComponent(cat)}`} className="block">
+      <div className="relative aspect-[3/4] bg-stone-900 overflow-hidden">
+        {cover?.thumbnail_url ? (
+          <img src={cover.thumbnail_url} alt={cat} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-4xl"
+            style={{ background: 'var(--brown-100)' }}>
+            {emoji}
+          </div>
+        )}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2.5 pt-8 pb-2.5">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-sm leading-none">{emoji}</span>
+            <p className="text-white text-xs font-bold capitalize line-clamp-1">{cat}</p>
+          </div>
+          <p className="text-white/60 text-[10px]">{recipes.length} receta{recipes.length !== 1 ? 's' : ''}</p>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+function CreatorSection({ title, recipes }: { title: string; recipes: RecipeWithCreator[] }) {
   const [open, setOpen] = useState(true)
   return (
     <div className="mb-5">
@@ -42,7 +76,7 @@ function GroupSection({ title, recipes }: { title: string; recipes: RecipeWithCr
         </svg>
       </button>
       {open && (
-        <div className="grid grid-cols-2 gap-0.5 px-0.5">
+        <div className="grid grid-cols-3 gap-0.5 px-0.5">
           {recipes.map(r => <RecipeThumb key={r.id} recipe={r} />)}
         </div>
       )}
@@ -141,15 +175,15 @@ export default function GuardadosClient({ recipes }: { recipes: RecipeWithCreato
           {filtered.map(r => <RecipeThumb key={r.id} recipe={r} />)}
         </div>
       ) : tab === 'categoria' ? (
-        <div>
+        <div className="grid grid-cols-2 gap-0.5 px-0.5">
           {byCategory.map(([cat, recs]) => (
-            <GroupSection key={cat} title={cat} recipes={recs} />
+            <CategoryCard key={cat} cat={cat} recipes={recs} />
           ))}
         </div>
       ) : (
         <div>
           {byCreator.map(([id, { name, recipes: recs }]) => (
-            <GroupSection key={id} title={name} recipes={recs} />
+            <CreatorSection key={id} title={name} recipes={recs} />
           ))}
         </div>
       )}
