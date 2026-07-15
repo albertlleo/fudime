@@ -3,9 +3,12 @@ import RecipeGrid from '@/components/recipe-grid'
 import BackButton from '@/components/back-button'
 import type { RecipeWithCreator } from '@/lib/types'
 
-const TAG_EMOJIS: Record<string, string> = {
-  pasta: '🍝', pollo: '🍗', vegano: '🥗', postre: '🍰', rápido: '⚡',
-  ensalada: '🥙', arroz: '🍚', sopas: '🍲', snacks: '🍿', smoothie: '🥤',
+const CAT_EMOJIS: Record<string, string> = {
+  'aperitivos': '🥨', 'entrantes': '🥗', 'ensaladas': '🥙', 'cremas y sopas': '🍲',
+  'platos de cuchara': '🫕', 'pasta': '🍝', 'arroces': '🍚', 'verduras': '🥦',
+  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
+  'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
+  'comida rápida': '🍔', 'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
 }
 
 export default async function CategoriaPage({ params }: { params: Promise<{ tag: string }> }) {
@@ -22,7 +25,7 @@ export default async function CategoriaPage({ params }: { params: Promise<{ tag:
     .limit(40)
 
   const list = (recipes ?? []) as RecipeWithCreator[]
-  const emoji = TAG_EMOJIS[decoded] ?? '🍴'
+  const emoji = CAT_EMOJIS[decoded.toLowerCase()] ?? '🍴'
 
   return (
     <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>

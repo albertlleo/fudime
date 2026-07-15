@@ -89,8 +89,13 @@ function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, onTog
   const creator = recipe.users
 
   return (
-    <div ref={containerRef} className="h-dvh snap-start snap-always relative flex-shrink-0 bg-stone-950"
-      onClick={handleVideoTap}>
+    <div ref={containerRef} className="h-dvh snap-start snap-always relative flex-shrink-0 overflow-hidden"
+      style={{ background: '#111' }} onClick={handleVideoTap}>
+      {recipe.thumbnail_url && (
+        <img src={recipe.thumbnail_url} alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'blur(24px)', transform: 'scale(1.15)', opacity: 0.6 }} />
+      )}
       <video
         ref={videoRef}
         src={recipe.video_url}

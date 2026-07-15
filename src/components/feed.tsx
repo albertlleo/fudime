@@ -298,8 +298,15 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
   const hasDesc = !!recipe.description
 
   return (
-    <div ref={containerRef} className="h-dvh snap-start snap-always relative flex-shrink-0 bg-stone-950"
+    <div ref={containerRef} className="h-dvh snap-start snap-always relative flex-shrink-0 overflow-hidden"
+      style={{ background: '#111' }}
       onClick={handleVideoTap}>
+      {/* Blurred thumbnail as background — prevents any black margins during load */}
+      {recipe.thumbnail_url && (
+        <img src={recipe.thumbnail_url} alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ filter: 'blur(24px)', transform: 'scale(1.15)', opacity: 0.6 }} />
+      )}
       <video
         ref={videoRef}
         src={recipe.video_url}

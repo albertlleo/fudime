@@ -38,15 +38,13 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
   return (
     <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
 
-      {/* Dark video hero */}
-      <div className="relative bg-black">
-        {/* Back button overlay */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 pt-12 pb-3"
-          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)' }}>
-          <BackButton fallback="/" glass />
-          <span className="text-white font-semibold text-sm truncate drop-shadow">{r.title}</span>
-        </div>
-
+      {/* Video hero — 9:16 aspect ratio, object-cover, no black bars */}
+      <div className="relative w-full overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: '75vh' }}>
+        {r.thumbnail_url && (
+          <img src={r.thumbnail_url} alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ filter: 'blur(20px)', transform: 'scale(1.1)' }} />
+        )}
         <video
           src={r.video_url}
           poster={r.thumbnail_url ?? undefined}
@@ -54,9 +52,14 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
           playsInline
           autoPlay
           muted
-          className="w-full"
-          style={{ maxHeight: '60vh', objectFit: 'contain' }}
+          className="absolute inset-0 w-full h-full object-cover"
         />
+        {/* Back button overlay */}
+        <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 pt-12 pb-3"
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)' }}>
+          <BackButton fallback="/" glass />
+          <span className="text-white font-semibold text-sm truncate drop-shadow">{r.title}</span>
+        </div>
       </div>
 
       {/* Cream content */}
