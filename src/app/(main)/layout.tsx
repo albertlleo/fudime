@@ -22,7 +22,12 @@ export default async function MainLayout({ children }: { children: React.ReactNo
 
   return (
     <div className="relative h-dvh overflow-hidden">
-      {children}
+      {/* Desktop: offset sidebar + center content column (Instagram style) */}
+      <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
+        <div className="w-full lg:max-w-[500px] h-full">
+          {children}
+        </div>
+      </div>
       <BottomNav notifCount={notifCount} />
       <Onboarding />
       <InstallPrompt />

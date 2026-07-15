@@ -87,36 +87,70 @@ const tabs = [
 export default function BottomNav({ notifCount = 0 }: { notifCount?: number }) {
   const pathname = usePathname()
 
+  const items = tabs.map(tab => ({
+    ...tab,
+    active: pathname === tab.href,
+  }))
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe"
-      style={{
-        background: 'rgba(250,247,242,0.92)',
-        backdropFilter: 'blur(16px)',
-        borderTop: '1px solid var(--brown-100)',
-      }}>
-      <div className="flex items-center justify-around h-16">
-        {tabs.map(({ href, label, icon, iconFilled }) => {
-          const active = pathname === href
-          const isProfile = href === '/perfil'
-          return (
-            <Link
-              key={href}
-              href={href}
+    <>
+      {/* ── Mobile: bottom bar ── */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe"
+        style={{
+          background: 'rgba(250,247,242,0.92)',
+          backdropFilter: 'blur(16px)',
+          borderTop: '1px solid var(--brown-100)',
+        }}>
+        <div className="flex items-center justify-around h-16">
+          {items.map(({ href, label, icon, iconFilled, active }) => (
+            <Link key={href} href={href}
               className="relative flex flex-col items-center gap-0.5 px-3 py-2 transition-colors"
-              style={{ color: active ? 'var(--amber)' : 'var(--brown-300)' }}
-            >
+              style={{ color: active ? 'var(--amber)' : 'var(--brown-300)' }}>
               {active ? iconFilled : icon}
               <span className="text-[10px] font-semibold leading-none"
                 style={{ color: active ? 'var(--brown-700)' : 'var(--brown-300)' }}>
                 {label}
               </span>
-              {isProfile && notifCount > 0 && (
+              {href === '/perfil' && notifCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
               )}
             </Link>
-          )
-        })}
-      </div>
-    </nav>
+          ))}
+        </div>
+      </nav>
+
+      {/* ── Desktop: left sidebar (Instagram-style) ── */}
+      <nav className="hidden lg:flex fixed top-0 left-0 bottom-0 z-50 w-[72px] flex-col"
+        style={{
+          background: 'rgba(250,247,242,0.97)',
+          backdropFilter: 'blur(16px)',
+          borderRight: '1px solid var(--brown-100)',
+        }}>
+
+        {/* FUDIME logo mark */}
+        <div className="flex h-[60px] items-center justify-center flex-shrink-0"
+          style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <span className="text-lg font-black" style={{ color: 'var(--brown-900)', letterSpacing: '-1px' }}>F</span>
+        </div>
+
+        {/* Nav icons */}
+        <div className="flex flex-col flex-1 items-center py-3 gap-1">
+          {items.map(({ href, label, icon, iconFilled, active }) => (
+            <Link key={href} href={href}
+              title={label}
+              className="relative w-12 h-12 flex items-center justify-center rounded-xl transition-all"
+              style={{
+                color: active ? 'var(--amber)' : 'var(--brown-500)',
+                background: active ? 'rgba(245,158,11,0.1)' : 'transparent',
+              }}>
+              {active ? iconFilled : icon}
+              {href === '/perfil' && notifCount > 0 && (
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
+              )}
+            </Link>
+          ))}
+        </div>
+      </nav>
+    </>
   )
 }
