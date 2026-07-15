@@ -59,7 +59,7 @@ function RecipeThumbH({ recipe }: { recipe: RecipeWithCreator }) {
 function RecipeThumbGrid({ recipe }: { recipe: RecipeWithCreator }) {
   return (
     <Link href={`/receta/${recipe.id}`} className="block">
-      <div className="relative aspect-[9/16] bg-stone-900 rounded-xl overflow-hidden">
+      <div className="relative aspect-[3/4] bg-stone-900 overflow-hidden">
         {recipe.thumbnail_url
           ? <img src={recipe.thumbnail_url} alt={recipe.title} className="w-full h-full object-cover" />
           : <div className="w-full h-full flex items-center justify-center text-2xl">🍴</div>
@@ -214,7 +214,7 @@ export default function ChefsPageClient({
                   <p className="text-sm" style={{ color: 'var(--brown-500)' }}>Sin resultados</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-0.5 px-0.5">
+                <div className="grid grid-cols-3 gap-0.5">
                   {searchResults.map(r => <RecipeThumbGrid key={r.id} recipe={r} />)}
                 </div>
               )
@@ -275,13 +275,13 @@ export default function ChefsPageClient({
                   <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-300)' }}>
                     Dietas e intolerancias
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {DIETS.map(d => (
                       <Link key={d.key}
                         href={`/chefs?diet=${encodeURIComponent(d.key)}`}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
+                        className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                         style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
-                        <span className="text-base">{d.emoji}</span>
+                        <span className="text-xl leading-none">{d.emoji}</span>
                         <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{d.label}</span>
                       </Link>
                     ))}
@@ -293,13 +293,13 @@ export default function ChefsPageClient({
                   <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-300)' }}>
                     Tiempo de cocinado
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     {TIMES.map(t => (
                       <Link key={t.key}
                         href={`/chefs?tiempo=${t.key}`}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
+                        className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                         style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
-                        <span className="text-base">{t.emoji}</span>
+                        <span className="text-xl leading-none">{t.emoji}</span>
                         <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{t.label}</span>
                       </Link>
                     ))}
