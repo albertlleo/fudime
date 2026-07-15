@@ -6,7 +6,7 @@ import { getUploadSignature, getImageUploadSignature, createRecipe } from '@/app
 const CATEGORIES = [
   'Aperitivos', 'Entrantes', 'Ensaladas', 'Cremas y sopas', 'Platos de cuchara',
   'Pasta', 'Arroces', 'Verduras', 'Carne y aves', 'Pescado y marisco',
-  'Proteínas vegetales', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
+  'Plant Based', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
   'Comida internacional', 'Comida rápida', 'Bocadillos y sándwiches',
   'Postres y dulces', 'Salsas y aliños', 'Bebidas',
 ]

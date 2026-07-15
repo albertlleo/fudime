@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import VerifiedBadge from '@/components/verified-badge'
 import type { RecipeWithCreator } from '@/lib/types'
 
 type Tab = 'todas' | 'categoria' | 'creador'
@@ -9,7 +10,7 @@ type Tab = 'todas' | 'categoria' | 'creador'
 const CAT_EMOJIS: Record<string, string> = {
   'aperitivos': '🥨', 'entrantes': '🥗', 'ensaladas': '🥙', 'cremas y sopas': '🍲',
   'platos de cuchara': '🫕', 'pasta': '🍝', 'arroces': '🍚', 'verduras': '🥦',
-  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'proteínas vegetales': '🌿', 'plant based': '🌿',
+  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
   'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
   'comida internacional': '🌍', 'comida rápida': '🍔', 'bocadillos y sándwiches': '🥪',
   'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
@@ -58,30 +59,38 @@ function CategoryCard({ cat, recipes }: { cat: string; recipes: RecipeWithCreato
   )
 }
 
-function CreatorSection({ title, recipes }: { title: string; recipes: RecipeWithCreator[] }) {
-  const [open, setOpen] = useState(true)
+function SavedChefRow({ id, name, avatarUrl, validatedAt, count }: {
+  id: string; name: string; avatarUrl: string | null; validatedAt: string | null; count: number
+}) {
+  const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
   return (
-    <div className="mb-5">
-      <button onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-5 py-2">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-bold" style={{ color: 'var(--brown-900)' }}>{title}</p>
-          <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
-            style={{ background: 'var(--brown-100)', color: 'var(--brown-500)' }}>
-            {recipes.length}
-          </span>
-        </div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-          className={`w-4 h-4 transition-transform ${open ? 'rotate-180' : ''}`} style={{ color: 'var(--brown-300)' }}>
-          <path d="M6 9l6 6 6-6" />
-        </svg>
-      </button>
-      {open && (
-        <div className="grid grid-cols-3 gap-0.5 px-0.5">
-          {recipes.map(r => <RecipeThumb key={r.id} recipe={r} />)}
-        </div>
-      )}
-    </div>
+    <Link href={`/guardados/creador/${id}`}
+      className="flex items-center gap-3.5 px-5 py-3.5 active:opacity-70 transition-opacity"
+      style={{ borderBottom: '1px solid var(--brown-100)' }}>
+      <div className="relative flex-shrink-0">
+        {avatarUrl
+          ? <img src={avatarUrl} alt={name} className="w-14 h-14 rounded-full object-cover" />
+          : <div className="w-14 h-14 rounded-full flex items-center justify-center text-base font-black text-black"
+              style={{ background: 'var(--amber)' }}>{initials}</div>
+        }
+        {validatedAt && (
+          <div className="absolute -bottom-0.5 -right-0.5 rounded-full"
+            style={{ background: '#fff', padding: '1.5px' }}>
+            <VerifiedBadge size="sm" />
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-sm" style={{ color: 'var(--brown-900)' }}>@{name}</p>
+        <p className="text-xs mt-0.5" style={{ color: 'var(--brown-500)' }}>
+          {count} receta{count !== 1 ? 's' : ''} guardada{count !== 1 ? 's' : ''}
+        </p>
+      </div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+        className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--brown-300)' }}>
+        <path d="M9 18l6-6-6-6" />
+      </svg>
+    </Link>
   )
 }
 
@@ -111,10 +120,10 @@ export default function GuardadosClient({ recipes }: { recipes: RecipeWithCreato
   }, [filtered])
 
   const byCreator = useMemo(() => {
-    const map: Record<string, { name: string; recipes: RecipeWithCreator[] }> = {}
+    const map: Record<string, { name: string; avatarUrl: string | null; validatedAt: string | null; recipes: RecipeWithCreator[] }> = {}
     for (const r of filtered) {
       const id = r.users.id
-      if (!map[id]) map[id] = { name: r.users.display_name, recipes: [] }
+      if (!map[id]) map[id] = { name: r.users.display_name, avatarUrl: r.users.avatar_url, validatedAt: r.users.validated_at, recipes: [] }
       map[id].recipes.push(r)
     }
     return Object.entries(map).sort((a, b) => b[1].recipes.length - a[1].recipes.length)
@@ -183,8 +192,8 @@ export default function GuardadosClient({ recipes }: { recipes: RecipeWithCreato
         </div>
       ) : (
         <div>
-          {byCreator.map(([id, { name, recipes: recs }]) => (
-            <CreatorSection key={id} title={name} recipes={recs} />
+          {byCreator.map(([id, { name, avatarUrl, validatedAt, recipes: recs }]) => (
+            <SavedChefRow key={id} id={id} name={name} avatarUrl={avatarUrl} validatedAt={validatedAt} count={recs.length} />
           ))}
         </div>
       )}
