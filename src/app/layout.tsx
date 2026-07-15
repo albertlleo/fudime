@@ -23,8 +23,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full bg-amber-50 text-stone-900">{children}</body>
+    <html lang="es" className={`${geist.variable} antialiased`}>
+      <body>
+        {/* Mobile-first: content capped at 430px (iPhone width), cream margins on desktop */}
+        <div style={{ maxWidth: '430px', margin: '0 auto', minHeight: '100dvh', position: 'relative' }}>
+          {children}
+        </div>
+      </body>
     </html>
   )
 }
