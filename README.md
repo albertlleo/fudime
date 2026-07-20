@@ -1,110 +1,119 @@
 # FUDIME
 
-**Red social de recetas en vídeo.** Los creadores publican recetas cortas en formato vertical (al estilo TikTok); los usuarios las descubren en un feed, las guardan, las comparten y siguen a sus creadores favoritos.
+**Red social de recetas en vídeo.** Los creadores publican recetas cortas en formato vertical (9:16); los usuarios las descubren en un feed, las guardan y siguen a sus creadores favoritos.
 
 ---
 
 ## ¿Qué es FUDIME?
 
-FUDIME es una aplicación móvil-first (pensada para usarse desde el teléfono) donde:
+Una app mobile-first donde:
 
-- Los **creadores** de contenido gastronómico suben vídeos cortos de recetas con título, descripción y etiquetas.
-- Los **usuarios** consumen ese contenido en un feed vertical con scroll, como TikTok o Reels.
-- Hay un sistema de **likes, guardados, compartir y comentarios** para interactuar con las recetas.
-- Los usuarios pueden **seguir a creadores** y ver sus perfiles públicos.
-- La app tiene **búsqueda** por nombre o por categoría (`#pasta`, `#vegano`, etc.).
-- Los creadores pasan por un proceso de **validación** antes de publicar, para garantizar la calidad del contenido.
+- Los **creadores** verificados suben vídeos de recetas con título, descripción, categoría, dieta y tiempo de cocinado.
+- Los **usuarios** consumen ese contenido en un feed vertical con scroll (estilo TikTok/Reels).
+- Hay un sistema completo de **likes, guardados, comentarios, compartir y follows**.
+- Los creadores pasan por un proceso de **validación** antes de poder publicar.
+- En escritorio la app muestra una barra lateral fija al estilo Instagram.
 
 ---
 
-## Estado actual del desarrollo
+## Funcionalidades
 
-### ✅ Funcionalidades completadas
-
-#### Autenticación
-- Registro con email y contraseña, con elección de rol: **consumidor** o **creador**
+### Autenticación
+- Registro con email y contraseña, eligiendo rol: **consumidor** o **creador**
 - Login / logout
-- Protección de rutas: si no estás logueado, la app redirige al login automáticamente
+- Rutas protegidas — redirige a `/login` si no hay sesión
 
-#### Feed principal
-- Scroll vertical con vídeos en pantalla completa (estilo TikTok)
-- **Autoplay** al entrar en cada vídeo, pausa al salir
-- Control de **sonido** (botón de silenciar/activar)
-- Dos modos de feed:
-  - **Para ti** — recetas ordenadas por fecha de publicación, con scroll infinito (carga de 10 en 10)
-  - **🔥 Tendencias** — recetas ordenadas por número de likes, carga las 50 más populares
-- Cambio entre modos con animación de transición
+### Feed principal
+- Scroll vertical full-screen con autoplay/pausa por intersección
+- Fondo con thumbnail desenfocado para evitar bordes negros durante la carga
+- Doble tap para dar like con animación de corazón
+- Control de sonido (botón silenciar/activar)
+- Dos modos:
+  - **Para ti** — paginación infinita (carga 10 en 10 al llegar al final)
+  - **🔥 Tendencias** — ordenado por número de likes
+- Panel de ingredientes y paso a paso deslizable desde abajo
 
-#### Interacción con recetas
-- **Like** (corazón) con contador en tiempo real
-- **Guardar** (marcador) para coleccionar recetas en tu perfil
-- **Compartir** — abre el panel nativo del móvil o copia el enlace
-- **Comentarios** — hilo de comentarios por receta, con posibilidad de borrar los tuyos
+### Subida de recetas (solo creadores)
+- Selección de vídeo desde la **galería** con **preview local** antes de subir
+- Confirmación antes de iniciar la subida (para verificar que es el vídeo correcto)
+- Barra de progreso en tiempo real durante la subida a Cloudinary
+- **Herramienta de recorte de portada**: ajuste de posición (arriba/abajo) y zoom con drag táctil o botones, exporta el recorte exacto en 3:4 (1080×1440px) antes de subir
+- Portada generada automáticamente del vídeo si no se sube ninguna
+- Campos obligatorios: título, ingredientes/paso a paso, categoría, dieta, tiempo de cocinado
+- Categorías, dietas y tiempos en **cuadrícula 2 columnas con emojis**, estilo outline/ámbar al seleccionar
+- El vídeo se guarda como **borrador** hasta que el creador lo publica
 
-#### Subida de recetas (solo creadores)
-- Drag & drop o selector de archivo de vídeo
-- Subida directa a Cloudinary con **barra de progreso** en tiempo real
-- Campos: título, descripción, etiquetas (tags separados por comas)
-- El vídeo se guarda como **borrador** hasta que el creador decide publicarlo
+### Página de receta
+- Vídeo 9:16 con `object-cover` y fondo desenfocado (sin barras negras)
+- Tags clicables → página de categoría
+- Card del creador con badge verificado
+- Like, guardar, comentarios
 
-#### Perfil propio
-- Avatar (imagen o iniciales generadas automáticamente)
-- Estadísticas: recetas publicadas, likes dados, guardados
-- Listado de **mis recetas** (publicadas y borradores)
-- Borradores con botón "Publicar" para hacerlos visibles
+### Búsqueda y categorías (`/chefs`)
+- Búsqueda por título de receta o nombre de creador
+- Filtros de **dieta** (vegana, sin gluten…) en grid 2 columnas con emojis
+- Filtros de **tiempo de cocinado** en grid 2 columnas con emojis
+- Listado de **categorías** con emojis, en grid 2 columnas
+- Pestaña de **Chefs** con creadores en seguimiento y descubrimiento
+- Resultados de búsqueda en grid 3 columnas 3:4
+
+### Página de categoría (`/categoria/[tag]`)
+- Header con emoji y nombre de la categoría
+- Grid 3 columnas de recetas ordenadas por popularidad
+
+### Perfiles de creadores (`/creador/[id]`)
+- Avatar, bio, redes sociales, estadísticas
+- Badge de **verificado** (sello ámbar estilo Twitter/X con check blanco)
+- Botón Seguir / Dejar de seguir
+- Feed completo del creador con scroll vertical (mismo estilo que el feed principal)
+
+### Perfil propio (`/perfil`)
+- Avatar, bio, estadísticas
+- Grid 3 columnas de mis recetas — tap para abrir la receta publicada
+- Borradores con botón "Publicar"
+- Botón eliminar con confirmación
 - Edición de perfil: nombre, bio, avatar, Instagram, TikTok
-- Acceso a notificaciones
-- Acceso al **panel de administración** (solo para el admin)
 
-#### Perfiles públicos de creadores
-- Página `/creador/[id]` con avatar, bio, redes sociales y estadísticas
-- Número de recetas publicadas y seguidores
-- Botón **Seguir / Dejar de seguir** con actualización optimista
-- Distintivo de **creador verificado** (checkmark dorado)
+### Guardados (`/guardados`)
+- **Pestaña Todas**: grid 3 columnas de todas las recetas guardadas
+- **Pestaña Categoría**: cuadrícula de tarjetas por categoría con portada (thumbnail de la última receta guardada) → abre `/guardados/categoria/[tag]`
+- **Pestaña Creador**: lista de chefs con avatar circular y badge verificado → abre `/guardados/creador/[id]`
+- Buscador para filtrar por título o nombre de creador
 
-#### Página de detalle de receta
-- Vídeo con controles nativos
-- Etiquetas clicables que llevan a la categoría
-- Enlace al perfil del creador
-- Acciones (like, guardar)
-- Sección de comentarios
+### Notificaciones
+- Se generan al recibir: **like**, **comentario** y nuevo **seguidor**
+- No se generan si la acción es sobre tu propia receta/perfil
+- Badge rojo en el icono de perfil cuando hay notificaciones sin leer
+- Página `/notificaciones` con avatar del actor, texto descriptivo, thumbnail y tiempo relativo
+- Se marcan como leídas automáticamente al entrar
 
-#### Búsqueda y categorías
-- Búsqueda por título de receta
-- Búsqueda por `#etiqueta`
-- Página de **categorías** (`/buscar`) con pills de los tags más usados
-- Página de **categoría individual** (`/categoria/pasta`) con todas las recetas de ese tag, ordenadas por popularidad
+### Diseño responsive
+- **Móvil**: navegación inferior con 5 pestañas
+- **Escritorio** (`lg:`): barra lateral fija de 72px (estilo Instagram) + columna de contenido centrada de 500px
 
-#### Notificaciones
-- Sistema de notificaciones para: likes, comentarios y nuevos seguidores
-- Badge rojo en el perfil cuando hay notificaciones sin leer
-- Página `/notificaciones` con historial
-- Las notificaciones se marcan como leídas al entrar
-
-#### Panel de administración
-- Acceso restringido al email configurado como admin
-- Vista de estadísticas generales (usuarios, recetas publicadas, creadores pendientes)
-- Lista de creadores pendientes de validación con sus redes sociales
-- Botones para **validar** o **rechazar** cada creador
-- Lista de creadores ya validados
+### Panel de administración (`/admin`)
+- Acceso restringido por email (`ADMIN_EMAIL`)
+- Estadísticas generales: usuarios, recetas publicadas, creadores pendientes
+- Validar o rechazar creadores pendientes
+- Lista de creadores ya verificados
 
 ---
 
-## Stack tecnológico
+## Stack
 
-| Capa | Tecnología | Por qué |
-|------|-----------|---------|
-| Frontend + Backend | **Next.js 16** (App Router) | Todo en un solo proyecto: páginas, lógica de servidor y API |
-| Base de datos + Auth | **Supabase** (PostgreSQL) | Autenticación lista, base de datos en tiempo real, hosting gratuito |
-| Almacenamiento de vídeo | **Cloudinary** | Streaming de vídeo optimizado, transformaciones automáticas |
-| Estilos | **Tailwind CSS v4** | Rápido de prototipar, paleta cálida (stone/amber) |
-| Hosting | **Vercel** (recomendado) | Deploy automático desde GitHub, integración nativa con Next.js |
+| Capa | Tecnología |
+|------|-----------|
+| Frontend + Backend | **Next.js 16** App Router (Server + Client Components, Server Actions) |
+| Base de datos + Auth | **Supabase** (PostgreSQL + RLS) |
+| Almacenamiento de vídeo e imágenes | **Cloudinary** (streaming, transformaciones automáticas) |
+| Estilos | **Tailwind CSS v4** — paleta cálida (cream/amber/brown) |
+| Hosting | **Vercel** — deploy automático desde GitHub |
 
 ---
 
 ## Requisitos previos
 
-- Node.js 18 o superior
+- Node.js 18+
 - Cuenta en [Supabase](https://supabase.com) (gratuita)
 - Cuenta en [Cloudinary](https://cloudinary.com) (gratuita)
 
@@ -112,7 +121,7 @@ FUDIME es una aplicación móvil-first (pensada para usarse desde el teléfono) 
 
 ## Variables de entorno
 
-Crea un fichero `.env.local` en la raíz del proyecto con los siguientes valores:
+Crea `.env.local` en la raíz:
 
 ```env
 # Supabase
@@ -128,26 +137,35 @@ CLOUDINARY_API_SECRET=<api-secret>
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-# Admin (email del usuario con acceso al panel de administración)
+# Admin
 ADMIN_EMAIL=tu@email.com
 ```
 
-Los valores de Supabase están en: **Dashboard → Settings → API**
-Los valores de Cloudinary están en: **Dashboard → API Keys**
+- Valores de Supabase: **Dashboard → Settings → API**
+- Valores de Cloudinary: **Dashboard → API Keys**
+
+---
+
+## Arrancar en local
+
+```bash
+npm install
+npm run dev
+```
+
+Abre [http://localhost:3000](http://localhost:3000).
 
 ---
 
 ## Base de datos — Migraciones SQL
 
-Ejecuta estos bloques en el **SQL Editor** de Supabase (**Dashboard → SQL Editor → New query**). Puedes ejecutarlos todos de una vez o por partes.
+Ejecuta en el **SQL Editor** de Supabase (**Dashboard → SQL Editor → New query**):
 
 ### Bloque 1 — Tablas principales
 
 ```sql
--- Tags en recetas
 alter table recipes add column if not exists tags text[] not null default '{}';
 
--- Tabla de follows
 create table if not exists follows (
   id uuid default gen_random_uuid() primary key,
   follower_id uuid not null references public.users(id) on delete cascade,
@@ -195,18 +213,15 @@ create policy "Sistema puede crear notificaciones" on notifications for insert w
 create policy "Usuarios marcan sus notificaciones" on notifications for update using (auth.uid() = user_id);
 ```
 
-### Bloque 4 — Trending y categorías (mejoras de producto)
+### Bloque 4 — Contador de likes y tags populares
 
 ```sql
--- Contador de likes por receta (para el feed de tendencias)
 alter table recipes add column if not exists likes_count integer not null default 0;
 
--- Rellena los contadores existentes
 update recipes r set likes_count = (
   select count(*) from likes l where l.recipe_id = r.id
 );
 
--- Trigger para mantener el contador actualizado automáticamente
 create or replace function sync_recipe_likes_count()
 returns trigger language plpgsql as $$
 begin
@@ -224,7 +239,6 @@ create trigger trg_recipe_likes_count
 after insert or delete on likes
 for each row execute function sync_recipe_likes_count();
 
--- Función para obtener los tags más populares (para las pills de categorías)
 create or replace function get_popular_tags(p_limit int default 10)
 returns table (tag text, cnt bigint)
 language sql stable security definer as $$
@@ -241,88 +255,79 @@ grant execute on function get_popular_tags(int) to anon, authenticated;
 
 ---
 
-## Arrancar en local
-
-```bash
-npm install
-npm run dev
-```
-
-Abre [http://localhost:3000](http://localhost:3000). La app redirige a `/login` si no hay sesión activa.
-
----
-
 ## Estructura del proyecto
 
 ```
 src/
 ├── app/
-│   ├── (auth)/               # Login y registro
-│   ├── (main)/               # App principal (requiere autenticación)
-│   │   ├── page.tsx          # Feed principal (Para ti + Tendencias)
-│   │   ├── actions.ts        # Server Actions: likes, saves, follows, paginación
-│   │   ├── constants.ts      # PAGE_SIZE y otras constantes compartidas
-│   │   ├── buscar/           # Búsqueda + pills de categorías
-│   │   ├── categoria/[tag]/  # Página de categoría por etiqueta
-│   │   ├── guardados/        # Recetas guardadas por el usuario
-│   │   ├── subir/            # Subir nueva receta en vídeo
-│   │   ├── perfil/           # Perfil propio + editar + notificaciones
-│   │   ├── receta/[id]/      # Detalle de receta + comentarios
-│   │   ├── creador/[id]/     # Perfil público de creador + follow
-│   │   └── notificaciones/   # Centro de notificaciones
-│   ├── admin/                # Panel de administración (acceso restringido)
-│   └── globals.css
+│   ├── (auth)/                    # Login y registro
+│   ├── (main)/                    # App principal (requiere autenticación)
+│   │   ├── layout.tsx             # Layout responsive: sidebar desktop + bottom nav móvil
+│   │   ├── page.tsx               # Feed principal (Para ti + Tendencias)
+│   │   ├── actions.ts             # Server Actions: likes, saves, follows, paginación
+│   │   ├── chefs/                 # Búsqueda, filtros, categorías y descubrir chefs
+│   │   ├── categoria/[tag]/       # Recetas por categoría con emoji
+│   │   ├── creador/[id]/          # Perfil público + feed vertical del creador
+│   │   ├── guardados/             # Recetas guardadas (todas / por categoría / por creador)
+│   │   │   ├── categoria/[tag]/   # Detalle de categoría guardada
+│   │   │   └── creador/[id]/      # Detalle de creador guardado
+│   │   ├── subir/                 # Subir receta (solo creadores)
+│   │   ├── perfil/                # Perfil propio + editar + seguidores/siguiendo
+│   │   ├── receta/[id]/           # Detalle de receta + comentarios
+│   │   └── notificaciones/        # Centro de notificaciones
+│   ├── admin/                     # Panel de administración (acceso restringido)
+│   └── globals.css                # Variables CSS (--cream, --amber, --brown-*)
 ├── components/
-│   ├── feed.tsx              # Feed TikTok con scroll infinito y modo trending
-│   ├── recipe-grid.tsx       # Grid de recetas con autoplay al hacer scroll
-│   ├── my-recipe-grid.tsx    # Grid del perfil propio con borradores
-│   ├── video-uploader.tsx    # Uploader con Cloudinary + tags
-│   ├── bottom-nav.tsx        # Navegación inferior con badge de notificaciones
-│   └── search-input.tsx      # Input de búsqueda
+│   ├── feed.tsx                   # Feed TikTok con scroll infinito
+│   ├── creator-feed.tsx           # Feed vertical del perfil de un creador
+│   ├── recipe-grid.tsx            # Grid 3 col / 3:4 de recetas
+│   ├── my-recipe-grid.tsx         # Grid del perfil propio con borradores
+│   ├── video-uploader.tsx         # Uploader: preview, crop portada, selector con iconos
+│   ├── verified-badge.tsx         # Sello ámbar verificado (SVG 12 puntas)
+│   ├── bottom-nav.tsx             # Nav inferior móvil + sidebar desktop
+│   ├── back-button.tsx            # Botón volver con fallback
+│   ├── onboarding.tsx             # Pantalla de bienvenida (primera vez)
+│   └── install-prompt.tsx         # Banner "Añadir a pantalla de inicio" (PWA)
 ├── lib/
 │   ├── supabase/
-│   │   ├── server.ts         # Cliente Supabase para Server Components
-│   │   ├── clients.ts        # Cliente Supabase para Client Components
-│   │   └── admin.ts          # Cliente con service role (para el admin panel)
-│   └── types.ts              # Tipos TypeScript de toda la app
-└── proxy.ts                  # Middleware de autenticación (Next.js 16)
+│   │   ├── server.ts              # Cliente para Server Components
+│   │   ├── clients.ts             # Cliente para Client Components
+│   │   └── admin.ts               # Cliente con service role (admin)
+│   └── types.ts                   # Tipos TypeScript de toda la app
+└── proxy.ts                       # Middleware de autenticación
 ```
+
+---
+
+## Flujo de un creador
+
+1. **Registro** → elige rol "Creador"
+2. **El admin valida** la cuenta desde `/admin` → aparece el sello verificado ✓
+3. **Sube una receta** desde `/subir`:
+   - Selecciona vídeo → previsualiza → confirma subida
+   - Sube o ajusta la portada (crop 3:4)
+   - Rellena título, ingredientes, categoría, dieta y tiempo (todos obligatorios)
+   - Guarda como borrador o publica directamente
+4. **Publica borradores** desde su perfil
+5. Recibe **notificaciones** de likes, comentarios y nuevos seguidores
+
+## Flujo de un usuario
+
+1. **Registro** → elige rol "Consumidor"
+2. **Descubre recetas** en el feed (Para ti / Tendencias)
+3. **Busca** por título, filtra por categoría, dieta o tiempo
+4. **Interactúa**: like, comentario, guardar, compartir
+5. **Sigue creadores** y ve sus recetas agrupadas
+6. Consulta **Guardados** organizados por categoría o por creador
 
 ---
 
 ## Scripts de mantenimiento
 
 ```bash
-# Evita que el proyecto de Supabase entre en pausa por inactividad
-# Ejecutar manualmente cada 5 días, o configurar como cron
+# Evita que el proyecto Supabase entre en pausa por inactividad
 bash scripts/keep-alive.sh
+
+# Elimina todas las recetas y vídeos de Cloudinary (útil para limpiar datos de prueba)
+node scripts/clean-recipes.mjs
 ```
-
----
-
-## Flujo de un creador (paso a paso)
-
-1. **Registro** → elige rol "Creador" → el admin recibe solicitud de validación
-2. **El admin valida** la cuenta desde `/admin` → el creador queda verificado (checkmark dorado)
-3. **Sube una receta** desde `/subir` → selecciona vídeo, añade título, descripción y tags → queda como borrador
-4. **Publica el borrador** desde su perfil → la receta aparece en el feed de todos los usuarios
-5. Los usuarios pueden **dar like, guardar, comentar y compartir** la receta
-6. El creador recibe **notificaciones** de cada interacción
-
-## Flujo de un usuario (paso a paso)
-
-1. **Registro** → elige rol "Consumidor"
-2. **Descubre recetas** en el feed principal (Para ti) o en Tendencias
-3. **Busca** por nombre o navega por categorías (`#pasta`, `#vegano`...)
-4. **Interactúa**: like, comentario, guardar, compartir
-5. **Sigue a creadores** desde su perfil público
-6. Consulta sus **recetas guardadas** en el apartado Guardados de la navegación
-
----
-
-## Próximos pasos sugeridos
-
-- **Feed personalizado** — mostrar primero recetas de creadores que sigues
-- **Onboarding** — tutorial de bienvenida la primera vez que entras
-- **Versión nativa** — empaquetar con Capacitor para publicar en App Store / Google Play
-- **Analíticas para creadores** — vistas, alcance y engagement por receta
