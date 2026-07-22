@@ -57,10 +57,10 @@ export async function toggleSave(recipeId: string): Promise<void> {
   }
 }
 
-export async function toggleFollow(creatorId: string): Promise<void> {
+export async function toggleFollow(creatorId: string): Promise<{ isFollowing: boolean }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user || user.id === creatorId) return
+  if (!user || user.id === creatorId) return { isFollowing: false }
 
   const { data: existing } = await supabase
     .from('follows')
@@ -71,9 +71,11 @@ export async function toggleFollow(creatorId: string): Promise<void> {
 
   if (existing) {
     await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', creatorId)
+    return { isFollowing: false }
   } else {
     await supabase.from('follows').insert({ follower_id: user.id, following_id: creatorId })
     await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
+    return { isFollowing: true }
   }
 }
 
