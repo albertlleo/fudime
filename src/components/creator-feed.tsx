@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { toggleLike, toggleSave } from '@/app/(main)/actions'
 import CommentSheet from '@/components/comment-sheet'
 import type { RecipeWithCreator } from '@/lib/types'
@@ -19,13 +20,14 @@ interface SlideProps {
   likeCount: number
   commentCount: number
   muted: boolean
+  isOwner: boolean
   onToggleMute: () => void
   onComment: () => void
   onLike: () => void
   onSave: () => void
 }
 
-function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, onToggleMute, onComment, onLike, onSave }: SlideProps) {
+function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, isOwner, onToggleMute, onComment, onLike, onSave }: SlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const lastTapRef = useRef<number>(0)
@@ -179,6 +181,17 @@ function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, onTog
 
       {/* Right actions */}
       <div className="absolute bottom-24 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
+        {isOwner && (
+          <Link href={`/receta/${recipe.id}/editar`}
+            className="flex flex-col items-center gap-1.5 active:opacity-80">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7 drop-shadow-lg">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            <span className="text-white text-xs font-bold drop-shadow-md" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>Editar</span>
+          </Link>
+        )}
+
         <button onClick={handleLike} className="flex flex-col items-center gap-1.5 active:opacity-80">
           <div className={`transition-transform duration-200 ${likeAnim ? 'scale-[1.4]' : 'scale-100'}`}>
             <svg viewBox="0 0 24 24" fill={isLiked ? '#ff2d55' : 'white'} stroke="none" className="w-7 h-7 drop-shadow-lg">
@@ -283,6 +296,7 @@ export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedId
             likeCount={counts[recipe.id] ?? 0}
             commentCount={commentCounts[recipe.id] ?? 0}
             muted={muted}
+            isOwner={!!userId && userId === recipe.users.id}
             onToggleMute={() => setMuted(v => !v)}
             onComment={() => setCommentRecipeId(recipe.id)}
             onLike={() => {
