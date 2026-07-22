@@ -78,11 +78,11 @@ type Chef = Pick<User, 'id' | 'display_name' | 'avatar_url' | 'validated_at' | '
 function ChefCard({ chef }: { chef: Chef }) {
   const initials = chef.display_name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
   return (
-    <Link href={`/creador/${chef.id}`} className="flex flex-col items-center gap-2 active:opacity-70 transition-opacity">
+    <Link href={`/creador/${chef.id}`} className="flex flex-col items-center gap-1.5 active:opacity-70 transition-opacity">
       <div className="relative">
         {chef.avatar_url
-          ? <img src={chef.avatar_url} alt={chef.display_name} className="w-20 h-20 rounded-full object-cover" />
-          : <div className="w-20 h-20 rounded-full flex items-center justify-center text-xl font-black text-black"
+          ? <img src={chef.avatar_url} alt={chef.display_name} className="w-24 h-24 rounded-full object-cover" />
+          : <div className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-black text-black"
               style={{ background: 'var(--amber)' }}>{initials}</div>
         }
         {chef.validated_at && (
@@ -92,7 +92,7 @@ function ChefCard({ chef }: { chef: Chef }) {
           </div>
         )}
       </div>
-      <p className="text-xs font-semibold text-center leading-tight line-clamp-2 max-w-[80px]"
+      <p className="text-xs font-semibold text-center leading-tight line-clamp-2 max-w-[90px]"
         style={{ color: 'var(--brown-900)' }}>{chef.display_name}</p>
     </Link>
   )
@@ -316,12 +316,12 @@ export default function ChefsPageClient({
 
             {/* EN TENDENCIA */}
             {!cq && trendingChefs.length > 0 && (
-              <div className="mb-7">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4 px-5"
+              <div className="mb-5">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3 px-5"
                   style={{ color: 'var(--brown-300)' }}>
                   En tendencia
                 </p>
-                <div className="grid grid-cols-3 gap-x-2 gap-y-5 px-5">
+                <div className="grid grid-cols-3 gap-x-2 gap-y-3 px-5">
                   {trendingChefs.map(chef => <ChefCard key={chef.id} chef={chef} />)}
                 </div>
               </div>
@@ -329,12 +329,12 @@ export default function ChefsPageClient({
 
             {/* SIGUIENDO */}
             {filteredFollowing.length > 0 && (
-              <div className="mb-7">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4 px-5"
+              <div className="mb-5">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3 px-5"
                   style={{ color: 'var(--brown-300)' }}>
                   Siguiendo
                 </p>
-                <div className="grid grid-cols-3 gap-x-2 gap-y-5 px-5">
+                <div className="grid grid-cols-3 gap-x-2 gap-y-3 px-5">
                   {filteredFollowing.map(chef => <ChefCard key={chef.id} chef={chef} />)}
                 </div>
               </div>
@@ -342,12 +342,12 @@ export default function ChefsPageClient({
 
             {/* DESCUBRIR */}
             {filteredDiscover.length > 0 && (
-              <div className="mb-7">
-                <p className="text-xs font-semibold uppercase tracking-widest mb-4 px-5"
+              <div className="mb-5">
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3 px-5"
                   style={{ color: 'var(--brown-300)' }}>
                   {cq ? 'Resultados' : 'Descubrir'}
                 </p>
-                <div className="grid grid-cols-3 gap-x-2 gap-y-5 px-5">
+                <div className="grid grid-cols-3 gap-x-2 gap-y-3 px-5">
                   {filteredDiscover.map(chef => <ChefCard key={chef.id} chef={chef} />)}
                 </div>
               </div>
