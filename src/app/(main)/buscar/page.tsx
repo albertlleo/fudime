@@ -138,7 +138,7 @@ export default async function BuscarPage({
               </div>
               <div className="flex gap-3 overflow-x-auto px-5 pb-1" style={{ scrollbarWidth: 'none' }}>
                 {trendingList.map(recipe => (
-                  <Link key={recipe.id} href={`/receta/${recipe.id}`} className="flex-shrink-0 w-28">
+                  <Link key={recipe.id} href={`/buscar/feed?start=${recipe.id}`} className="flex-shrink-0 w-28">
                     <div className="relative w-28 rounded-2xl overflow-hidden bg-stone-900" style={{ aspectRatio: '9/16' }}>
                       {recipe.thumbnail_url ? (
                         <img src={recipe.thumbnail_url} alt={recipe.title} className="w-full h-full object-cover" />
@@ -269,6 +269,7 @@ export default async function BuscarPage({
             emptyText={creatorList.length > 0
               ? `No hay recetas con "${searchTerm || filterLabel}"`
               : `No hay resultados para "${searchTerm || filterLabel}"`}
+            feedBase="/buscar/feed"
           />
         </>
       )}
