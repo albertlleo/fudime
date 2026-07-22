@@ -321,7 +321,7 @@ export default function ChefsPageClient({
                   style={{ color: 'var(--brown-300)' }}>
                   En tendencia
                 </p>
-                <div className="grid grid-cols-3 gap-x-2 gap-y-3 px-5">
+                <div className="grid grid-cols-3 gap-x-2 gap-y-1 px-5">
                   {trendingChefs.map(chef => <ChefCard key={chef.id} chef={chef} />)}
                 </div>
               </div>
@@ -334,7 +334,7 @@ export default function ChefsPageClient({
                   style={{ color: 'var(--brown-300)' }}>
                   Siguiendo
                 </p>
-                <div className="grid grid-cols-3 gap-x-2 gap-y-3 px-5">
+                <div className="grid grid-cols-3 gap-x-2 gap-y-1 px-5">
                   {filteredFollowing.map(chef => <ChefCard key={chef.id} chef={chef} />)}
                 </div>
               </div>
@@ -347,7 +347,7 @@ export default function ChefsPageClient({
                   style={{ color: 'var(--brown-300)' }}>
                   {cq ? 'Resultados' : 'Descubrir'}
                 </p>
-                <div className="grid grid-cols-3 gap-x-2 gap-y-3 px-5">
+                <div className="grid grid-cols-3 gap-x-2 gap-y-1 px-5">
                   {filteredDiscover.map(chef => <ChefCard key={chef.id} chef={chef} />)}
                 </div>
               </div>
