@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
 import { toggleLike, toggleSave, fetchMoreRecipes, fetchTrendingRecipes, fetchFollowingRecipes } from '@/app/(main)/actions'
 import { PAGE_SIZE } from '@/app/(main)/constants'
 import CommentSheet from '@/components/comment-sheet'
@@ -150,6 +151,7 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
           isSaved={saved.has(recipe.id)}
           likeCount={counts[recipe.id] ?? 0}
           muted={muted}
+          isOwner={!!userId && userId === recipe.users.id}
           onToggleMute={() => setMuted(v => !v)}
           commentCount={commentCounts[recipe.id] ?? 0}
           onComment={() => setCommentRecipeId(recipe.id)}
@@ -212,6 +214,7 @@ interface VideoCardProps {
   likeCount: number
   commentCount: number
   muted: boolean
+  isOwner: boolean
   onToggleMute: () => void
   onComment: () => void
   onLike: () => void
@@ -224,12 +227,13 @@ function fmtCount(n: number): string {
   return String(n)
 }
 
-function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, onToggleMute, onComment, onLike, onSave }: VideoCardProps) {
+function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, isOwner, onToggleMute, onComment, onLike, onSave }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const lastTapRef = useRef<number>(0)
   const [descExpanded, setDescExpanded] = useState(false)
   const [showIngredients, setShowIngredients] = useState(false)
+  const [showOptions, setShowOptions] = useState(false)
   const [shareToast, setShareToast] = useState(false)
   const [likeAnim, setLikeAnim] = useState(false)
   const [doubleTapHeart, setDoubleTapHeart] = useState<{ x: number; y: number; key: number } | null>(null)
@@ -400,8 +404,54 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
         </div>
       </div>
 
+      {/* Options sheet (owner only) */}
+      {isOwner && (
+        <>
+          <div className="fixed inset-0 z-[60] transition-opacity duration-300"
+            style={{ background: 'rgba(0,0,0,0.45)', opacity: showOptions ? 1 : 0, pointerEvents: showOptions ? 'auto' : 'none' }}
+            onClick={() => setShowOptions(false)} />
+          <div className="fixed inset-0 z-[70] pointer-events-none">
+            <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
+              <div className="w-full lg:max-w-[500px] h-full relative">
+                <div className="absolute left-0 right-0 bottom-0 pointer-events-auto transition-transform duration-300 ease-out"
+                  style={{ borderRadius: '20px 20px 0 0', background: '#fff', transform: showOptions ? 'translateY(0)' : 'translateY(100%)' }}
+                  onClick={e => e.stopPropagation()}>
+                  <div className="flex justify-center pt-3 pb-1">
+                    <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-200)' }} />
+                  </div>
+                  <Link href={`/receta/${recipe.id}/editar`}
+                    className="flex items-center gap-3.5 px-5 py-4 active:opacity-70 transition-opacity"
+                    style={{ borderTop: '1px solid var(--brown-100)' }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+                      className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--brown-700)' }}>
+                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                    <span className="text-base font-medium" style={{ color: 'var(--brown-900)' }}>Editar publicación</span>
+                  </Link>
+                  <button onClick={() => setShowOptions(false)}
+                    className="w-full flex items-center justify-center py-4 text-sm font-medium"
+                    style={{ borderTop: '1px solid var(--brown-100)', color: 'var(--brown-400)', marginBottom: 'env(safe-area-inset-bottom)' }}>
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Right actions — TikTok style */}
       <div className="absolute bottom-24 lg:bottom-8 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
+
+        {/* Options (owner only) */}
+        {isOwner && (
+          <button onClick={() => setShowOptions(true)} className="flex flex-col items-center gap-1 active:opacity-80">
+            <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6 drop-shadow-lg">
+              <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
+            </svg>
+          </button>
+        )}
 
         {/* Like */}
         <button onClick={handleLike} className="flex flex-col items-center gap-1.5 active:opacity-80">

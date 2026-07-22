@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateRecipe } from './actions'
+import { getImageUploadSignature } from '@/app/(main)/subir/actions'
 import type { Recipe } from '@/lib/types'
 
 const CATEGORIES = [
@@ -67,6 +68,9 @@ function IconGrid({ options, selected, onToggle, single = false }: {
 
 export default function EditRecipeForm({ recipe }: { recipe: Recipe }) {
   const router = useRouter()
+  const coverInputRef = useRef<HTMLInputElement>(null)
+  const [thumbnailUrl, setThumbnailUrl] = useState(recipe.thumbnail_url ?? '')
+  const [uploadingCover, setUploadingCover] = useState(false)
   const [title, setTitle] = useState(recipe.title)
   const [description, setDescription] = useState(recipe.description ?? '')
   const [categories, setCategories] = useState<string[]>(
@@ -78,6 +82,29 @@ export default function EditRecipeForm({ recipe }: { recipe: Recipe }) {
   const [cookTime, setCookTime] = useState(recipe.cook_time ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingCover(true)
+    setError(null)
+    try {
+      const sig = await getImageUploadSignature()
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('api_key', sig.apiKey)
+      fd.append('timestamp', String(sig.timestamp))
+      fd.append('signature', sig.signature)
+      fd.append('folder', sig.folder)
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, { method: 'POST', body: fd })
+      if (!res.ok) throw new Error()
+      setThumbnailUrl((await res.json()).secure_url)
+    } catch {
+      setError('Error al subir la portada. Inténtalo de nuevo.')
+    } finally {
+      setUploadingCover(false)
+    }
+  }
 
   function toggleCategory(c: string) {
     setCategories(p => p.includes(c) ? p.filter(x => x !== c) : [...p, c])
@@ -101,6 +128,7 @@ export default function EditRecipeForm({ recipe }: { recipe: Recipe }) {
       tags: categories.map(c => c.toLowerCase()),
       diet: diet.map(d => d.toLowerCase()),
       cookTime: cookTime || null,
+      thumbnailUrl: thumbnailUrl || undefined,
     })
     if (result.error) {
       setError(result.error)
@@ -112,6 +140,43 @@ export default function EditRecipeForm({ recipe }: { recipe: Recipe }) {
 
   return (
     <div className="px-5 space-y-5">
+      {/* Portada */}
+      <div>
+        <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--brown-700)' }}>
+          Foto de portada
+        </label>
+        <button type="button" onClick={() => coverInputRef.current?.click()}
+          className="relative w-full rounded-2xl overflow-hidden flex items-center justify-center"
+          style={{ aspectRatio: '3/4', maxHeight: 220, background: 'var(--brown-100)', border: '1.5px solid var(--brown-100)' }}>
+          {thumbnailUrl ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 active:opacity-100 transition-opacity"
+                style={{ background: 'rgba(0,0,0,0.35)' }}>
+                <span className="text-white text-sm font-semibold">Cambiar</span>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"
+                className="w-8 h-8" style={{ color: 'var(--brown-300)' }}>
+                <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <span className="text-xs" style={{ color: 'var(--brown-400)' }}>Toca para subir portada</span>
+            </div>
+          )}
+          {uploadingCover && (
+            <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
+              <div className="w-8 h-8 border-2 rounded-full animate-spin"
+                style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
+            </div>
+          )}
+        </button>
+        <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
+      </div>
+
       <div>
         <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
           Título <span style={{ color: '#dc2626' }}>*</span>
