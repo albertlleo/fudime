@@ -38,7 +38,7 @@ type VideoState =
 
 type CoverState =
   | { status: 'idle' }
-  | { status: 'cropping'; blobUrl: string; offsetY: number; scale: number }
+  | { status: 'cropping'; blobUrl: string; panX: number; panY: number; scale: number }
   | { status: 'uploading' }
   | { status: 'done'; url: string }
   | { status: 'error' }
@@ -73,8 +73,8 @@ export default function VideoUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
   const cropContainerRef = useRef<HTMLDivElement>(null)
-  const touchStartY = useRef(0)
-  const touchStartOffset = useRef(50)
+  const panRef = useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(null)
+  const pinchRef = useRef<{ dist: number; panX: number; panY: number; scale: number } | null>(null)
 
   const [videoState, setVideoState] = useState<VideoState>({ status: 'idle' })
   const [coverState, setCoverState] = useState<CoverState>({ status: 'idle' })
@@ -102,23 +102,47 @@ export default function VideoUploader() {
     }
   }, [])
 
-  // Non-passive touchmove to allow preventDefault inside crop area
+  // Non-passive touchmove for pinch+pan crop gestures
   useEffect(() => {
     const el = cropContainerRef.current
     if (!el || coverState.status !== 'cropping') return
+    const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
+    // Container is 210x280; max pan = half of "overflow" at current scale
+    const maxPanX = (s: number) => 105 * (s - 1)
+    const maxPanY = (s: number) => 140 * (s - 1)
     const onMove = (e: TouchEvent) => {
       e.preventDefault()
-      const dy = e.touches[0].clientY - touchStartY.current
-      const h = el.getBoundingClientRect().height || 280
-      const scale = coverState.status === 'cropping' ? coverState.scale : 1
-      const rangePx = (h / 3) * scale
-      const delta = (-dy / rangePx) * 100
-      const next = Math.max(0, Math.min(100, touchStartOffset.current + delta))
-      setCoverState(prev => prev.status === 'cropping' ? { ...prev, offsetY: next } : prev)
+      if (e.touches.length === 1 && panRef.current) {
+        const dx = e.touches[0].clientX - panRef.current.startX
+        const dy = e.touches[0].clientY - panRef.current.startY
+        setCoverState(prev => {
+          if (prev.status !== 'cropping') return prev
+          return {
+            ...prev,
+            panX: clamp(panRef.current!.panX + dx, -maxPanX(prev.scale), maxPanX(prev.scale)),
+            panY: clamp(panRef.current!.panY + dy, -maxPanY(prev.scale), maxPanY(prev.scale)),
+          }
+        })
+      } else if (e.touches.length === 2 && pinchRef.current) {
+        const newDist = Math.hypot(
+          e.touches[1].clientX - e.touches[0].clientX,
+          e.touches[1].clientY - e.touches[0].clientY,
+        )
+        const newScale = clamp(pinchRef.current.scale * (newDist / pinchRef.current.dist), 1, 4)
+        setCoverState(prev => {
+          if (prev.status !== 'cropping') return prev
+          return {
+            ...prev,
+            scale: newScale,
+            panX: clamp(pinchRef.current!.panX, -maxPanX(newScale), maxPanX(newScale)),
+            panY: clamp(pinchRef.current!.panY, -maxPanY(newScale), maxPanY(newScale)),
+          }
+        })
+      }
     }
     el.addEventListener('touchmove', onMove, { passive: false })
     return () => el.removeEventListener('touchmove', onMove)
-  }, [coverState.status, coverState.status === 'cropping' ? coverState.scale : 1])
+  }, [coverState.status])
 
   function handleVideoSelect(file: File) {
     if (!file.type.startsWith('video/')) {
@@ -166,25 +190,36 @@ export default function VideoUploader() {
   function handleCoverSelect(file: File) {
     if (!file.type.startsWith('image/')) return
     if (coverState.status === 'cropping') URL.revokeObjectURL(coverState.blobUrl)
-    setCoverState({ status: 'cropping', blobUrl: URL.createObjectURL(file), offsetY: 50, scale: 1 })
+    setCoverState({ status: 'cropping', blobUrl: URL.createObjectURL(file), panX: 0, panY: 0, scale: 1 })
   }
 
   async function confirmCrop() {
     if (coverState.status !== 'cropping') return
-    const { blobUrl, offsetY, scale } = coverState
+    const { blobUrl, panX, panY, scale } = coverState
     setCoverState({ status: 'uploading' })
     try {
       const img = new Image()
       img.src = blobUrl
       await new Promise<void>(r => { img.onload = () => r() })
-      const W = img.naturalWidth, H = img.naturalHeight
-      const visW = W / scale
-      const visH = Math.min(visW * (4 / 3), H)
-      const srcX = Math.max(0, (W - visW) / 2)
-      const srcY = (offsetY / 100) * Math.max(0, H - visH)
+      // Replicate object-fit:cover at canvas resolution (1080x1440 = 3:4)
+      const targetW = 1080, targetH = 1440
+      const imgAspect = img.naturalWidth / img.naturalHeight
+      const targetAspect = targetW / targetH
+      let drawW: number, drawH: number
+      if (imgAspect > targetAspect) {
+        drawH = targetH * scale
+        drawW = drawH * imgAspect
+      } else {
+        drawW = targetW * scale
+        drawH = drawW / imgAspect
+      }
+      // Scale pan from container (210x280) to canvas (1080x1440)
+      const ratio = targetW / 210
+      const x = (targetW - drawW) / 2 + panX * ratio
+      const y = (targetH - drawH) / 2 + panY * ratio
       const canvas = document.createElement('canvas')
-      canvas.width = 1080; canvas.height = 1440
-      canvas.getContext('2d')!.drawImage(img, srcX, srcY, visW, visH, 0, 0, 1080, 1440)
+      canvas.width = targetW; canvas.height = targetH
+      canvas.getContext('2d')!.drawImage(img, x, y, drawW, drawH)
       const blob = await new Promise<Blob>(r => canvas.toBlob(b => r(b!), 'image/jpeg', 0.92))
       URL.revokeObjectURL(blobUrl)
       const sig = await getImageUploadSignature()
@@ -198,16 +233,6 @@ export default function VideoUploader() {
       if (!res.ok) throw new Error()
       setCoverState({ status: 'done', url: (await res.json()).secure_url })
     } catch { setCoverState({ status: 'error' }) }
-  }
-
-  function adjustCrop(dir: 'up' | 'down' | 'zoomIn' | 'zoomOut') {
-    setCoverState(prev => {
-      if (prev.status !== 'cropping') return prev
-      if (dir === 'up') return { ...prev, offsetY: Math.max(0, prev.offsetY - 10) }
-      if (dir === 'down') return { ...prev, offsetY: Math.min(100, prev.offsetY + 10) }
-      if (dir === 'zoomIn') return { ...prev, scale: Math.min(3, +(prev.scale + 0.15).toFixed(2)) }
-      return { ...prev, scale: Math.max(1, +(prev.scale - 0.15).toFixed(2)) }
-    })
   }
 
   function toggleCategory(c: string) { setCategories(p => p.includes(c) ? p.filter(x => x !== c) : [...p, c]) }
@@ -333,19 +358,33 @@ export default function VideoUploader() {
             <div className="flex justify-center py-3" style={{ background: '#1a1a1a' }}>
               <div ref={cropContainerRef}
                 className="relative overflow-hidden"
-                style={{ width: 210, height: 280, touchAction: 'none', cursor: 'grab', userSelect: 'none' }}
+                style={{ width: 210, height: 280, touchAction: 'none', userSelect: 'none' }}
                 onTouchStart={e => {
-                  touchStartY.current = e.touches[0].clientY
-                  touchStartOffset.current = coverState.offsetY
+                  if (e.touches.length === 1) {
+                    panRef.current = { startX: e.touches[0].clientX, startY: e.touches[0].clientY, panX: coverState.panX, panY: coverState.panY }
+                    pinchRef.current = null
+                  } else if (e.touches.length === 2) {
+                    const dist = Math.hypot(e.touches[1].clientX - e.touches[0].clientX, e.touches[1].clientY - e.touches[0].clientY)
+                    pinchRef.current = { dist, panX: coverState.panX, panY: coverState.panY, scale: coverState.scale }
+                    panRef.current = null
+                  }
                 }}>
-                <div className="absolute inset-0"
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={coverState.blobUrl}
+                  alt=""
+                  draggable={false}
                   style={{
-                    backgroundImage: `url(${coverState.blobUrl})`,
-                    backgroundSize: `${Math.round(coverState.scale * 100)}%`,
-                    backgroundPosition: `center ${coverState.offsetY.toFixed(1)}%`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundColor: '#000',
-                  }} />
+                    position: 'absolute',
+                    inset: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    transform: `translate(${coverState.panX}px, ${coverState.panY}px) scale(${coverState.scale})`,
+                    transformOrigin: 'center',
+                    pointerEvents: 'none',
+                  }}
+                />
                 {/* Rule-of-thirds grid */}
                 <div className="absolute inset-0 pointer-events-none"
                   style={{
@@ -354,28 +393,12 @@ export default function VideoUploader() {
                   }} />
               </div>
             </div>
+            <p className="text-center text-[11px] py-1.5" style={{ background: '#111', color: 'rgba(255,255,255,0.45)' }}>
+              Mueve con 1 dedo · Pellizca para ampliar
+            </p>
 
-            {/* Controls */}
-            <div className="px-3 py-3 flex items-center gap-2" style={{ background: '#fff' }}>
-              <span className="text-xs font-medium mr-1" style={{ color: 'var(--brown-500)' }}>Posición</span>
-              {(['up', 'down'] as const).map(dir => (
-                <button key={dir} type="button" onClick={() => adjustCrop(dir)}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'var(--brown-100)' }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{ color: 'var(--brown-700)' }}>
-                    {dir === 'up' ? <path d="M18 15l-6-6-6 6" /> : <path d="M6 9l6 6 6-6" />}
-                  </svg>
-                </button>
-              ))}
-              <span className="text-xs font-medium ml-2 mr-1" style={{ color: 'var(--brown-500)' }}>Zoom</span>
-              {(['zoomOut', 'zoomIn'] as const).map(dir => (
-                <button key={dir} type="button" onClick={() => adjustCrop(dir)}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-base font-bold"
-                  style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
-                  {dir === 'zoomOut' ? '−' : '+'}
-                </button>
-              ))}
-              <div className="flex-1" />
+            {/* Confirm / Cancel */}
+            <div className="px-3 py-3 flex items-center gap-2 justify-end" style={{ background: '#fff' }}>
               <button type="button"
                 onClick={() => { URL.revokeObjectURL(coverState.blobUrl); setCoverState({ status: 'idle' }) }}
                 className="h-9 px-3 rounded-xl text-xs font-medium"

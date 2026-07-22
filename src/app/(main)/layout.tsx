@@ -11,13 +11,22 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   if (!user) redirect('/login')
 
   let notifCount = 0
+  let isCreator = false
   try {
-    const { count } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .eq('read', false)
+    const [{ count }, { data: profile }] = await Promise.all([
+      supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('read', false),
+      supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single(),
+    ])
     notifCount = count ?? 0
+    isCreator = profile?.role === 'creator'
   } catch {}
 
   return (
@@ -28,7 +37,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
           {children}
         </div>
       </div>
-      <BottomNav notifCount={notifCount} />
+      <BottomNav notifCount={notifCount} isCreator={isCreator} />
       <Onboarding />
       <InstallPrompt />
     </div>

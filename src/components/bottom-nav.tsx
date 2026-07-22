@@ -84,13 +84,15 @@ const tabs = [
   },
 ]
 
-export default function BottomNav({ notifCount = 0 }: { notifCount?: number }) {
+export default function BottomNav({ notifCount = 0, isCreator = false }: { notifCount?: number; isCreator?: boolean }) {
   const pathname = usePathname()
 
-  const items = tabs.map(tab => ({
-    ...tab,
-    active: pathname === tab.href,
-  }))
+  const items = tabs
+    .filter(tab => tab.href !== '/subir' || isCreator)
+    .map(tab => ({
+      ...tab,
+      active: pathname === tab.href,
+    }))
 
   return (
     <>
