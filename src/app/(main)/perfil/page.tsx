@@ -67,8 +67,10 @@ export default async function PerfilPage() {
               </a>
             </div>
 
-            <div className="flex items-center gap-2 mt-1.5">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              <span className="text-sm" style={{ color: 'var(--brown-400)' }}>@{user.display_name}</span>
+              {user.role === 'creator' && user.validated_at && <VerifiedBadge size="sm" />}
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
                 style={{
                   background: user.role === 'creator' ? '#fffbeb' : 'var(--brown-100)',
                   color: user.role === 'creator' ? '#92400e' : 'var(--brown-500)',
@@ -76,11 +78,10 @@ export default async function PerfilPage() {
                 }}>
                 {user.role === 'creator' ? '✦ Creador' : 'Consumidor'}
               </span>
-              {user.role === 'creator' && user.validated_at && <VerifiedBadge />}
             </div>
 
             {user.bio && (
-              <p className="mt-2 text-sm leading-relaxed line-clamp-2" style={{ color: 'var(--brown-500)' }}>
+              <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--brown-500)' }}>
                 {user.bio}
               </p>
             )}

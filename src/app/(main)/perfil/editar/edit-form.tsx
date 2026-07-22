@@ -116,7 +116,7 @@ export default function EditForm({ user }: { user: User }) {
         <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
           Bio
         </label>
-        <textarea name="bio" defaultValue={user.bio ?? ''} maxLength={200} rows={3}
+        <textarea name="bio" defaultValue={user.bio ?? ''} maxLength={400} rows={5}
           placeholder="Cuéntanos algo sobre ti..."
           className="input-cream resize-none" />
       </div>

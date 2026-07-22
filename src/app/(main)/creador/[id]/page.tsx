@@ -99,15 +99,16 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
 
           {/* Info */}
           <div className="flex-1 min-w-0 pt-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>
-                {displayName}
-              </h1>
-              {creator.validated_at && <VerifiedBadge size="lg" />}
+            <h1 className="text-xl font-black leading-tight" style={{ color: 'var(--brown-900)' }}>
+              {displayName}
+            </h1>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-sm" style={{ color: 'var(--brown-400)' }}>@{displayName}</span>
+              {creator.validated_at && <VerifiedBadge size="sm" />}
             </div>
 
             {creator.bio && (
-              <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--brown-500)' }}>
+              <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--brown-500)' }}>
                 {creator.bio}
               </p>
             )}
