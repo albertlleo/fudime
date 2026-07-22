@@ -182,8 +182,12 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
         onClick={onClose}
       />
 
+      {/* Mirror the main layout column so the sheet aligns with the video width on desktop */}
+      <div className="fixed inset-0 z-[70] pointer-events-none">
+        <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
+          <div className="w-full lg:max-w-[500px] h-full relative">
       <div
-        className="fixed left-0 right-0 bottom-0 z-[70] flex flex-col transition-transform duration-300 ease-out"
+        className="absolute left-0 right-0 bottom-0 flex flex-col pointer-events-auto transition-transform duration-300 ease-out"
         style={{
           height: '70dvh',
           borderRadius: '20px 20px 0 0',
@@ -300,6 +304,9 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
               {' '}para comentar
             </p>
           )}
+        </div>
+      </div>
+          </div>
         </div>
       </div>
     </>
