@@ -256,7 +256,7 @@ export default function VideoUploader() {
   }
 
   const canSubmit = videoState.status === 'done' && !!title.trim() && !!description.trim()
-    && categories.length > 0 && diet.length > 0 && !!cookTime && !submitting
+    && categories.length > 0 && !!cookTime && !submitting
 
   return (
     <div className="min-h-dvh overflow-y-auto pb-24 px-5 pt-14" style={{ background: 'var(--cream)' }}>
@@ -483,23 +483,23 @@ export default function VideoUploader() {
 
         <div>
           <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--brown-700)' }}>
-            Dieta e intolerancias <span style={{ color: '#dc2626' }}>*</span>
-          </label>
-          <IconGrid
-            options={DIETS.map(d => ({ key: d.key, label: d.key, emoji: d.emoji }))}
-            selected={diet}
-            onToggle={toggleDiet}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--brown-700)' }}>
             Tiempo de cocinado <span style={{ color: '#dc2626' }}>*</span>
           </label>
           <IconGrid
             options={TIMES.map(t => ({ key: t.key, label: t.label, emoji: t.emoji }))}
             selected={cookTime ? [cookTime] : []}
             onToggle={toggleTime}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--brown-700)' }}>
+            Dieta e intolerancias <span className="font-normal ml-1" style={{ color: 'var(--brown-300)' }}>(opcional)</span>
+          </label>
+          <IconGrid
+            options={DIETS.map(d => ({ key: d.key, label: d.key, emoji: d.emoji }))}
+            selected={diet}
+            onToggle={toggleDiet}
           />
         </div>
 
