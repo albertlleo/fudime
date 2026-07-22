@@ -21,7 +21,6 @@ const CAT_EMOJIS: Record<string, string> = {
 const DIETS = [
   { key: 'Vegana', emoji: '🌱' }, { key: 'Vegetariana', emoji: '🥕' },
   { key: 'Sin gluten', emoji: '🌾' }, { key: 'Sin lactosa', emoji: '🥛' },
-  { key: 'Sin azúcar', emoji: '🍬' },
 ]
 const TIMES = [
   { key: 'menos-15', label: 'Menos de 15 min', emoji: '⚡' },

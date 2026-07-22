@@ -25,7 +25,6 @@ const DIETS = [
   { key: 'vegetariana', label: 'Vegetariana', emoji: '🥕' },
   { key: 'sin gluten', label: 'Sin gluten', emoji: '🌾' },
   { key: 'sin lactosa', label: 'Sin lactosa', emoji: '🥛' },
-  { key: 'sin azúcar', label: 'Sin azúcar', emoji: '🍬' },
 ]
 
 const TIMES = [
