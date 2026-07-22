@@ -49,7 +49,7 @@ function RecipeThumbH({ recipe }: { recipe: RecipeWithCreator }) {
           : <div className="w-full h-full flex items-center justify-center text-2xl">🍴</div>
         }
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-          <p className="text-white text-[10px] font-semibold line-clamp-2 leading-tight">{recipe.title}</p>
+          <p className="text-white text-[10px] font-semibold line-clamp-1 leading-tight">{recipe.title}</p>
         </div>
       </div>
     </Link>
@@ -65,7 +65,7 @@ function RecipeThumbGrid({ recipe }: { recipe: RecipeWithCreator }) {
           : <div className="w-full h-full flex items-center justify-center text-2xl">🍴</div>
         }
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-          <p className="text-white text-[10px] font-bold line-clamp-2 leading-tight">{recipe.title}</p>
+          <p className="text-white text-[10px] font-bold line-clamp-1 leading-tight">{recipe.title}</p>
           <p className="text-[9px] mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>@{recipe.users.display_name}</p>
         </div>
       </div>

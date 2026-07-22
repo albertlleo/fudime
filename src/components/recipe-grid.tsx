@@ -1,43 +1,21 @@
-'use client'
-
 import Link from 'next/link'
-import { useRef, useEffect } from 'react'
 import type { RecipeWithCreator } from '@/lib/types'
 
 function RecipeCard({ recipe, href }: { recipe: RecipeWithCreator; href: string }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-
-  useEffect(() => {
-    const el = containerRef.current
-    const video = videoRef.current
-    if (!el || !video) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) video.play().catch(() => {})
-        else video.pause()
-      },
-      { threshold: 0.5 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
-
   return (
     <Link href={href} className="block">
-      <div ref={containerRef} className="relative aspect-[3/4] bg-stone-900 overflow-hidden">
-        <video
-          ref={videoRef}
-          src={recipe.video_url}
-          poster={recipe.thumbnail_url ?? undefined}
-          muted
-          loop
-          playsInline
-          preload="none"
-          className="w-full h-full object-cover"
-        />
+      <div className="relative aspect-[3/4] bg-stone-900 overflow-hidden">
+        {recipe.thumbnail_url ? (
+          <img
+            src={recipe.thumbnail_url}
+            alt={recipe.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-2xl">🍴</div>
+        )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2.5">
-          <p className="text-white text-xs font-bold line-clamp-2 leading-tight">{recipe.title}</p>
+          <p className="text-white text-xs font-bold line-clamp-1 leading-tight">{recipe.title}</p>
           <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>@{recipe.users.display_name}</p>
         </div>
         {(recipe.likes_count ?? 0) > 0 && (
@@ -63,8 +41,6 @@ interface RecipeGridProps {
   emptyIcon: string
   emptyTitle: string
   emptyText: string
-  /** Base URL for the feed when a card is tapped, e.g. "/categoria/ensaladas/feed".
-   *  The recipe id is appended as ?start=[id]. Falls back to /receta/[id] if omitted. */
   feedBase?: string
 }
 
