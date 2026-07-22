@@ -3,7 +3,32 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import type { UserRole } from '@/lib/types'
+
+function isValidUsername(u: string) {
+  return /^[a-z0-9_]{3,20}$/.test(u)
+}
+
+function getAge(birthdate: string): number {
+  const birth = new Date(birthdate)
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
+  return age
+}
+
+export async function checkUsername(
+  username: string
+): Promise<{ available: boolean; error?: string }> {
+  if (!isValidUsername(username)) return { available: false, error: 'invalid' }
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('users')
+    .select('id')
+    .eq('username', username)
+    .maybeSingle()
+  return { available: !data }
+}
 
 export async function loginAction(
   formData: FormData
@@ -30,17 +55,30 @@ export async function registerAction(
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const displayName = (formData.get('display_name') as string).trim()
-  const role = formData.get('role') as UserRole
-  const socialUrl = (formData.get('social_url') as string | null)?.trim() || null
+  const username = (formData.get('username') as string).trim().toLowerCase()
+  const birthdate = formData.get('birthdate') as string
 
-  if (!displayName) return { error: 'El nombre es obligatorio.' }
-  if (!['consumer', 'creator'].includes(role)) return { error: 'Rol inválido.' }
+  if (!displayName) return { error: 'El nombre completo es obligatorio.' }
+  if (!isValidUsername(username)) {
+    return { error: 'El nombre de usuario solo puede contener letras minúsculas, números y guiones bajos (3–20 caracteres).' }
+  }
+  if (!birthdate) return { error: 'La fecha de nacimiento es obligatoria.' }
+  if (getAge(birthdate) < 18) return { error: 'Debes tener al menos 18 años para registrarte.' }
+
+  // Check username availability
+  const admin = createAdminClient()
+  const { data: existingUsername } = await admin
+    .from('users')
+    .select('id')
+    .eq('username', username)
+    .maybeSingle()
+  if (existingUsername) return { error: 'Este nombre de usuario ya está en uso.' }
 
   const { data: authData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { display_name: displayName, role },
+      data: { display_name: displayName, role: 'consumer' },
     },
   })
 
@@ -55,26 +93,13 @@ export async function registerAction(
     return { error: 'No se pudo crear el usuario.' }
   }
 
-  let instagramUrl: string | null = null
-  let tiktokUrl: string | null = null
-  if (socialUrl) {
-    if (socialUrl.includes('tiktok.com') || socialUrl.includes('tiktok')) {
-      tiktokUrl = socialUrl
-    } else {
-      instagramUrl = socialUrl
-    }
-  }
-
-  // Upsert so we overwrite any row a Supabase trigger may have already created
-  // (triggers default to role='consumer'; upsert ensures the chosen role wins)
-  const admin = createAdminClient()
   const { error: upsertError } = await admin.from('users').upsert({
     id: authData.user.id,
     email,
     display_name: displayName,
-    role,
-    instagram_url: instagramUrl,
-    tiktok_url: tiktokUrl,
+    username,
+    birthdate,
+    role: 'consumer',
     validated_at: null,
   }, { onConflict: 'id' })
 
@@ -82,7 +107,6 @@ export async function registerAction(
     return { error: 'Error al guardar el perfil. Intenta de nuevo.' }
   }
 
-  // Email confirmation required — redirect to login with info banner
   if (!authData.session) {
     redirect('/login?confirm=1')
   }

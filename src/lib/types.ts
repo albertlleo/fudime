@@ -5,12 +5,24 @@ export interface User {
   id: string
   email: string
   display_name: string
+  username: string | null
   avatar_url: string | null
   bio: string | null
   role: UserRole
   instagram_url: string | null
   tiktok_url: string | null
   validated_at: string | null
+  birthdate: string | null
+  created_at: string
+}
+
+export interface CreatorRequest {
+  id: string
+  user_id: string
+  instagram_url: string | null
+  tiktok_url: string | null
+  other_links: string | null
+  status: 'pending' | 'approved' | 'rejected'
   created_at: string
 }
 

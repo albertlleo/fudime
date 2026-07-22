@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { signOutAction } from './actions'
 import MyRecipeGrid from '@/components/my-recipe-grid'
 import VerifiedBadge from '@/components/verified-badge'
-import type { User, Recipe } from '@/lib/types'
+import type { User, Recipe, CreatorRequest } from '@/lib/types'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -17,11 +17,15 @@ export default async function PerfilPage() {
 
   const user = profile as User
 
-  const [{ data: recipes }, { count: followersCount }, { count: followingCount }] = await Promise.all([
+  const [{ data: recipes }, { count: followersCount }, { count: followingCount }, { data: creatorReqRaw }] = await Promise.all([
     supabase.from('recipes').select('*').eq('creator_id', user.id).order('created_at', { ascending: false }),
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id),
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
+    user.role === 'consumer'
+      ? supabase.from('creator_requests').select('status').eq('user_id', user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
+  const creatorRequest = creatorReqRaw as Pick<CreatorRequest, 'status'> | null
 
   const recipeList = (recipes ?? []) as Recipe[]
   const publishedCount = recipeList.filter(r => r.status === 'published').length
@@ -68,7 +72,7 @@ export default async function PerfilPage() {
             </div>
 
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-sm" style={{ color: 'var(--brown-400)' }}>@{user.display_name}</span>
+              <span className="text-sm" style={{ color: 'var(--brown-400)' }}>@{user.username ?? user.display_name}</span>
               {user.role === 'creator' && user.validated_at && <VerifiedBadge size="sm" />}
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
                 style={{
@@ -149,6 +153,34 @@ export default async function PerfilPage() {
             </div>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
               className="w-4 h-4" style={{ color: '#d97706' }}>
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </Link>
+        </div>
+      )}
+
+      {/* Solicitar cuenta creador (solo consumers) */}
+      {user.role === 'consumer' && (
+        <div className="mx-5 mb-3">
+          <Link href="/perfil/solicitar-creador"
+            className="flex items-center justify-between rounded-2xl px-4 py-3.5 transition-colors"
+            style={{
+              background: creatorRequest?.status === 'pending' ? '#fffbeb' : '#fff',
+              border: `1.5px solid ${creatorRequest?.status === 'pending' ? '#fcd34d' : 'var(--brown-100)'}`,
+            }}>
+            <div className="flex items-center gap-3">
+              <span className="text-lg">🎬</span>
+              <div>
+                <span className="text-sm font-semibold block" style={{ color: 'var(--brown-900)' }}>
+                  Solicitar cuenta de creador
+                </span>
+                {creatorRequest?.status === 'pending' && (
+                  <span className="text-xs" style={{ color: '#d97706' }}>Solicitud en revisión</span>
+                )}
+              </div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+              className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--brown-300)' }}>
               <path d="M9 18l6-6-6-6" />
             </svg>
           </Link>

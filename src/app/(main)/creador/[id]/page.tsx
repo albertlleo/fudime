@@ -103,7 +103,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
               {displayName}
             </h1>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-sm" style={{ color: 'var(--brown-400)' }}>@{displayName}</span>
+              <span className="text-sm" style={{ color: 'var(--brown-400)' }}>@{creator.username ?? displayName}</span>
               {creator.validated_at && <VerifiedBadge size="sm" />}
             </div>
 

@@ -45,7 +45,9 @@
       "Bash(vercel link *)",
       "Bash(vercel env *)",
       "Bash(vercel *)",
-      "Bash(lsof -ti:3000)"
+      "Bash(lsof -ti:3000)",
+      "Bash(grep -rn '`/receta/${' /Users/albertlleo/Documents/fudime/src --include=\"*.tsx\" --include=\"*.ts\")",
+      "Bash(xargs ls -la)"
     ]
   }
 }

@@ -1,50 +1,54 @@
 'use client'
 
-import { useTransition, useState } from 'react'
+import { useTransition, useState, useEffect } from 'react'
 import Link from 'next/link'
-import { registerAction } from '../actions'
-import type { UserRole } from '@/lib/types'
-
-function RoleCard({
-  value, selected, onSelect, title, description, emoji,
-}: {
-  value: UserRole; selected: boolean; onSelect: (v: UserRole) => void
-  title: string; description: string; emoji: string
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(value)}
-      className="flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl text-center transition-all"
-      style={{
-        border: selected ? '2px solid var(--amber)' : '2px solid var(--brown-100)',
-        background: selected ? '#fffbeb' : '#fff',
-      }}
-    >
-      <span className="text-2xl">{emoji}</span>
-      <span className="font-semibold text-sm" style={{ color: selected ? '#92400e' : 'var(--brown-700)' }}>
-        {title}
-      </span>
-      <span className="text-xs leading-relaxed" style={{ color: 'var(--brown-500)' }}>{description}</span>
-    </button>
-  )
-}
+import { registerAction, checkUsername } from '../actions'
 
 export default function RegisterPage() {
-  const [role, setRole] = useState<UserRole>('consumer')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  const [username, setUsername] = useState('')
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken' | 'invalid'>('idle')
+
+  useEffect(() => {
+    if (!username) { setUsernameStatus('idle'); return }
+    if (!/^[a-z0-9_]{1,20}$/.test(username)) { setUsernameStatus('invalid'); return }
+    if (username.length < 3) { setUsernameStatus('idle'); return }
+    setUsernameStatus('checking')
+    const timer = setTimeout(async () => {
+      const res = await checkUsername(username)
+      setUsernameStatus(res.available ? 'available' : 'taken')
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [username])
+
+  function handleUsernameInput(v: string) {
+    setUsername(v.toLowerCase().replace(/[^a-z0-9_]/g, ''))
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
     const formData = new FormData(e.currentTarget)
-    formData.set('role', role)
     startTransition(async () => {
       const result = await registerAction(formData)
       if (result?.error) setError(result.error)
     })
   }
+
+  const usernameColor =
+    usernameStatus === 'available' ? '#16a34a'
+    : usernameStatus === 'taken' ? '#dc2626'
+    : usernameStatus === 'invalid' ? '#d97706'
+    : 'var(--brown-300)'
+
+  const usernameHint =
+    usernameStatus === 'available' ? '✓ Disponible'
+    : usernameStatus === 'taken' ? '✗ Ya está en uso'
+    : usernameStatus === 'invalid' ? 'Solo letras minúsculas, números y _'
+    : usernameStatus === 'checking' ? 'Comprobando...'
+    : 'Solo letras minúsculas, números y _ (3–20 caracteres)'
 
   return (
     <div className="w-full" style={{ maxWidth: 390 }}>
@@ -65,34 +69,53 @@ export default function RegisterPage() {
           </div>
         )}
 
-        <div className="mb-5">
-          <p className="text-sm font-medium mb-3" style={{ color: 'var(--brown-700)' }}>¿Cómo usarás FUDIME?</p>
-          <div className="flex gap-3">
-            <RoleCard
-              value="consumer" selected={role === 'consumer'} onSelect={setRole}
-              emoji="🍽️" title="Descubrir" description="Explora recetas de creadores"
-            />
-            <RoleCard
-              value="creator" selected={role === 'creator'} onSelect={setRole}
-              emoji="🎬" title="Crear" description="Publica tus recetas en vídeo"
-            />
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="hidden" name="role" value={role} />
-
           <div>
             <label htmlFor="display_name" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
-              Nombre
+              Nombre completo <span style={{ color: '#dc2626' }}>*</span>
             </label>
             <input id="display_name" name="display_name" type="text" required autoComplete="name"
-              placeholder="Tu nombre o apodo" className="input-cream" />
+              placeholder="Tu nombre y apellidos" className="input-cream" />
+          </div>
+
+          <div>
+            <label htmlFor="username" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
+              Nombre de usuario <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <div className="relative">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium pointer-events-none"
+                style={{ color: 'var(--brown-400)' }}>@</span>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                value={username}
+                onChange={e => handleUsernameInput(e.target.value)}
+                autoComplete="username"
+                placeholder="tunombre"
+                className="input-cream pl-7"
+                maxLength={20}
+              />
+            </div>
+            <p className="text-xs mt-1.5" style={{ color: usernameColor }}>{usernameHint}</p>
+          </div>
+
+          <div>
+            <label htmlFor="birthdate" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
+              Fecha de nacimiento <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <input id="birthdate" name="birthdate" type="date" required
+              max={new Date(Date.now() - 18 * 365.25 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+              className="input-cream"
+              style={{ colorScheme: 'light' }}
+            />
+            <p className="text-xs mt-1.5" style={{ color: 'var(--brown-300)' }}>Debes ser mayor de 18 años</p>
           </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
-              Email
+              Correo electrónico <span style={{ color: '#dc2626' }}>*</span>
             </label>
             <input id="email" name="email" type="email" required autoComplete="email"
               placeholder="tu@email.com" className="input-cream" />
@@ -100,34 +123,31 @@ export default function RegisterPage() {
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
-              Contraseña
+              Contraseña <span style={{ color: '#dc2626' }}>*</span>
             </label>
             <input id="password" name="password" type="password" required autoComplete="new-password"
               minLength={6} placeholder="Mínimo 6 caracteres" className="input-cream" />
           </div>
 
-          {role === 'creator' && (
-            <div>
-              <label htmlFor="social_url" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
-                Instagram o TikTok{' '}
-                <span className="font-normal" style={{ color: 'var(--brown-500)' }}>(para validación)</span>
-              </label>
-              <input id="social_url" name="social_url" type="url"
-                placeholder="https://instagram.com/tuusuario" className="input-cream" />
-              <p className="text-xs mt-1.5" style={{ color: 'var(--brown-500)' }}>
-                Validamos tu cuenta antes de que puedas publicar.
-              </p>
-            </div>
-          )}
+          {/* Creator disclaimer */}
+          <div className="rounded-2xl p-3.5" style={{ background: 'var(--brown-50, #fdfaf7)', border: '1.5px solid var(--brown-100)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--brown-500)' }}>
+              Podrás activar tu cuenta como creador una vez hayas creado la cuenta.{' '}
+              <a href="https://fudime.com" target="_blank" rel="noopener noreferrer"
+                className="font-semibold underline" style={{ color: 'var(--brown-700)' }}>
+                Más info aquí
+              </a>
+            </p>
+          </div>
 
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || usernameStatus === 'taken' || usernameStatus === 'checking'}
             className="w-full font-semibold rounded-2xl py-3.5 text-sm mt-1 transition-opacity"
             style={{
-              background: isPending ? 'rgba(245,158,11,0.5)' : 'var(--amber)',
+              background: 'var(--amber)',
               color: '#000',
-              opacity: isPending ? 0.7 : 1,
+              opacity: isPending || usernameStatus === 'taken' || usernameStatus === 'checking' ? 0.5 : 1,
             }}
           >
             {isPending ? 'Creando cuenta...' : 'Crear cuenta'}

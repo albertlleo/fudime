@@ -37,6 +37,8 @@ export async function updateProfile(formData: FormData): Promise<void> {
   if (!user) return
 
   const display_name = (formData.get('display_name') as string)?.trim()
+  const rawUsername = (formData.get('username') as string)?.trim().toLowerCase()
+  const username = rawUsername && /^[a-z0-9_]{3,20}$/.test(rawUsername) ? rawUsername : undefined
   const bio = (formData.get('bio') as string)?.trim() || null
   const instagram_url = (formData.get('instagram_url') as string)?.trim() || null
   const tiktok_url = (formData.get('tiktok_url') as string)?.trim() || null
@@ -44,6 +46,7 @@ export async function updateProfile(formData: FormData): Promise<void> {
 
   await supabase.from('users').update({
     ...(display_name && { display_name }),
+    ...(username && { username }),
     bio,
     instagram_url,
     tiktok_url,

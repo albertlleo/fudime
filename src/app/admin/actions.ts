@@ -12,7 +12,7 @@ async function assertAdmin() {
   return user
 }
 
-export async function validateCreator(creatorId: string): Promise<{ error?: string }> {
+export async function validateCreator(userId: string): Promise<{ error?: string }> {
   try {
     await assertAdmin()
   } catch {
@@ -20,20 +20,22 @@ export async function validateCreator(creatorId: string): Promise<{ error?: stri
   }
 
   const admin = createAdminClient()
+  const now = new Date().toISOString()
 
-  const { error } = await admin
-    .from('users')
-    .update({ validated_at: new Date().toISOString() })
-    .eq('id', creatorId)
+  const [{ error: userError }, { error: reqError }] = await Promise.all([
+    admin.from('users').update({ role: 'creator', validated_at: now }).eq('id', userId),
+    admin.from('creator_requests').update({ status: 'approved' }).eq('user_id', userId),
+  ])
 
-  if (error) return { error: error.message }
+  if (userError) return { error: userError.message }
+  if (reqError) return { error: reqError.message }
 
   // Notify the creator
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   try {
     await admin.from('notifications').insert({
-      user_id: creatorId,
+      user_id: userId,
       type: 'follow',
       actor_id: user!.id,
       recipe_id: null,
@@ -43,7 +45,7 @@ export async function validateCreator(creatorId: string): Promise<{ error?: stri
   return {}
 }
 
-export async function rejectCreator(creatorId: string): Promise<{ error?: string }> {
+export async function rejectCreator(userId: string): Promise<{ error?: string }> {
   try {
     await assertAdmin()
   } catch {
@@ -52,9 +54,9 @@ export async function rejectCreator(creatorId: string): Promise<{ error?: string
 
   const admin = createAdminClient()
   const { error } = await admin
-    .from('users')
-    .update({ role: 'consumer', validated_at: null })
-    .eq('id', creatorId)
+    .from('creator_requests')
+    .update({ status: 'rejected' })
+    .eq('user_id', userId)
 
   if (error) return { error: error.message }
   return {}
