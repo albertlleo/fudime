@@ -72,10 +72,13 @@ export interface Comment {
   user_id: string
   content: string
   created_at: string
+  parent_id: string | null
 }
 
 export interface CommentWithUser extends Comment {
   users: Pick<User, 'id' | 'display_name' | 'avatar_url'>
+  likes_count?: number
+  user_has_liked?: boolean
 }
 
 export type NotificationType = 'like' | 'follow' | 'comment'

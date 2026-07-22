@@ -5,7 +5,8 @@ import RecipeActions from './recipe-actions'
 import Comments from './comments'
 import BackButton from '@/components/back-button'
 import VerifiedBadge from '@/components/verified-badge'
-import type { RecipeWithCreator, CommentWithUser } from '@/lib/types'
+import { fetchComments } from './comment-actions'
+import type { RecipeWithCreator } from '@/lib/types'
 
 export default async function RecetaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -22,15 +23,14 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
 
   const r = recipe as RecipeWithCreator
 
-  const [likeRow, saveRow, likeCountResult, commentsData] = await Promise.all([
+  const [likeRow, saveRow, likeCountResult, comments] = await Promise.all([
     user ? supabase.from('likes').select('recipe_id').eq('user_id', user.id).eq('recipe_id', id).maybeSingle() : Promise.resolve({ data: null }),
     user ? supabase.from('saves').select('recipe_id').eq('user_id', user.id).eq('recipe_id', id).maybeSingle() : Promise.resolve({ data: null }),
     supabase.from('likes').select('*', { count: 'exact', head: true }).eq('recipe_id', id),
-    supabase.from('comments').select('*, users!user_id(id, display_name, avatar_url)').eq('recipe_id', id).order('created_at', { ascending: true }),
+    fetchComments(id, user?.id ?? undefined),
   ])
 
   const tags: string[] = Array.isArray((r as any).tags) ? (r as any).tags : []
-  const comments = ((commentsData as any).data ?? []) as CommentWithUser[]
   const likeCount = (likeCountResult as any).count ?? 0
 
   const creatorInitial = r.users.display_name[0].toUpperCase()
