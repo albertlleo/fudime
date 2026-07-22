@@ -355,7 +355,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
           <span className="text-stone-300 text-sm font-medium">@{creator.display_name}</span>
         </a>
         {/* 2. Recipe title */}
-        <p className="text-white font-semibold text-base leading-snug mb-2">{recipe.title}</p>
+        <p className="text-white font-semibold text-base leading-snug mb-2 truncate">{recipe.title}</p>
         {/* 3. INGREDIENTES Y PASO A PASO button */}
         {hasDesc && (
           <button

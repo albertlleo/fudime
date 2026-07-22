@@ -139,7 +139,7 @@ function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, isOwn
           )}
           <span className="text-stone-300 text-sm font-medium">@{creator.display_name}</span>
         </a>
-        <p className="text-white font-semibold text-base leading-snug mb-2">{recipe.title}</p>
+        <p className="text-white font-semibold text-base leading-snug mb-2 truncate">{recipe.title}</p>
         {recipe.description && (
           <button onClick={() => setShowIngredients(true)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium active:opacity-70 transition-opacity">

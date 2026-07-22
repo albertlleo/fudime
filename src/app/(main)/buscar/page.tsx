@@ -146,7 +146,7 @@ export default async function BuscarPage({
                         <div className="w-full h-full flex items-center justify-center text-2xl">🍴</div>
                       )}
                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                        <p className="text-white text-[10px] font-semibold line-clamp-2 leading-tight">{recipe.title}</p>
+                        <p className="text-white text-[10px] font-semibold line-clamp-1 leading-tight">{recipe.title}</p>
                       </div>
                     </div>
                   </Link>
@@ -169,7 +169,7 @@ export default async function BuscarPage({
                   style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
                 >
                   <span className="text-xl leading-none">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
-                  <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{cat}</span>
+                  <span className="text-[15px] font-semibold" style={{ color: 'var(--brown-700)' }}>{cat}</span>
                 </Link>
               ))}
             </div>
