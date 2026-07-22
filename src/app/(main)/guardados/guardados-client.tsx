@@ -142,13 +142,8 @@ export default function GuardadosClient({ recipes }: { recipes: RecipeWithCreato
 
         {/* Search */}
         <div className="relative mb-4">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-            style={{ color: 'var(--brown-300)' }}>
-            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-          </svg>
           <input type="search" value={query} onChange={e => setQuery(e.target.value)}
-            placeholder="Buscar receta guardada..." className="input-cream pl-10" />
+            placeholder="Buscar receta guardada..." className="input-cream" />
         </div>
 
         {/* Tabs */}
