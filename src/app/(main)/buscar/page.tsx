@@ -100,7 +100,7 @@ export default async function BuscarPage({
     <div className="h-dvh overflow-y-auto pb-20" style={{ background: 'var(--cream)' }}>
 
       {/* Header */}
-      <div className="px-5 pt-14 pb-4">
+      <div className="px-5 pt-14 pb-8">
         <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>
           {isTrending ? '🔥 Tendencias' : 'Buscar'}
         </h1>
