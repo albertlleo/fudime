@@ -70,6 +70,7 @@ export default async function GuardadosCreadorPage({ params }: { params: Promise
         emptyIcon="🔖"
         emptyTitle="Sin recetas guardadas"
         emptyText={`No tienes recetas guardadas de @${creator.display_name}`}
+        feedBase={`/guardados/creador/${id}/feed`}
       />
     </div>
   )

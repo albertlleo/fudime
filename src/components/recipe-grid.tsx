@@ -63,11 +63,12 @@ interface RecipeGridProps {
   emptyIcon: string
   emptyTitle: string
   emptyText: string
-  /** When set, recipe clicks open /creador/[feedCreatorId]/feed?start=[recipeId] */
-  feedCreatorId?: string
+  /** Base URL for the feed when a card is tapped, e.g. "/categoria/ensaladas/feed".
+   *  The recipe id is appended as ?start=[id]. Falls back to /receta/[id] if omitted. */
+  feedBase?: string
 }
 
-export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText, feedCreatorId }: RecipeGridProps) {
+export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText, feedBase }: RecipeGridProps) {
   if (recipes.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center text-center px-8 py-20">
@@ -84,7 +85,7 @@ export default function RecipeGrid({ recipes, emptyIcon, emptyTitle, emptyText, 
         <RecipeCard
           key={recipe.id}
           recipe={recipe}
-          href={feedCreatorId ? `/creador/${feedCreatorId}/feed?start=${recipe.id}` : `/receta/${recipe.id}`}
+          href={feedBase ? `${feedBase}?start=${recipe.id}` : `/receta/${recipe.id}`}
         />
       ))}
     </div>

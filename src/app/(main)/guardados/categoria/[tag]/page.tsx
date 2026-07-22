@@ -67,6 +67,7 @@ export default async function GuardadosCategoriaPage({ params }: { params: Promi
         emptyIcon="🔖"
         emptyTitle="Sin recetas guardadas"
         emptyText={`No tienes recetas guardadas en ${decoded}`}
+        feedBase={`/guardados/categoria/${tag}/feed`}
       />
     </div>
   )

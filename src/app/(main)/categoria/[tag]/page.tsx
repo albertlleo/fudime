@@ -56,6 +56,7 @@ export default async function CategoriaPage({ params }: { params: Promise<{ tag:
         emptyIcon="🏷️"
         emptyTitle="Sin recetas"
         emptyText={`Nadie ha publicado recetas con #${decoded} todavía`}
+        feedBase={`/categoria/${tag}/feed`}
       />
     </div>
   )

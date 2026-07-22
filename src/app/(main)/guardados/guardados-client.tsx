@@ -18,7 +18,7 @@ const CAT_EMOJIS: Record<string, string> = {
 
 function RecipeThumb({ recipe }: { recipe: RecipeWithCreator }) {
   return (
-    <Link href={`/receta/${recipe.id}`} className="block">
+    <Link href={`/guardados/feed?start=${recipe.id}`} className="block">
       <div className="relative aspect-[3/4] bg-stone-900 overflow-hidden">
         {recipe.thumbnail_url ? (
           <img src={recipe.thumbnail_url} alt={recipe.title} className="w-full h-full object-cover" />
