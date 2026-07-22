@@ -76,7 +76,7 @@ export default async function NotificacionesPage() {
             return (
               <Link
                 key={n.id}
-                href={n.recipe ? `/receta/${n.recipe.id}` : `/creador/${n.actor.id}`}
+                href={n.recipe ? `/perfil/feed?start=${n.recipe.id}` : `/creador/${n.actor.id}`}
                 className="flex items-center gap-3 px-4 py-3.5 transition-colors"
                 style={{
                   background: !n.read ? '#fffbf5' : '#fff',

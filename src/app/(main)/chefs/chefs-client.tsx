@@ -42,7 +42,7 @@ const TIMES = [
 
 function RecipeThumbH({ recipe }: { recipe: RecipeWithCreator }) {
   return (
-    <Link href={`/receta/${recipe.id}`} className="flex-shrink-0 w-28 block">
+    <Link href={`/buscar/feed?start=${recipe.id}`} className="flex-shrink-0 w-28 block">
       <div className="relative w-28 rounded-2xl overflow-hidden bg-stone-900" style={{ aspectRatio: '9/16' }}>
         {recipe.thumbnail_url
           ? <img src={recipe.thumbnail_url} alt={recipe.title} className="w-full h-full object-cover" />
@@ -58,7 +58,7 @@ function RecipeThumbH({ recipe }: { recipe: RecipeWithCreator }) {
 
 function RecipeThumbGrid({ recipe }: { recipe: RecipeWithCreator }) {
   return (
-    <Link href={`/receta/${recipe.id}`} className="block">
+    <Link href={`/creador/${recipe.users.id}/feed?start=${recipe.id}`} className="block">
       <div className="relative aspect-[3/4] bg-stone-900 overflow-hidden">
         {recipe.thumbnail_url
           ? <img src={recipe.thumbnail_url} alt={recipe.title} className="w-full h-full object-cover" />
