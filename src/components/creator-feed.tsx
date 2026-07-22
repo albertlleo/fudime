@@ -127,7 +127,7 @@ function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, isOwn
       )}
 
       {/* Bottom info */}
-      <div className="absolute bottom-20 left-0 right-16 px-4 pb-2" onClick={e => e.stopPropagation()}>
+      <div className="absolute bottom-20 lg:bottom-4 left-0 right-16 px-4 pb-2" onClick={e => e.stopPropagation()}>
         <a href={`/creador/${creator.id}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity mb-1">
           {creator.avatar_url ? (
             <img src={creator.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0 border border-white/30" />
@@ -218,7 +218,7 @@ function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, isOwn
       )}
 
       {/* Right actions */}
-      <div className="absolute bottom-24 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
+      <div className="absolute bottom-24 lg:bottom-8 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
         {isOwner && (
           <button onClick={() => setShowOptions(true)} className="flex flex-col items-center gap-1 active:opacity-80">
             <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6 drop-shadow-lg">
