@@ -337,7 +337,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
       )}
 
       {/* Bottom info */}
-      <div className="absolute bottom-20 left-0 right-16 px-4 pb-2" onClick={e => e.stopPropagation()}>
+      <div className="absolute bottom-20 lg:bottom-4 left-0 right-16 px-4 pb-2" onClick={e => e.stopPropagation()}>
         {/* 1. Creator link */}
         <a href={`/creador/${creator.id}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity mb-1">
           {creator.avatar_url ? (
@@ -418,7 +418,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, o
       </div>
 
       {/* Right actions — TikTok style */}
-      <div className="absolute bottom-24 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
+      <div className="absolute bottom-24 lg:bottom-8 right-3 flex flex-col items-center gap-6" onClick={e => e.stopPropagation()}>
 
         {/* Like */}
         <button onClick={handleLike} className="flex flex-col items-center gap-1.5 active:opacity-80">
