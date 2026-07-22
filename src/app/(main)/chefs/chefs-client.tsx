@@ -145,7 +145,7 @@ export default function ChefsPageClient({
     <div className="h-dvh flex flex-col" style={{ background: 'var(--cream)' }}>
 
       {/* Fixed header: title + tabs + search */}
-      <div className="flex-shrink-0 px-5 pt-14 pb-3" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+      <div className="flex-shrink-0 px-5 pt-14 pb-4">
         <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>Descubrir</h1>
 
         {/* Tab strip */}
