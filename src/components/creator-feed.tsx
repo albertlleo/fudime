@@ -292,6 +292,7 @@ interface CreatorFeedProps {
 export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId, initialIndex = 0 }: CreatorFeedProps) {
   const router = useRouter()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const loopSentinelRef = useRef<HTMLDivElement>(null)
   const [liked, setLiked] = useState(() => new Set(likedIds))
   const [saved, setSaved] = useState(() => new Set(savedIds))
   const [counts, setCounts] = useState<Record<string, number>>(() => ({ ...likeCountMap }))
@@ -304,6 +305,20 @@ export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedId
       scrollRef.current.scrollTop = initialIndex * scrollRef.current.clientHeight
     }
   }, [initialIndex])
+
+  // Loop back to first video when end sentinel enters view
+  useEffect(() => {
+    const sentinel = loopSentinelRef.current
+    const container = scrollRef.current
+    if (!sentinel || !container) return
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        container.scrollTop = 0
+      }
+    }, { threshold: 0.3 })
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
 
   function handleBack() {
     if (window.history.length > 1) router.back()
@@ -358,14 +373,8 @@ export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedId
           />
         ))}
 
-        {/* End card */}
-        <div className="h-dvh snap-start snap-always flex flex-col items-center justify-center text-center px-8 bg-stone-950">
-          <span className="text-4xl mb-3">👨‍🍳</span>
-          <p className="text-white font-semibold">Has visto todas las recetas</p>
-          <button onClick={handleBack} className="mt-4 px-5 py-2.5 rounded-xl text-sm font-semibold text-black" style={{ background: 'var(--amber)' }}>
-            Volver al perfil
-          </button>
-        </div>
+        {/* Loop sentinel — invisible snap target, scrolls back to first on enter */}
+        <div ref={loopSentinelRef} className="h-dvh snap-start snap-always bg-stone-950" />
       </div>
     </div>
   )
