@@ -55,10 +55,9 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
           className="absolute inset-0 w-full h-full object-cover"
         />
         {/* Back button overlay */}
-        <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 pt-12 pb-3"
-          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)' }}>
+        <div className="absolute top-0 left-0 right-0 z-10 px-4 pb-6"
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)', paddingTop: 'max(52px, calc(env(safe-area-inset-top) + 12px))' }}>
           <BackButton fallback="/" glass />
-          <span className="text-white font-semibold text-sm truncate drop-shadow">{r.title}</span>
         </div>
       </div>
 
