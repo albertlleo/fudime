@@ -72,9 +72,9 @@ export default function EditForm({ user }: { user: User }) {
       <div className="flex flex-col items-center gap-3 py-2">
         <div className="relative">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="w-24 h-24 rounded-2xl object-cover" />
+            <img src={avatarUrl} alt="" className="w-24 h-24 rounded-full object-cover" />
           ) : (
-            <div className="w-24 h-24 rounded-2xl flex items-center justify-center text-2xl font-black text-black"
+            <div className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-black text-black"
               style={{ background: 'var(--amber)' }}>
               {initials}
             </div>

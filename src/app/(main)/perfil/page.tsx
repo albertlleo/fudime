@@ -43,10 +43,10 @@ export default async function PerfilPage() {
           <div className="relative flex-shrink-0">
             {user.avatar_url ? (
               <img src={user.avatar_url} alt={user.display_name}
-                className="w-20 h-20 rounded-2xl object-cover"
+                className="w-20 h-20 rounded-full object-cover"
                 style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
             ) : (
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-xl font-black text-black"
+              <div className="w-20 h-20 rounded-full flex items-center justify-center text-xl font-black text-black"
                 style={{ background: 'var(--amber)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}>
                 {initials}
               </div>

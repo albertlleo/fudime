@@ -286,16 +286,24 @@ interface CreatorFeedProps {
   likeCountMap: Record<string, number>
   commentCountMap: Record<string, number>
   userId: string | null
+  initialIndex?: number
 }
 
-export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId }: CreatorFeedProps) {
+export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId, initialIndex = 0 }: CreatorFeedProps) {
   const router = useRouter()
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [liked, setLiked] = useState(() => new Set(likedIds))
   const [saved, setSaved] = useState(() => new Set(savedIds))
   const [counts, setCounts] = useState<Record<string, number>>(() => ({ ...likeCountMap }))
   const [commentCounts] = useState<Record<string, number>>(() => ({ ...commentCountMap }))
   const [muted, setMuted] = useState(true)
   const [commentRecipeId, setCommentRecipeId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (initialIndex > 0 && scrollRef.current) {
+      scrollRef.current.scrollTop = initialIndex * scrollRef.current.clientHeight
+    }
+  }, [initialIndex])
 
   function handleBack() {
     if (window.history.length > 1) router.back()
@@ -321,7 +329,7 @@ export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedId
         onCountChange={() => {}}
       />
 
-      <div className="h-dvh overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
+      <div ref={scrollRef} className="h-dvh overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
         {initialRecipes.map(recipe => (
           <Slide
             key={recipe.id}

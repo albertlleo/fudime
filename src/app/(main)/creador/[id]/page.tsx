@@ -88,10 +88,10 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
           {/* Avatar */}
           {creator.avatar_url ? (
             <img src={creator.avatar_url} alt={creator.display_name}
-              className="w-20 h-20 rounded-2xl object-cover flex-shrink-0"
+              className="w-20 h-20 rounded-full object-cover flex-shrink-0"
               style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
           ) : (
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-xl font-black text-black flex-shrink-0"
+            <div className="w-20 h-20 rounded-full flex items-center justify-center text-xl font-black text-black flex-shrink-0"
               style={{ background: 'var(--amber)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}>
               {initials}
             </div>

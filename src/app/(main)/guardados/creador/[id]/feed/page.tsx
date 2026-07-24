@@ -34,11 +34,8 @@ export default async function GuardadosCreadorFeedPage({
 
   if (!recipesRaw || recipesRaw.length === 0) notFound()
 
-  let recipes = recipesRaw as RecipeWithCreator[]
-  if (start) {
-    const idx = recipes.findIndex(r => r.id === start)
-    if (idx > 0) recipes = [recipes[idx], ...recipes.slice(0, idx), ...recipes.slice(idx + 1)]
-  }
+  const recipes = recipesRaw as RecipeWithCreator[]
+  const initialIndex = start ? Math.max(0, recipes.findIndex(r => r.id === start)) : 0
 
   const recipeIds = recipes.map(r => r.id)
 
@@ -67,6 +64,7 @@ export default async function GuardadosCreadorFeedPage({
       likeCountMap={likeCountMap}
       commentCountMap={commentCountMap}
       userId={user.id}
+      initialIndex={initialIndex}
     />
   )
 }

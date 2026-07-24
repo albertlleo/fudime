@@ -42,9 +42,9 @@ export default async function SeguidoresPage() {
                 className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-stone-50"
                 style={i > 0 ? { borderTop: '1px solid var(--brown-100)' } : {}}>
                 {u.avatar_url ? (
-                  <img src={u.avatar_url} alt={u.display_name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0" />
+                  <img src={u.avatar_url} alt={u.display_name} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
                 ) : (
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black text-black flex-shrink-0"
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-black text-black flex-shrink-0"
                     style={{ background: 'var(--amber)' }}>{initials}</div>
                 )}
                 <div className="flex-1 min-w-0">
