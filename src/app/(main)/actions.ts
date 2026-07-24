@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { revalidatePath } from 'next/cache'
 import type { RecipeWithCreator } from '@/lib/types'
 import { PAGE_SIZE } from './constants'
 
@@ -62,7 +64,9 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
   const { data: { user } } = await supabase.auth.getUser()
   if (!user || user.id === creatorId) return { isFollowing: false }
 
-  const { data: existing } = await supabase
+  // Use admin client to bypass RLS SELECT restrictions on follows table
+  const admin = createAdminClient()
+  const { data: existing } = await admin
     .from('follows')
     .select('id')
     .eq('follower_id', user.id)
@@ -71,10 +75,12 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
 
   if (existing) {
     await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', creatorId)
+    revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: false }
   } else {
     await supabase.from('follows').insert({ follower_id: user.id, following_id: creatorId })
     await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
+    revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: true }
   }
 }
