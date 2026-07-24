@@ -16,7 +16,7 @@ export default async function SeguidoresPage() {
   const followers = (rows ?? []).map((r: any) => r.users).filter(Boolean)
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
       <div className="px-5 pt-14 pb-4 flex items-center gap-3">
         <BackButton fallback="/perfil" />
         <h1 className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>

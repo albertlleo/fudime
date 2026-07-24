@@ -36,7 +36,7 @@ export default async function RecetaPage({ params }: { params: Promise<{ id: str
   const creatorInitial = r.users.display_name[0].toUpperCase()
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
 
       {/* Video hero — 9:16 aspect ratio, object-cover, no black bars */}
       <div className="relative w-full overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: '75vh' }}>

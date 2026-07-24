@@ -16,7 +16,7 @@ export default async function EditarPerfilPage() {
   const user = profile as User
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
       <div className="px-5 pt-14 pb-5 flex items-center gap-3">
         <BackButton fallback="/perfil" />
         <h1 className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>Editar perfil</h1>

@@ -29,7 +29,7 @@ export default async function PerfilPage() {
     .split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <div className="relative min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="relative min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
 
       {/* Settings button — top right */}
       <div className="absolute top-0 right-0 pt-14 pr-5">

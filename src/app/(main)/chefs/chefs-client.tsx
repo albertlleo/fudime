@@ -200,7 +200,7 @@ export default function ChefsPageClient({
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto pb-20">
+      <div className="flex-1 overflow-y-auto pb-28">
 
         {/* ── BUSCAR TAB ──────────────────────────────────── */}
         {tab === 'buscar' && (

@@ -96,17 +96,19 @@ export default function BottomNav({ notifCount = 0, isCreator = false }: { notif
 
   return (
     <>
-      {/* ── Mobile: bottom bar ── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 pb-safe"
-        style={{
-          background: 'rgba(250,247,242,0.92)',
-          backdropFilter: 'blur(16px)',
-          borderTop: '1px solid var(--brown-100)',
-        }}>
-        <div className="flex items-center justify-around h-16">
+      {/* ── Mobile: floating pill ── */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4"
+        style={{ paddingBottom: 'max(16px, calc(env(safe-area-inset-bottom) + 8px))' }}>
+        <div className="flex items-center justify-around h-[62px] rounded-2xl"
+          style={{
+            background: 'rgba(250,247,242,0.96)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            boxShadow: '0 4px 32px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.8) inset',
+          }}>
           {items.map(({ href, label, icon, iconFilled, active }) => (
             <Link key={href} href={href}
-              className="relative flex flex-col items-center gap-0.5 px-3 py-2 transition-colors"
+              className="relative flex flex-col items-center gap-0.5 px-3 py-2 transition-opacity active:opacity-60"
               style={{ color: active ? 'var(--amber)' : 'var(--brown-300)' }}>
               {active ? iconFilled : icon}
               <span className="text-[10px] font-semibold leading-none"

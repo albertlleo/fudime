@@ -41,7 +41,7 @@ export default async function GuardadosCategoriaPage({ params }: { params: Promi
   const emoji = CAT_EMOJIS[decoded.toLowerCase()] ?? '🍴'
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
       <div className="px-5 pt-14 pb-5">
         <div className="mb-5">
           <BackButton fallback="/guardados" />

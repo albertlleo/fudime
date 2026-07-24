@@ -96,7 +96,7 @@ export default async function BuscarPage({
     : null
 
   return (
-    <div className="h-dvh overflow-y-auto pb-20" style={{ background: 'var(--cream)' }}>
+    <div className="h-dvh overflow-y-auto pb-28" style={{ background: 'var(--cream)' }}>
 
       {/* Header */}
       <div className="px-5 pt-14 pb-8">

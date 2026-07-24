@@ -50,7 +50,7 @@ export default async function ConfiguracionPage() {
   }
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
 
       {/* Header */}
       <div className="px-5 pt-14 pb-6 flex items-center gap-3">

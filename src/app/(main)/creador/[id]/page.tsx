@@ -74,7 +74,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
   const initials = displayName.split(' ').map((w: string) => w[0] ?? '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
 
       {/* Back + Share */}
       <div className="px-5 pt-14 pb-2 flex items-center justify-between">

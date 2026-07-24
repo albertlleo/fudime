@@ -35,7 +35,7 @@ export default async function GuardadosCreadorPage({ params }: { params: Promise
   const initials = creator.display_name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
       <div className="px-5 pt-14 pb-5">
         <div className="mb-5">
           <BackButton fallback="/guardados" />
