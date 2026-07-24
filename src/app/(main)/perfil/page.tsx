@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { signOutAction } from './actions'
 import MyRecipeGrid from '@/components/my-recipe-grid'
 import VerifiedBadge from '@/components/verified-badge'
-import type { User, Recipe, CreatorRequest } from '@/lib/types'
+import type { User, Recipe } from '@/lib/types'
 
 export default async function PerfilPage() {
   const supabase = await createClient()
@@ -17,15 +16,11 @@ export default async function PerfilPage() {
 
   const user = profile as User
 
-  const [{ data: recipes }, { count: followersCount }, { count: followingCount }, { data: creatorReqRaw }] = await Promise.all([
+  const [{ data: recipes }, { count: followersCount }, { count: followingCount }] = await Promise.all([
     supabase.from('recipes').select('*').eq('creator_id', user.id).order('created_at', { ascending: false }),
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id),
     supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
-    user.role === 'consumer'
-      ? supabase.from('creator_requests').select('status').eq('user_id', user.id).maybeSingle()
-      : Promise.resolve({ data: null }),
   ])
-  const creatorRequest = creatorReqRaw as Pick<CreatorRequest, 'status'> | null
 
   const recipeList = (recipes ?? []) as Recipe[]
   const publishedCount = recipeList.filter(r => r.status === 'published').length
@@ -34,7 +29,21 @@ export default async function PerfilPage() {
     .split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <div className="min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+    <div className="relative min-h-dvh pb-20 overflow-y-auto" style={{ background: 'var(--cream)' }}>
+
+      {/* Settings button — top right */}
+      <div className="absolute top-0 right-0 pt-14 pr-5">
+        <Link href="/perfil/configuracion"
+          className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+          style={{ background: 'var(--brown-100)' }}
+          aria-label="Configuración">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+            className="w-4.5 h-4.5" style={{ color: 'var(--brown-500)' }}>
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
+          </svg>
+        </Link>
+      </div>
 
       {/* Header hero */}
       <div className="pt-14 pb-6 px-5">
@@ -137,101 +146,6 @@ export default async function PerfilPage() {
 
       {/* Recipe grid */}
       <MyRecipeGrid recipes={recipeList} />
-
-      {/* Admin link */}
-      {authUser?.email === process.env.ADMIN_EMAIL && (
-        <div className="mx-5 mb-3">
-          <Link href="/admin"
-            className="flex items-center justify-between rounded-2xl px-4 py-3.5 transition-colors"
-            style={{ background: '#fffbeb', border: '1.5px solid #fcd34d' }}>
-            <div className="flex items-center gap-3">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-                className="w-5 h-5" style={{ color: '#d97706' }}>
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              <span className="text-sm font-semibold" style={{ color: '#92400e' }}>Panel Admin</span>
-            </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-              className="w-4 h-4" style={{ color: '#d97706' }}>
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </Link>
-        </div>
-      )}
-
-      {/* Solicitar cuenta creador (solo consumers) */}
-      {user.role === 'consumer' && (
-        <div className="mx-5 mb-3">
-          <Link href="/perfil/solicitar-creador"
-            className="flex items-center justify-between rounded-2xl px-4 py-3.5 transition-colors"
-            style={{
-              background: creatorRequest?.status === 'pending' ? '#fffbeb' : '#fff',
-              border: `1.5px solid ${creatorRequest?.status === 'pending' ? '#fcd34d' : 'var(--brown-100)'}`,
-            }}>
-            <div className="flex items-center gap-3">
-              <span className="text-lg">🎬</span>
-              <div>
-                <span className="text-sm font-semibold block" style={{ color: 'var(--brown-900)' }}>
-                  Solicitar cuenta de creador
-                </span>
-                {creatorRequest?.status === 'pending' && (
-                  <span className="text-xs" style={{ color: '#d97706' }}>Solicitud en revisión</span>
-                )}
-              </div>
-            </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-              className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--brown-300)' }}>
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </Link>
-        </div>
-      )}
-
-      {/* Notifications */}
-      <div className="mx-5 mb-3">
-        <Link href="/notificaciones"
-          className="flex items-center justify-between rounded-2xl px-4 py-3.5 transition-colors"
-          style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
-          <div className="flex items-center gap-3">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-              className="w-5 h-5" style={{ color: 'var(--brown-500)' }}>
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
-            </svg>
-            <span className="text-sm font-medium" style={{ color: 'var(--brown-700)' }}>Notificaciones</span>
-          </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-            className="w-4 h-4" style={{ color: 'var(--brown-300)' }}>
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </Link>
-      </div>
-
-      {/* Account info */}
-      <div className="mx-5 rounded-2xl overflow-hidden mb-4"
-        style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
-        <div className="px-4 py-3 flex justify-between items-center"
-          style={{ borderBottom: '1px solid var(--brown-100)' }}>
-          <span className="text-sm" style={{ color: 'var(--brown-500)' }}>Email</span>
-          <span className="text-sm truncate max-w-[200px]" style={{ color: 'var(--brown-700)' }}>{user.email}</span>
-        </div>
-        <div className="px-4 py-3 flex justify-between items-center">
-          <span className="text-sm" style={{ color: 'var(--brown-500)' }}>Rol</span>
-          <span className="text-sm font-medium" style={{ color: 'var(--brown-700)' }}>
-            {user.role === 'creator' ? 'Creador' : 'Consumidor'}
-          </span>
-        </div>
-      </div>
-
-      {/* Sign out */}
-      <div className="mx-5 mb-8">
-        <form action={signOutAction}>
-          <button type="submit"
-            className="w-full font-medium rounded-2xl py-3.5 text-sm transition-colors"
-            style={{ background: '#fff', border: '1.5px solid #fca5a5', color: '#dc2626' }}>
-            Cerrar sesión
-          </button>
-        </form>
-      </div>
     </div>
   )
 }
