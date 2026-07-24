@@ -97,14 +97,14 @@ export default function BottomNav({ notifCount = 0, isCreator = false }: { notif
   return (
     <>
       {/* ── Mobile: floating pill ── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4"
-        style={{ paddingBottom: 'max(16px, calc(env(safe-area-inset-bottom) + 8px))' }}>
-        <div className="flex items-center justify-around h-[62px] rounded-2xl"
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-5"
+        style={{ paddingBottom: 'max(28px, calc(env(safe-area-inset-bottom) + 16px))' }}>
+        <div className="flex items-center justify-around h-[62px] rounded-full"
           style={{
-            background: 'rgba(250,247,242,0.96)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            boxShadow: '0 4px 32px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.8) inset',
+            background: 'rgba(250,247,242,0.80)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            boxShadow: '0 4px 32px rgba(0,0,0,0.14), 0 1px 0 rgba(255,255,255,0.6) inset',
           }}>
           {items.map(({ href, label, icon, iconFilled, active }) => (
             <Link key={href} href={href}
