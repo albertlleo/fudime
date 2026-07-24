@@ -38,10 +38,9 @@ export default async function GuardadosFeedPage({
 
   const recipeIds = recipes.map(r => r.id)
 
-  const [likedResult, commentCountsResult, likeCountsResult] = await Promise.all([
+  const [likedResult, commentCountsResult] = await Promise.all([
     supabase.from('likes').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds),
     supabase.from('comments').select('recipe_id').in('recipe_id', recipeIds),
-    supabase.from('likes').select('recipe_id').in('recipe_id', recipeIds),
   ])
 
   const likedIds = (likedResult.data ?? []).map((r: any) => r.recipe_id)
@@ -51,8 +50,8 @@ export default async function GuardadosFeedPage({
     commentCountMap[(row as any).recipe_id] = (commentCountMap[(row as any).recipe_id] ?? 0) + 1
   }
   const likeCountMap: Record<string, number> = {}
-  for (const row of likeCountsResult.data ?? []) {
-    likeCountMap[(row as any).recipe_id] = (likeCountMap[(row as any).recipe_id] ?? 0) + 1
+  for (const recipe of recipes) {
+    likeCountMap[recipe.id] = (recipe as any).likes_count ?? 0
   }
 
   return (
