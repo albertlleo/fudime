@@ -5,32 +5,7 @@ import { useRouter } from 'next/navigation'
 import { updateRecipe } from './actions'
 import { getImageUploadSignature } from '@/app/(main)/subir/actions'
 import type { Recipe } from '@/lib/types'
-
-const CATEGORIES = [
-  'Aperitivos', 'Entrantes', 'Ensaladas', 'Cremas y sopas', 'Platos de cuchara',
-  'Pasta', 'Arroces', 'Verduras', 'Carne y aves', 'Pescado y marisco',
-  'Plant Based', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
-  'Comida internacional', 'Comida rápida', 'Bocadillos y sándwiches',
-  'Postres y dulces', 'Salsas y aliños', 'Bebidas',
-]
-const CAT_EMOJIS: Record<string, string> = {
-  'Aperitivos': '🥨', 'Entrantes': '🥗', 'Ensaladas': '🥙', 'Cremas y sopas': '🍲',
-  'Platos de cuchara': '🫕', 'Pasta': '🍝', 'Arroces': '🍚', 'Verduras': '🥦',
-  'Carne y aves': '🍗', 'Pescado y marisco': '🐟', 'Plant Based': '🌿',
-  'Huevos y tortillas': '🍳', 'Panadería': '🍞', 'Masas y hojaldres': '🥐',
-  'Comida internacional': '🌍', 'Comida rápida': '🍔', 'Bocadillos y sándwiches': '🥪',
-  'Postres y dulces': '🍰', 'Salsas y aliños': '🫙', 'Bebidas': '🥤',
-}
-const DIETS = [
-  { key: 'Vegana', emoji: '🌱' }, { key: 'Vegetariana', emoji: '🥕' },
-  { key: 'Sin gluten', emoji: '🌾' }, { key: 'Sin lactosa', emoji: '🥛' },
-]
-const TIMES = [
-  { key: 'menos-15', label: 'Menos de 15 min', emoji: '⚡' },
-  { key: '15-30', label: '15–30 min', emoji: '🕐' },
-  { key: '30-60', label: '30–60 min', emoji: '⏱️' },
-  { key: 'mas-1h', label: 'Más de 1 hora', emoji: '🍳' },
-]
+import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES } from '@/lib/categories'
 
 function normalizeTag(t: string) {
   return CATEGORIES.find(c => c.toLowerCase() === t.toLowerCase()) ?? t
@@ -199,7 +174,7 @@ export default function EditRecipeForm({ recipe }: { recipe: Recipe }) {
           Categoría <span style={{ color: '#dc2626' }}>*</span>
         </label>
         <IconGrid
-          options={CATEGORIES.map(c => ({ key: c, label: c, emoji: CAT_EMOJIS[c] ?? '🍴' }))}
+          options={CATEGORIES.map(c => ({ key: c, label: c, emoji: CAT_EMOJIS[c.toLowerCase()] ?? '🍴' }))}
           selected={categories}
           onToggle={toggleCategory}
         />
@@ -221,7 +196,7 @@ export default function EditRecipeForm({ recipe }: { recipe: Recipe }) {
           Dieta e intolerancias <span className="font-normal ml-1" style={{ color: 'var(--brown-300)' }}>(opcional)</span>
         </label>
         <IconGrid
-          options={DIETS.map(d => ({ key: d.key, label: d.key, emoji: d.emoji }))}
+          options={DIETS.map(d => ({ key: d.key, label: d.label, emoji: d.emoji }))}
           selected={diet}
           onToggle={toggleDiet}
         />

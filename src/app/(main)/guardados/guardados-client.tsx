@@ -4,17 +4,9 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import VerifiedBadge from '@/components/verified-badge'
 import type { RecipeWithCreator } from '@/lib/types'
+import { CAT_EMOJIS } from '@/lib/categories'
 
 type Tab = 'todas' | 'categoria' | 'creador'
-
-const CAT_EMOJIS: Record<string, string> = {
-  'aperitivos': '🥨', 'entrantes': '🥗', 'ensaladas': '🥙', 'cremas y sopas': '🍲',
-  'platos de cuchara': '🫕', 'pasta': '🍝', 'arroces': '🍚', 'verduras': '🥦',
-  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
-  'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
-  'comida internacional': '🌍', 'comida rápida': '🍔', 'bocadillos y sándwiches': '🥪',
-  'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
-}
 
 function RecipeThumb({ recipe }: { recipe: RecipeWithCreator }) {
   return (

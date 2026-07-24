@@ -4,35 +4,7 @@ import RecipeGrid from '@/components/recipe-grid'
 import Link from 'next/link'
 import VerifiedBadge from '@/components/verified-badge'
 import type { RecipeWithCreator, User } from '@/lib/types'
-
-const CATEGORIES = [
-  'Aperitivos', 'Entrantes', 'Ensaladas', 'Cremas y sopas', 'Platos de cuchara',
-  'Pasta', 'Arroces', 'Verduras', 'Carne y aves', 'Pescado y marisco',
-  'Plant Based', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
-  'Comida rápida', 'Postres y dulces', 'Salsas y aliños', 'Bebidas',
-]
-
-const CAT_EMOJIS: Record<string, string> = {
-  'aperitivos': '🥨', 'entrantes': '🥗', 'ensaladas': '🥙', 'cremas y sopas': '🍲',
-  'platos de cuchara': '🫕', 'pasta': '🍝', 'arroces': '🍚', 'verduras': '🥦',
-  'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
-  'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
-  'comida rápida': '🍔', 'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
-}
-
-const DIETS = [
-  { key: 'vegana', label: 'Vegana', emoji: '🌱' },
-  { key: 'vegetariana', label: 'Vegetariana', emoji: '🥕' },
-  { key: 'sin gluten', label: 'Sin gluten', emoji: '🌾' },
-  { key: 'sin lactosa', label: 'Sin lactosa', emoji: '🥛' },
-]
-
-const TIMES = [
-  { key: 'menos-15', label: 'Menos de 15 min', emoji: '⚡' },
-  { key: '15-30', label: '15–30 min', emoji: '🕐' },
-  { key: '30-60', label: '30–60 min', emoji: '⏱️' },
-  { key: 'mas-1h', label: 'Más de 1 hora', emoji: '🍳' },
-]
+import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES } from '@/lib/categories'
 
 export default async function BuscarPage({
   searchParams,
