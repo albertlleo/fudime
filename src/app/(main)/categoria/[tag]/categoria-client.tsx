@@ -139,17 +139,18 @@ export default function CategoriaClient({ activeQ, activeDiet, activeTiempo, act
 
       {/* Filter sheet */}
       <div className="fixed inset-0 z-[70] pointer-events-none">
-        <div className="h-full flex flex-col justify-end">
-          <div
-            className="pointer-events-auto transition-transform duration-300 ease-out px-5 pb-8 pt-4"
-            style={{
-              background: 'var(--cream)',
-              borderRadius: '20px 20px 0 0',
-              transform: showFilters ? 'translateY(0)' : 'translateY(100%)',
-              paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
+        <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
+          <div className="w-full lg:max-w-[500px] h-full relative">
+            <div
+              className="absolute left-0 right-0 bottom-0 pointer-events-auto transition-transform duration-300 ease-out px-5 pt-4"
+              style={{
+                background: 'var(--cream)',
+                borderRadius: '20px 20px 0 0',
+                transform: showFilters ? 'translateY(0)' : 'translateY(100%)',
+                paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
             {/* Handle */}
             <div className="flex justify-center mb-4">
               <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
@@ -218,6 +219,7 @@ export default function CategoriaClient({ activeQ, activeDiet, activeTiempo, act
               style={{ background: 'var(--brown-900)' }}>
               Ver {activeCount} receta{activeCount !== 1 ? 's' : ''}
             </button>
+            </div>
           </div>
         </div>
       </div>
