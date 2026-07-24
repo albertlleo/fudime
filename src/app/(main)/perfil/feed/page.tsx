@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound, redirect } from 'next/navigation'
 import CreatorFeed from '@/components/creator-feed'
 import type { RecipeWithCreator } from '@/lib/types'
@@ -31,12 +30,11 @@ export default async function PerfilFeedPage({
 
   const recipeIds = recipes.map(r => r.id)
 
-  const admin = createAdminClient()
   const [likedResult, savedResult, commentCountsResult, likeCountsResult] = await Promise.all([
     supabase.from('likes').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds),
     supabase.from('saves').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds),
     supabase.from('comments').select('recipe_id').in('recipe_id', recipeIds),
-    admin.from('likes').select('recipe_id').in('recipe_id', recipeIds),
+    supabase.from('likes').select('recipe_id').in('recipe_id', recipeIds),
   ])
 
   const likedIds = (likedResult.data ?? []).map((r: any) => r.recipe_id)

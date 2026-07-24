@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import RecipeGrid from '@/components/recipe-grid'
@@ -33,7 +32,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
       .eq('creator_id', id)
       .eq('status', 'published')
       .order('published_at', { ascending: false }),
-    createAdminClient()
+    supabase
       .from('follows')
       .select('id')
       .eq('following_id', id),
