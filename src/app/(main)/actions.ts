@@ -21,17 +21,14 @@ export async function toggleLike(recipeId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  const { data: existing } = await supabase
-    .from('likes')
-    .select('recipe_id')
-    .eq('user_id', user.id)
-    .eq('recipe_id', recipeId)
-    .maybeSingle()
+  const { data, error } = await supabase.rpc('toggle_like', {
+    p_recipe_id: recipeId,
+    p_user_id: user.id,
+  })
 
-  if (existing) {
-    await supabase.from('likes').delete().eq('user_id', user.id).eq('recipe_id', recipeId)
-  } else {
-    await supabase.from('likes').insert({ user_id: user.id, recipe_id: recipeId })
+  if (error || !data) return
+
+  if (data.liked) {
     const { data: recipe } = await supabase.from('recipes').select('creator_id').eq('id', recipeId).single()
     if (recipe && recipe.creator_id !== user.id) {
       await createNotification(supabase, { user_id: recipe.creator_id, type: 'like', actor_id: user.id, recipe_id: recipeId })
@@ -63,24 +60,19 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
   const { data: { user } } = await supabase.auth.getUser()
   if (!user || user.id === creatorId) return { isFollowing: false }
 
-  const { data: existing } = await supabase
-    .from('follows')
-    .select('id')
-    .eq('follower_id', user.id)
-    .eq('following_id', creatorId)
-    .maybeSingle()
+  const { data, error } = await supabase.rpc('toggle_follow', {
+    p_follower_id: user.id,
+    p_following_id: creatorId,
+  })
 
-  if (existing) {
-    await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', creatorId)
-    revalidatePath(`/creador/${creatorId}`)
-    return { isFollowing: false }
-  } else {
-    const { error } = await supabase.from('follows').insert({ follower_id: user.id, following_id: creatorId })
-    if (error) return { isFollowing: false }
+  if (error || !data) return { isFollowing: false }
+
+  const isFollowing: boolean = data.is_following
+  if (isFollowing) {
     await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
-    revalidatePath(`/creador/${creatorId}`)
-    return { isFollowing: true }
   }
+  revalidatePath(`/creador/${creatorId}`)
+  return { isFollowing }
 }
 
 export async function fetchFollowingRecipes(): Promise<{
