@@ -312,15 +312,17 @@ export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedId
 
   return (
     <div className="relative h-dvh">
-      {/* Back button — fixed overlay, always visible */}
-      <button onClick={handleBack}
-        className="fixed left-4 z-40 w-10 h-10 rounded-full flex items-center justify-center"
-        style={{ top: 'max(52px, calc(env(safe-area-inset-top) + 12px))', background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.15)' }}
-        aria-label="Volver">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-          <path d="M19 12H5M12 5l-7 7 7 7" />
-        </svg>
-      </button>
+      {/* Overlay layer — sits above the scroll container, pointer-events only on the button */}
+      <div className="absolute inset-0 z-50 pointer-events-none">
+        <button onClick={handleBack}
+          className="absolute left-4 w-11 h-11 rounded-full flex items-center justify-center pointer-events-auto"
+          style={{ top: 'max(52px, calc(env(safe-area-inset-top) + 12px))', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(12px)', border: '1.5px solid rgba(255,255,255,0.25)', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
+          aria-label="Volver">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+        </button>
+      </div>
 
       <CommentSheet
         recipeId={commentRecipeId}
