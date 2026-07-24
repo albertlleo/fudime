@@ -156,7 +156,7 @@ export default async function BuscarPage({
               {DIETS.map(d => (
                 <Link
                   key={d.key}
-                  href={`/buscar?diet=${encodeURIComponent(d.key)}`}
+                  href={`/dieta/${encodeURIComponent(d.key)}`}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
                   style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
                 >
@@ -176,7 +176,7 @@ export default async function BuscarPage({
               {TIMES.map(t => (
                 <Link
                   key={t.key}
-                  href={`/buscar?tiempo=${t.key}`}
+                  href={`/tiempo/${t.key}`}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-2xl"
                   style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
                 >

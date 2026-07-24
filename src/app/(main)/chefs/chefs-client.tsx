@@ -248,7 +248,7 @@ export default function ChefsPageClient({
                   <div className="grid grid-cols-2 gap-2">
                     {DIETS.map(d => (
                       <Link key={d.key}
-                        href={`/chefs?diet=${encodeURIComponent(d.key)}`}
+                        href={`/dieta/${encodeURIComponent(d.key)}`}
                         className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                         style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
                         <span className="text-xl leading-none">{d.emoji}</span>
@@ -266,7 +266,7 @@ export default function ChefsPageClient({
                   <div className="grid grid-cols-2 gap-2">
                     {TIMES.map(t => (
                       <Link key={t.key}
-                        href={`/chefs?tiempo=${t.key}`}
+                        href={`/tiempo/${t.key}`}
                         className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                         style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
                         <span className="text-xl leading-none">{t.emoji}</span>
