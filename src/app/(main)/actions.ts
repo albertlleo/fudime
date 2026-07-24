@@ -22,6 +22,8 @@ export async function toggleLike(recipeId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
+  const admin = createAdminClient()
+
   const { data: existing } = await supabase
     .from('likes')
     .select('recipe_id')
@@ -37,6 +39,12 @@ export async function toggleLike(recipeId: string): Promise<void> {
     if (recipe && recipe.creator_id !== user.id) {
       await createNotification(supabase, { user_id: recipe.creator_id, type: 'like', actor_id: user.id, recipe_id: recipeId })
     }
+  }
+
+  // Re-count and sync likes_count in case DB trigger is not applied
+  const { count } = await admin.from('likes').select('*', { count: 'exact', head: true }).eq('recipe_id', recipeId)
+  if (count !== null) {
+    await admin.from('recipes').update({ likes_count: count }).eq('id', recipeId)
   }
 }
 
@@ -64,8 +72,8 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
   const { data: { user } } = await supabase.auth.getUser()
   if (!user || user.id === creatorId) return { isFollowing: false }
 
-  // Use admin client to bypass RLS SELECT restrictions on follows table
   const admin = createAdminClient()
+
   const { data: existing } = await admin
     .from('follows')
     .select('id')
@@ -74,11 +82,12 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
     .maybeSingle()
 
   if (existing) {
-    await supabase.from('follows').delete().eq('follower_id', user.id).eq('following_id', creatorId)
+    await admin.from('follows').delete().eq('follower_id', user.id).eq('following_id', creatorId)
     revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: false }
   } else {
-    await supabase.from('follows').insert({ follower_id: user.id, following_id: creatorId })
+    const { error } = await admin.from('follows').insert({ follower_id: user.id, following_id: creatorId })
+    if (error) return { isFollowing: false }
     await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
     revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: true }
@@ -115,13 +124,14 @@ export async function fetchFollowingRecipes(): Promise<{
   const ids = list.map(r => r.id)
   if (ids.length === 0) return { recipes: [], likedIds: [], savedIds: [], likeCountMap: {} }
 
-  const [{ data: likes }, { data: saves }] = await Promise.all([
+  const [{ data: likes }, { data: saves }, { data: allLikes }] = await Promise.all([
     supabase.from('likes').select('recipe_id').eq('user_id', user.id).in('recipe_id', ids),
     supabase.from('saves').select('recipe_id').eq('user_id', user.id).in('recipe_id', ids),
+    createAdminClient().from('likes').select('recipe_id').in('recipe_id', ids),
   ])
 
-  const likeCountMap = list.reduce<Record<string, number>>((acc, r) => {
-    acc[r.id] = (r as any).likes_count ?? 0
+  const likeCountMap = (allLikes ?? []).reduce<Record<string, number>>((acc, l) => {
+    acc[l.recipe_id] = (acc[l.recipe_id] ?? 0) + 1
     return acc
   }, {})
 
@@ -153,8 +163,9 @@ export async function fetchTrendingRecipes(): Promise<{
   const list = (recipes ?? []) as RecipeWithCreator[]
   const ids = list.map(r => r.id)
 
-  const likeCountMap = list.reduce<Record<string, number>>((acc, r) => {
-    acc[r.id] = (r as any).likes_count ?? 0
+  const { data: allLikesForCount } = await createAdminClient().from('likes').select('recipe_id').in('recipe_id', ids)
+  const likeCountMap = (allLikesForCount ?? []).reduce<Record<string, number>>((acc, l) => {
+    acc[l.recipe_id] = (acc[l.recipe_id] ?? 0) + 1
     return acc
   }, {})
 
@@ -195,8 +206,9 @@ export async function fetchMoreRecipes(cursor: string): Promise<{
   const list = (recipes ?? []) as RecipeWithCreator[]
   const ids = list.map(r => r.id)
 
-  const likeCountMap = list.reduce<Record<string, number>>((acc, r) => {
-    acc[r.id] = (r as any).likes_count ?? 0
+  const { data: allLikesForCount2 } = await createAdminClient().from('likes').select('recipe_id').in('recipe_id', ids)
+  const likeCountMap = (allLikesForCount2 ?? []).reduce<Record<string, number>>((acc, l) => {
+    acc[l.recipe_id] = (acc[l.recipe_id] ?? 0) + 1
     return acc
   }, {})
 

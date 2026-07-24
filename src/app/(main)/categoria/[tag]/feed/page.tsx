@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import CreatorFeed from '@/components/creator-feed'
 import type { RecipeWithCreator } from '@/lib/types'
@@ -34,7 +35,8 @@ export default async function CategoriaFeedPage({
 
   const recipeIds = recipes.map(r => r.id)
 
-  const [likedResult, savedResult, commentCountsResult] = await Promise.all([
+  const admin = createAdminClient()
+  const [likedResult, savedResult, commentCountsResult, likeCountsResult] = await Promise.all([
     user
       ? supabase.from('likes').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds)
       : Promise.resolve({ data: [] }),
@@ -42,6 +44,7 @@ export default async function CategoriaFeedPage({
       ? supabase.from('saves').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds)
       : Promise.resolve({ data: [] }),
     supabase.from('comments').select('recipe_id').in('recipe_id', recipeIds),
+    admin.from('likes').select('recipe_id').in('recipe_id', recipeIds),
   ])
 
   const likedIds = (likedResult.data ?? []).map((r: any) => r.recipe_id)
@@ -52,8 +55,8 @@ export default async function CategoriaFeedPage({
     commentCountMap[(row as any).recipe_id] = (commentCountMap[(row as any).recipe_id] ?? 0) + 1
   }
   const likeCountMap: Record<string, number> = {}
-  for (const recipe of recipes) {
-    likeCountMap[recipe.id] = (recipe as any).likes_count ?? 0
+  for (const row of likeCountsResult.data ?? []) {
+    likeCountMap[(row as any).recipe_id] = (likeCountMap[(row as any).recipe_id] ?? 0) + 1
   }
 
   return (

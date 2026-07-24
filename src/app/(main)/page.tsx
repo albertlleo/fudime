@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Feed from '@/components/feed'
 import { PAGE_SIZE } from '@/app/(main)/constants'
 import type { RecipeWithCreator } from '@/lib/types'
@@ -17,7 +18,8 @@ export default async function FeedPage() {
   const recipeList = (recipes ?? []) as RecipeWithCreator[]
   const recipeIds = recipeList.map(r => r.id)
 
-  const [{ data: likes }, { data: saves }, { data: allComments }] = await Promise.all([
+  const admin = createAdminClient()
+  const [{ data: likes }, { data: saves }, { data: allComments }, { data: allLikes }] = await Promise.all([
     recipeIds.length > 0 && user
       ? supabase.from('likes').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds)
       : Promise.resolve({ data: [] }),
@@ -27,10 +29,13 @@ export default async function FeedPage() {
     recipeIds.length > 0
       ? supabase.from('comments').select('recipe_id').in('recipe_id', recipeIds)
       : Promise.resolve({ data: [] }),
+    recipeIds.length > 0
+      ? admin.from('likes').select('recipe_id').in('recipe_id', recipeIds)
+      : Promise.resolve({ data: [] }),
   ])
 
-  const likeCountMap = recipeList.reduce<Record<string, number>>((acc, r) => {
-    acc[r.id] = (r as any).likes_count ?? 0
+  const likeCountMap = (allLikes ?? []).reduce<Record<string, number>>((acc, l) => {
+    acc[l.recipe_id] = (acc[l.recipe_id] ?? 0) + 1
     return acc
   }, {})
 

@@ -38,7 +38,7 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
       .select('id')
       .eq('following_id', id),
     authUser && !isOwnProfile
-      ? createAdminClient().from('follows').select('id').eq('follower_id', authUser.id).eq('following_id', id).maybeSingle()
+      ? supabase.from('follows').select('id').eq('follower_id', authUser.id).eq('following_id', id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
   ])
 

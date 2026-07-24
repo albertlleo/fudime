@@ -47,7 +47,8 @@
       "Bash(vercel *)",
       "Bash(lsof -ti:3000)",
       "Bash(grep -rn '`/receta/${' /Users/albertlleo/Documents/fudime/src --include=\"*.tsx\" --include=\"*.ts\")",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "Bash(awk -F= '{print length\\($2\\), substr\\($2,1,5\\)}')"
     ]
   }
 }
