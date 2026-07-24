@@ -334,7 +334,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
             animation: 'dtHeart 0.85s ease-out forwards',
           }}
         >
-          <svg viewBox="0 0 24 24" fill="#ff2d55" className="w-24 h-24 drop-shadow-2xl">
+          <svg viewBox="0 0 24 24" fill="#f97316" className="w-24 h-24 drop-shadow-2xl">
             <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
           </svg>
         </div>
@@ -456,7 +456,7 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
         {/* Like */}
         <button onClick={handleLike} className="flex flex-col items-center gap-1.5 active:opacity-80">
           <div className={`transition-transform duration-200 ${likeAnim ? 'scale-[1.4]' : 'scale-100'}`}>
-            <svg viewBox="0 0 24 24" fill={isLiked ? '#ff2d55' : 'white'} stroke="none"
+            <svg viewBox="0 0 24 24" fill={isLiked ? '#f97316' : 'white'} stroke="none"
               className="w-7 h-7 drop-shadow-lg">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>

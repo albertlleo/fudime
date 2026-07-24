@@ -23,7 +23,7 @@ function notifText(n: NotificationWithDetails): string {
 }
 
 function notifIcon(type: string) {
-  if (type === 'like') return { bg: '#fef2f2', border: '#fca5a5', color: '#dc2626', label: '♥' }
+  if (type === 'like') return { bg: '#fff7ed', border: '#fed7aa', color: '#f97316', label: '♥' }
   if (type === 'follow') return { bg: '#fffbeb', border: '#fcd34d', color: '#d97706', label: '+' }
   return { bg: '#f5f3ff', border: '#c4b5fd', color: '#7c3aed', label: '💬' }
 }
