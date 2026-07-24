@@ -315,11 +315,12 @@ export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedId
       {/* Overlay layer — sits above the scroll container, pointer-events only on the button */}
       <div className="absolute inset-0 z-50 pointer-events-none">
         <button onClick={handleBack}
-          className="absolute left-4 w-11 h-11 rounded-full flex items-center justify-center pointer-events-auto"
-          style={{ top: 'max(52px, calc(env(safe-area-inset-top) + 12px))', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(12px)', border: '1.5px solid rgba(255,255,255,0.25)', boxShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
+          className="absolute left-4 flex items-center justify-center pointer-events-auto active:opacity-60 transition-opacity"
+          style={{ top: 'max(52px, calc(env(safe-area-inset-top) + 12px))' }}
           aria-label="Volver">
-          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-            <path d="M19 12H5M12 5l-7 7 7 7" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"
+            style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.7))' }}>
+            <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
       </div>

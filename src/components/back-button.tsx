@@ -24,13 +24,13 @@ export default function BackButton({ fallback = '/', glass = false }: Props) {
     return (
       <button
         onClick={handleBack}
-        className="w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center"
-        style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.15)' }}
+        className="flex items-center justify-center active:opacity-60 transition-opacity"
         aria-label="Volver"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5}
-          strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-          <path d="M19 12H5M12 5l-7 7 7 7" />
+          strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7"
+          style={{ filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.7))' }}>
+          <path d="M15 18l-6-6 6-6" />
         </svg>
       </button>
     )
@@ -39,14 +39,13 @@ export default function BackButton({ fallback = '/', glass = false }: Props) {
   return (
     <button
       onClick={handleBack}
-      className="w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center transition-colors active:opacity-70"
-      style={{ background: 'var(--brown-100)' }}
+      className="flex items-center justify-center active:opacity-60 transition-opacity"
       aria-label="Volver"
     >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}
         strokeLinecap="round" strokeLinejoin="round"
-        className="w-5 h-5" style={{ color: 'var(--brown-700)' }}>
-        <path d="M19 12H5M12 5l-7 7 7 7" />
+        className="w-7 h-7" style={{ color: 'var(--brown-700)' }}>
+        <path d="M15 18l-6-6 6-6" />
       </svg>
     </button>
   )
