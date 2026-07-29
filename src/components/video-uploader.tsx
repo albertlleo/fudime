@@ -18,45 +18,47 @@ type CoverState =
   | { status: 'done'; url: string }
   | { status: 'error' }
 
-const NUM_FRAMES = 14
+const NUM_FRAMES = 8
 
 function FramePicker({ blobUrl, duration, onSelect }: {
   blobUrl: string
   duration: number
   onSelect: (idx: number) => void
 }) {
-  const [frames, setFrames] = useState<string[]>([])
-  const [loading, setLoading] = useState(true)
+  const [frames, setFrames] = useState<(string | null)[]>(() => new Array(NUM_FRAMES).fill(null))
   const [selectedIdx, setSelectedIdx] = useState(0)
 
   useEffect(() => {
-    const video = document.createElement('video')
-    video.muted = true
-    video.playsInline = true
-    video.src = blobUrl
-    const captured: string[] = []
-    let idx = 0
+    setFrames(new Array(NUM_FRAMES).fill(null))
+    let cancelled = false
+    const videos: HTMLVideoElement[] = []
 
-    const capture = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = 54
-      canvas.height = 72
-      canvas.getContext('2d')!.drawImage(video, 0, 0, 54, 72)
-      captured.push(canvas.toDataURL('image/jpeg', 0.75))
-      idx++
-      if (idx < NUM_FRAMES) {
-        video.currentTime = (idx / (NUM_FRAMES - 1)) * duration
-      } else {
-        setFrames([...captured])
-        setLoading(false)
-        video.src = ''
+    for (let i = 0; i < NUM_FRAMES; i++) {
+      const idx = i
+      const time = (idx / (NUM_FRAMES - 1)) * duration
+      const v = document.createElement('video')
+      v.muted = true
+      v.playsInline = true
+      v.preload = 'auto'
+      v.src = blobUrl
+      videos.push(v)
+
+      const capture = () => {
+        if (cancelled) return
+        const canvas = document.createElement('canvas')
+        canvas.width = 54; canvas.height = 72
+        canvas.getContext('2d')!.drawImage(v, 0, 0, 54, 72)
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.6)
+        setFrames(prev => { const n = [...prev]; n[idx] = dataUrl; return n })
+        v.src = ''
       }
+
+      v.onseeked = capture
+      v.onloadedmetadata = () => { v.currentTime = time }
+      v.onerror = () => { if (!cancelled) setFrames(prev => { const n = [...prev]; n[idx] = ''; return n }) }
     }
 
-    video.onseeked = capture
-    video.onloadedmetadata = () => { video.currentTime = 0 }
-    video.onerror = () => setLoading(false)
-    return () => { video.src = '' }
+    return () => { cancelled = true; videos.forEach(v => { v.src = '' }) }
   }, [blobUrl, duration])
 
   function handleSelect(i: number) {
@@ -64,30 +66,23 @@ function FramePicker({ blobUrl, duration, onSelect }: {
     onSelect(i)
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 py-3 px-1">
-        <div className="w-3.5 h-3.5 border-2 rounded-full animate-spin flex-shrink-0"
-          style={{ borderColor: 'rgba(255,255,255,0.15)', borderTopColor: '#f59e0b' }} />
-        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Cargando frames...</span>
-      </div>
-    )
-  }
-
   return (
-    <div className="flex gap-0.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+    <div className="flex gap-0.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
       {frames.map((dataUrl, i) => (
-        <button key={i} type="button" onClick={() => handleSelect(i)}
+        <button key={i} type="button" onClick={() => dataUrl && handleSelect(i)}
           className="flex-shrink-0 rounded overflow-hidden relative"
           style={{
             width: 44, height: 58,
             outline: i === selectedIdx ? '2.5px solid #f59e0b' : '2.5px solid transparent',
             outlineOffset: '-2.5px',
+            background: '#222',
           }}>
-          <img src={dataUrl} alt="" className="w-full h-full object-cover" draggable={false} />
-          {i === selectedIdx && (
-            <div className="absolute inset-x-0 bottom-0 h-0.5" style={{ background: '#f59e0b' }} />
-          )}
+          {dataUrl
+            ? <img src={dataUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+            : <div className="w-full h-full flex items-center justify-center">
+                <div className="w-3 h-3 border border-white/20 border-t-amber-400 rounded-full animate-spin" />
+              </div>
+          }
         </button>
       ))}
     </div>
