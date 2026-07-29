@@ -410,7 +410,7 @@ export default function VideoUploader() {
           </div>
         </div>
 
-        <input ref={fileInputRef} type="file" accept="video/*" className="hidden"
+        <input ref={fileInputRef} type="file" accept="video/mp4,video/quicktime,video/webm,video/x-m4v" className="hidden"
           onChange={e => { const f = e.target.files?.[0]; if (f) handleVideoSelect(f); e.target.value = '' }} />
         <input ref={coverInputRef} type="file" accept="image/*" className="hidden"
           onChange={e => { const f = e.target.files?.[0]; if (f) handleCoverSelect(f); e.target.value = '' }} />
