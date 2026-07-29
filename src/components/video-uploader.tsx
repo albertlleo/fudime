@@ -67,20 +67,21 @@ function FramePicker({ blobUrl, duration, onSelect }: {
   }
 
   return (
-    <div className="flex gap-0.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
+    <div className="flex gap-0.5 overflow-x-auto" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
       {frames.map((dataUrl, i) => (
         <button key={i} type="button" onClick={() => dataUrl && handleSelect(i)}
-          className="flex-shrink-0 rounded overflow-hidden relative"
+          className="flex-shrink-0 rounded-lg overflow-hidden relative transition-all"
           style={{
-            width: 44, height: 58,
-            outline: i === selectedIdx ? '2.5px solid #f59e0b' : '2.5px solid transparent',
-            outlineOffset: '-2.5px',
-            background: '#222',
+            width: 40, height: 54,
+            outline: i === selectedIdx ? '2px solid #f59e0b' : '2px solid transparent',
+            outlineOffset: '-2px',
+            background: '#1a1a1a',
+            transform: i === selectedIdx ? 'scale(1.06)' : 'scale(1)',
           }}>
           {dataUrl
             ? <img src={dataUrl} alt="" className="w-full h-full object-cover" draggable={false} />
             : <div className="w-full h-full flex items-center justify-center">
-                <div className="w-3 h-3 border border-white/20 border-t-amber-400 rounded-full animate-spin" />
+                <div className="w-2.5 h-2.5 border border-white/15 border-t-amber-400 rounded-full animate-spin" />
               </div>
           }
         </button>
@@ -92,14 +93,14 @@ function FramePicker({ blobUrl, duration, onSelect }: {
 function Chip({ label, emoji, active, onClick }: { label: string; emoji: string; active: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick}
-      className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
       style={{
-        background: active ? 'var(--amber)' : '#fff',
-        color: active ? '#000' : 'var(--brown-700)',
+        background: active ? 'var(--amber)' : 'transparent',
+        color: active ? '#000' : 'var(--brown-600)',
         border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
       }}>
-      <span className="text-base leading-none flex-shrink-0">{emoji}</span>
-      <span className="leading-tight">{label}</span>
+      <span className="text-base leading-none">{emoji}</span>
+      <span className="leading-none whitespace-nowrap">{label}</span>
     </button>
   )
 }
@@ -120,7 +121,6 @@ export default function VideoUploader() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-  // Auto-generate cover thumbnail once video is uploaded
   useEffect(() => {
     if (videoState.status === 'done' && coverState.status === 'idle') {
       const autoThumb = videoState.videoUrl.replace('/upload/', '/upload/so_auto,w_1080,h_1920,c_fill,f_jpg/')
@@ -193,12 +193,10 @@ export default function VideoUploader() {
     if (!file.type.startsWith('image/')) return
     if (coverState.status === 'selected') URL.revokeObjectURL(coverState.blobUrl)
     setCoverState({ status: 'selected', blobUrl: URL.createObjectURL(file) })
-    // Upload immediately
     uploadCover(file)
   }
 
   async function uploadCover(file: File) {
-    setCoverState(prev => prev.status === 'selected' ? { ...prev } : prev)
     const blobUrl = URL.createObjectURL(file)
     setCoverState({ status: 'selected', blobUrl })
     setCoverState({ status: 'uploading' })
@@ -249,163 +247,251 @@ export default function VideoUploader() {
     : coverState.status === 'selected' ? coverState.blobUrl
     : null
 
-  // ── Step 1: Video + cover ──────────────────────────────────────────────────
+  // ── Step 1: Video + portada ────────────────────────────────────────────────
   if (step === 1) {
+    const isIdle = videoState.status === 'idle' || videoState.status === 'error'
+    const isPreview = videoState.status === 'preview'
+    const isUploading = videoState.status === 'uploading'
+    const isDone = videoState.status === 'done'
+    const showCoverPanel = isDone
+
     return (
-      <div className="min-h-dvh pb-28 flex flex-col" style={{ background: '#000' }}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-14 pb-3"
-          style={{ background: '#000', borderBottom: '0.5px solid rgba(255,255,255,0.1)' }}>
-          <h1 className="text-base font-semibold text-white">Nueva publicación</h1>
+      <div className="relative overflow-hidden" style={{ height: '100dvh', background: '#000' }}>
+
+        {/* ── Background: video (preview) or cover image (done) ── */}
+        {isPreview && (
+          <video
+            src={videoState.blobUrl}
+            className="absolute inset-0 w-full h-full object-contain"
+            style={{ background: '#000' }}
+            playsInline muted autoPlay loop
+          />
+        )}
+        {isDone && coverSrc && (
+          <img
+            src={coverSrc}
+            alt=""
+            className="absolute inset-0 w-full h-full object-contain"
+            style={{ background: '#000' }}
+          />
+        )}
+
+        {/* ── Idle: centered upload CTA ── */}
+        {isIdle && (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute inset-0 flex flex-col items-center justify-center gap-5"
+          >
+            <div
+              className="w-24 h-24 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(255,255,255,0.1)', border: '1.5px solid rgba(255,255,255,0.18)' }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-10 h-10">
+                <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.89L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <p className="text-white font-semibold text-base leading-tight">Seleccionar vídeo</p>
+              <p className="text-[13px] mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                MP4 · MOV · Máx. 100 MB
+              </p>
+              <p className="text-[11px] mt-2 px-10 leading-relaxed" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                En iPhone elige &quot;Biblioteca de fotos&quot;
+              </p>
+            </div>
+            {videoState.status === 'error' && (
+              <div className="px-6">
+                <p className="text-[13px] px-4 py-2.5 rounded-2xl text-center" style={{ background: 'rgba(220,38,38,0.18)', color: '#f87171' }}>
+                  {videoState.message}
+                </p>
+              </div>
+            )}
+          </button>
+        )}
+
+        {/* ── Upload progress: full-screen circular ring ── */}
+        {isUploading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
+            <div className="relative flex items-center justify-center">
+              <svg viewBox="0 0 100 100" className="w-36 h-36" style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx="50" cy="50" r="42" fill="none"
+                  stroke="rgba(255,255,255,0.1)" strokeWidth="5" />
+                <circle cx="50" cy="50" r="42" fill="none"
+                  stroke="#f59e0b" strokeWidth="5"
+                  strokeDasharray={`${2 * Math.PI * 42}`}
+                  strokeDashoffset={`${2 * Math.PI * 42 * (1 - videoState.progress / 100)}`}
+                  strokeLinecap="round"
+                  style={{ transition: 'stroke-dashoffset 0.25s ease' }}
+                />
+              </svg>
+              <span
+                className="absolute font-bold text-white"
+                style={{ fontSize: 26, fontVariantNumeric: 'tabular-nums' }}
+              >
+                {videoState.progress}%
+              </span>
+            </div>
+            <p className="text-[13px] font-medium tracking-wide" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Subiendo vídeo...
+            </p>
+          </div>
+        )}
+
+        {/* ── Done: check icon overlay on top of cover ── */}
+        {isDone && (
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none"
+            style={{ background: coverSrc ? 'rgba(0,0,0,0.42)' : 'transparent' }}
+          >
+            <div
+              className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(74,222,128,0.18)', border: '2px solid rgba(74,222,128,0.45)' }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            </div>
+            <p className="text-white font-semibold">Vídeo listo</p>
+            <button
+              onClick={() => { setVideoState({ status: 'idle' }); setCoverState({ status: 'idle' }) }}
+              className="pointer-events-auto text-[13px] px-4 py-1.5 rounded-full"
+              style={{ background: 'rgba(255,255,255,0.13)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.18)' }}
+            >
+              Cambiar vídeo
+            </button>
+          </div>
+        )}
+
+        {/* ── Top gradient ── */}
+        <div
+          className="absolute top-0 left-0 right-0 pointer-events-none z-10"
+          style={{ height: 140, background: 'linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%)' }}
+        />
+
+        {/* ── Header (floats over video) ── */}
+        <div
+          className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5"
+          style={{ paddingTop: 'max(52px, calc(env(safe-area-inset-top) + 16px))' }}
+        >
+          <p className="text-[15px] font-semibold text-white tracking-tight">Nueva publicación</p>
           <button
             onClick={() => setStep(2)}
             disabled={!canGoNext}
-            className="text-sm font-bold transition-opacity"
-            style={{ color: canGoNext ? '#f59e0b' : 'rgba(245,158,11,0.3)' }}>
+            className="text-[15px] font-bold transition-opacity"
+            style={{ color: canGoNext ? '#f59e0b' : 'rgba(245,158,11,0.28)' }}
+          >
             Siguiente
           </button>
         </div>
 
-        {/* Video preview — full width, 9:16 */}
-        <div className="flex-1 flex items-center justify-center bg-black" style={{ minHeight: '55vh' }}>
-          {videoState.status === 'idle' || videoState.status === 'error' ? (
-            <button type="button" onClick={() => fileInputRef.current?.click()}
-              className="flex flex-col items-center gap-3">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(255,255,255,0.1)' }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-9 h-9">
-                  <path d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.89L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-                </svg>
-              </div>
-              <p className="text-white font-semibold">Seleccionar vídeo</p>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Máx. 100 MB · formato 9:16</p>
-              <p className="text-xs px-8 text-center mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                En iPhone, elige "Biblioteca de fotos" en el menú que aparece
-              </p>
-              {videoState.status === 'error' && (
-                <p className="text-xs px-6 text-center" style={{ color: '#f87171' }}>{videoState.message}</p>
-              )}
-            </button>
-          ) : videoState.status === 'preview' ? (
-            <div className="w-full" style={{ aspectRatio: '9/16', maxHeight: '60vh' }}>
-              <video src={videoState.blobUrl} className="w-full h-full object-contain"
-                controls playsInline muted />
-            </div>
-          ) : videoState.status === 'uploading' ? (
-            <div className="flex flex-col items-center gap-4 px-10 w-full">
-              <div className="w-14 h-14 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(255,255,255,0.1)' }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-                </svg>
-              </div>
-              <div className="w-full">
-                <div className="flex justify-between text-xs mb-2">
-                  <span className="text-white font-medium">Subiendo vídeo...</span>
-                  <span style={{ color: '#f59e0b' }} className="font-bold">{videoState.progress}%</span>
-                </div>
-                <div className="w-full rounded-full h-1.5" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                  <div className="h-1.5 rounded-full transition-all" style={{ width: `${videoState.progress}%`, background: '#f59e0b' }} />
-                </div>
-              </div>
-            </div>
-          ) : videoState.status === 'done' ? (
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'rgba(74,222,128,0.15)' }}>
-                <svg viewBox="0 0 24 24" fill="#4ade80" className="w-8 h-8">
-                  <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm-1 14l-4-4 1.414-1.414L11 13.172l4.586-4.586L17 10l-6 6z" />
-                </svg>
-              </div>
-              <p className="text-white font-semibold">Vídeo listo</p>
-              <button onClick={() => { setVideoState({ status: 'idle' }); setCoverState({ status: 'idle' }) }}
-                className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                Cambiar vídeo
-              </button>
-            </div>
-          ) : null}
-        </div>
+        {/* ── Bottom gradient ── */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
+          style={{
+            height: showCoverPanel ? 260 : 160,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%)',
+          }}
+        />
 
-        {/* Bottom panel: cover + actions */}
-        <div style={{ background: '#111', borderTop: '0.5px solid rgba(255,255,255,0.1)' }}>
-
-          {/* Cover / Frame picker */}
-          <div className="px-4 pt-4 pb-3">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-white">Portada</p>
-              <button type="button" onClick={() => coverInputRef.current?.click()}
-                className="text-xs font-semibold" style={{ color: '#f59e0b' }}>
-                Subir foto
-              </button>
-            </div>
-
-            <div className="flex gap-3 items-start">
-              {/* Selected cover preview */}
-              <div className="relative flex-shrink-0 rounded-xl overflow-hidden"
-                style={{ width: 60, height: 80, background: '#222', border: `2px solid ${coverSrc ? '#f59e0b' : 'rgba(255,255,255,0.15)'}` }}>
+        {/* ── Bottom panel (floats over video) ── */}
+        <div
+          className="absolute bottom-0 left-0 right-0 z-20 px-4 flex flex-col gap-3"
+          style={{ paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 12px))' }}
+        >
+          {/* Cover + frame picker — only when done */}
+          {showCoverPanel && (
+            <div className="flex items-start gap-3 mb-1">
+              <div
+                className="relative flex-shrink-0 rounded-xl overflow-hidden"
+                style={{
+                  width: 52, height: 70,
+                  background: '#1a1a1a',
+                  border: `2px solid ${coverSrc ? '#f59e0b' : 'rgba(255,255,255,0.2)'}`,
+                }}
+              >
                 {coverSrc ? (
                   <img src={coverSrc} alt="" className="w-full h-full object-contain" style={{ background: '#000' }} />
                 ) : coverState.status === 'uploading' ? (
                   <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 rounded-full animate-spin"
-                      style={{ borderColor: 'rgba(255,255,255,0.2)', borderTopColor: '#f59e0b' }} />
+                    <div className="w-3 h-3 border-2 rounded-full animate-spin"
+                      style={{ borderColor: 'rgba(255,255,255,0.15)', borderTopColor: '#f59e0b' }} />
                   </div>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-xl">🎬</div>
+                  <div className="w-full h-full flex items-center justify-center text-lg opacity-30">🎬</div>
                 )}
                 {coverSrc && (
                   <div className="absolute bottom-0.5 left-0 right-0 flex justify-center">
-                    <span className="text-[8px] font-bold text-white px-1 py-0.5 rounded-full" style={{ background: '#f59e0b' }}>PORTADA</span>
+                    <span className="text-[7px] font-black text-black px-1 py-0.5 rounded-full" style={{ background: '#f59e0b', letterSpacing: '0.05em' }}>PORTADA</span>
                   </div>
                 )}
               </div>
 
-              {/* Frame strip — only when video is done and blob available */}
               <div className="flex-1 min-w-0">
-                {videoState.status === 'done' && videoBlobUrlRef.current ? (
-                  <>
-                    <p className="text-[10px] mb-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                      Selecciona el frame de portada
-                    </p>
-                    <FramePicker
-                      blobUrl={videoBlobUrlRef.current}
-                      duration={videoState.duration ?? 30}
-                      onSelect={handleFrameSelect}
-                    />
-                  </>
-                ) : (
-                  <p className="text-xs pt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                    Sube el vídeo para seleccionar el frame de portada
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[11px] font-semibold tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    FRAME
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => coverInputRef.current?.click()}
+                    className="text-[12px] font-semibold"
+                    style={{ color: '#f59e0b' }}
+                  >
+                    Subir foto
+                  </button>
+                </div>
+                {videoBlobUrlRef.current ? (
+                  <FramePicker
+                    blobUrl={videoBlobUrlRef.current}
+                    duration={videoState.status === 'done' ? (videoState.duration ?? 30) : 30}
+                    onSelect={handleFrameSelect}
+                  />
+                ) : (
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <div key={i} className="flex-shrink-0 rounded-lg"
+                        style={{ width: 40, height: 54, background: 'rgba(255,255,255,0.07)' }} />
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Upload / change video button */}
-          <div className="px-4 pb-4">
-            {videoState.status === 'preview' && (
-              <div className="flex gap-2">
-                <button type="button"
-                  onClick={() => { URL.revokeObjectURL(videoState.blobUrl); setVideoState({ status: 'idle' }) }}
-                  className="flex-1 py-3 rounded-xl text-sm font-medium"
-                  style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
-                  Otro vídeo
-                </button>
-                <button type="button" onClick={() => uploadVideo(videoState.file)}
-                  className="flex-[2] py-3 rounded-xl text-sm font-semibold"
-                  style={{ background: '#f59e0b', color: '#000' }}>
-                  Subir vídeo
-                </button>
-              </div>
-            )}
-            {(videoState.status === 'idle' || videoState.status === 'error') && (
-              <button type="button" onClick={() => fileInputRef.current?.click()}
-                className="w-full py-3 rounded-xl text-sm font-semibold"
-                style={{ background: '#f59e0b', color: '#000' }}>
-                Seleccionar vídeo
+          {/* Preview: upload / change buttons */}
+          {isPreview && (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => { URL.revokeObjectURL(videoState.blobUrl); setVideoState({ status: 'idle' }) }}
+                className="flex-1 py-3.5 rounded-2xl text-[14px] font-semibold"
+                style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.15)' }}
+              >
+                Otro vídeo
               </button>
-            )}
-          </div>
+              <button
+                type="button"
+                onClick={() => uploadVideo(videoState.file)}
+                className="flex-[2] py-3.5 rounded-2xl text-[14px] font-bold"
+                style={{ background: '#f59e0b', color: '#000' }}
+              >
+                Subir vídeo
+              </button>
+            </div>
+          )}
+
+          {/* Idle: select button */}
+          {isIdle && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full py-3.5 rounded-2xl text-[14px] font-bold tracking-wide"
+              style={{ background: '#f59e0b', color: '#000' }}
+            >
+              Seleccionar vídeo
+            </button>
+          )}
         </div>
 
         <input ref={fileInputRef} type="file" accept="video/mp4,video/quicktime,video/webm,video/x-m4v" className="hidden"
@@ -418,37 +504,59 @@ export default function VideoUploader() {
 
   // ── Step 2: Detalles ───────────────────────────────────────────────────────
   return (
-    <div className="min-h-dvh pb-28 flex flex-col" style={{ background: 'var(--cream)' }}>
+    <div className="flex flex-col" style={{ height: '100dvh', background: 'var(--cream)' }}>
+
       {/* Header */}
-      <div className="flex items-center justify-between px-4 pt-14 pb-3 flex-shrink-0"
-        style={{ background: 'var(--cream)', borderBottom: '1px solid var(--brown-100)' }}>
-        <button onClick={() => setStep(1)} className="flex items-center gap-1 text-sm" style={{ color: 'var(--brown-500)' }}>
+      <div
+        className="flex-shrink-0 flex items-center justify-between px-4"
+        style={{
+          paddingTop: 'max(52px, calc(env(safe-area-inset-top) + 14px))',
+          paddingBottom: 14,
+          background: 'var(--cream)',
+          borderBottom: '1px solid var(--brown-100)',
+        }}
+      >
+        <button
+          onClick={() => setStep(1)}
+          className="flex items-center gap-1 text-[14px] font-medium"
+          style={{ color: 'var(--brown-500)' }}
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
             <path d="M15 18l-6-6 6-6" />
           </svg>
           Atrás
         </button>
-        <h1 className="text-base font-semibold" style={{ color: 'var(--brown-900)' }}>Detalles</h1>
-        <button onClick={() => handleSubmit(true)} disabled={!canSubmit}
-          className="text-sm font-bold transition-opacity"
-          style={{ color: canSubmit ? '#f59e0b' : 'rgba(245,158,11,0.3)' }}>
+        <h1 className="text-[15px] font-bold" style={{ color: 'var(--brown-900)' }}>
+          Nueva publicación
+        </h1>
+        <button
+          onClick={() => handleSubmit(true)}
+          disabled={!canSubmit}
+          className="text-[15px] font-bold transition-opacity"
+          style={{ color: canSubmit ? '#f59e0b' : 'rgba(245,158,11,0.3)' }}
+        >
           {submitting ? 'Publicando...' : 'Publicar'}
         </button>
       </div>
 
+      {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
-        {/* Video + cover preview strip */}
-        <div className="flex gap-3 px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
-          {/* Miniatura portada */}
-          <div className="flex-shrink-0 rounded-xl overflow-hidden"
-            style={{ width: 64, height: 85, background: '#111', border: '1.5px solid var(--brown-100)' }}>
+
+        {/* Cover + title (Instagram-style: thumbnail left, caption right) */}
+        <div
+          className="flex gap-3 px-4 py-4"
+          style={{ borderBottom: '1px solid var(--brown-100)' }}
+        >
+          <div
+            className="flex-shrink-0 rounded-xl overflow-hidden"
+            style={{ width: 68, height: 90, background: '#111', border: '1.5px solid var(--brown-100)' }}
+          >
             {coverSrc ? (
               <img src={coverSrc} alt="" className="w-full h-full object-contain" style={{ background: '#000' }} />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-lg">🎬</div>
+              <div className="w-full h-full flex items-center justify-center text-xl opacity-30">🎬</div>
             )}
           </div>
-          {/* Title input inline */}
           <div className="flex-1 flex flex-col justify-between py-0.5">
             <textarea
               value={title}
@@ -456,79 +564,113 @@ export default function VideoUploader() {
               maxLength={80}
               placeholder="Escribe un título..."
               rows={3}
-              className="flex-1 text-sm font-medium resize-none focus:outline-none bg-transparent leading-relaxed"
-              style={{ color: 'var(--brown-900)' }}
+              className="flex-1 text-[15px] font-medium resize-none focus:outline-none bg-transparent leading-relaxed"
+              style={{ color: 'var(--brown-900)', caretColor: '#f59e0b' }}
             />
-            <p className="text-xs" style={{ color: 'var(--brown-300)' }}>{title.length}/80</p>
+            <p className="text-[11px]" style={{ color: 'var(--brown-300)' }}>{title.length}/80</p>
           </div>
         </div>
 
-        <div className="px-4 py-4 space-y-5">
-          {/* Description */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--brown-400)' }}>
-              Ingredientes y paso a paso <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)}
-              rows={6} placeholder="Lista de ingredientes, pasos de la receta, trucos..."
-              className="w-full text-sm rounded-2xl px-4 py-3 resize-none focus:outline-none"
-              style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)' }} />
-          </div>
+        {/* Description */}
+        <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-2.5" style={{ color: 'var(--brown-400)' }}>
+            Ingredientes y paso a paso <span style={{ color: '#dc2626' }}>*</span>
+          </p>
+          <textarea
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            rows={6}
+            placeholder="Lista de ingredientes, pasos de la receta, trucos..."
+            className="w-full text-[14px] rounded-2xl px-4 py-3 resize-none focus:outline-none"
+            style={{
+              background: '#fff',
+              border: '1.5px solid var(--brown-100)',
+              color: 'var(--brown-900)',
+              caretColor: '#f59e0b',
+            }}
+          />
+        </div>
 
-          {/* Categorías */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
-              Categoría <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map(c => (
-                <Chip key={c} label={c} emoji={CAT_EMOJIS[c.toLowerCase()] ?? '🍴'}
-                  active={categories.includes(c)} onClick={() => toggleCategory(c)} />
-              ))}
-            </div>
+        {/* Categoría */}
+        <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
+            Categoría <span style={{ color: '#dc2626' }}>*</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map(c => (
+              <Chip key={c} label={c} emoji={CAT_EMOJIS[c.toLowerCase()] ?? '🍴'}
+                active={categories.includes(c)} onClick={() => toggleCategory(c)} />
+            ))}
           </div>
+        </div>
 
-          {/* Tiempo */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
-              Tiempo de cocción <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {TIMES.map(t => (
-                <Chip key={t.key} label={t.label} emoji={t.emoji}
-                  active={cookTime === t.key} onClick={() => toggleTime(t.key)} />
-              ))}
-            </div>
+        {/* Tiempo */}
+        <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
+            Tiempo de cocción <span style={{ color: '#dc2626' }}>*</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {TIMES.map(t => (
+              <Chip key={t.key} label={t.label} emoji={t.emoji}
+                active={cookTime === t.key} onClick={() => toggleTime(t.key)} />
+            ))}
           </div>
+        </div>
 
-          {/* Dieta */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
-              Dieta e intolerancias <span className="font-normal normal-case" style={{ color: 'var(--brown-300)' }}>(opcional)</span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {DIETS.map(d => (
-                <Chip key={d.key} label={d.label} emoji={d.emoji}
-                  active={diet.includes(d.key)} onClick={() => toggleDiet(d.key)} />
-              ))}
-            </div>
+        {/* Dieta */}
+        <div className="px-4 py-4">
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--brown-400)' }}>
+            Dieta e intolerancias
+            <span className="ml-1.5 font-normal normal-case text-[11px]" style={{ color: 'var(--brown-300)' }}>opcional</span>
+          </p>
+          <div className="flex flex-wrap gap-2 mt-2.5">
+            {DIETS.map(d => (
+              <Chip key={d.key} label={d.label} emoji={d.emoji}
+                active={diet.includes(d.key)} onClick={() => toggleDiet(d.key)} />
+            ))}
           </div>
+        </div>
 
-          {submitError && <p className="text-sm" style={{ color: '#dc2626' }}>{submitError}</p>}
-
-          {/* Buttons */}
-          <div className="flex gap-3 pt-1">
-            <button onClick={() => handleSubmit(false)} disabled={!canSubmit}
-              className="flex-1 font-medium rounded-2xl py-3.5 text-sm"
-              style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)', opacity: !canSubmit ? 0.4 : 1 }}>
-              Guardar borrador
-            </button>
-            <button onClick={() => handleSubmit(true)} disabled={!canSubmit}
-              className="flex-1 font-semibold rounded-2xl py-3.5 text-sm"
-              style={{ background: 'var(--amber)', color: '#000', opacity: !canSubmit ? 0.4 : 1 }}>
-              {submitting ? 'Publicando...' : 'Publicar'}
-            </button>
+        {/* Error */}
+        {submitError && (
+          <div className="px-4 pb-2">
+            <p className="text-[13px] px-4 py-2.5 rounded-2xl text-center"
+              style={{ background: 'rgba(220,38,38,0.08)', color: '#dc2626' }}>
+              {submitError}
+            </p>
           </div>
+        )}
+
+        {/* Bottom buttons */}
+        <div
+          className="px-4 py-4 flex gap-2.5"
+          style={{ paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))' }}
+        >
+          <button
+            onClick={() => handleSubmit(false)}
+            disabled={!canSubmit}
+            className="flex-1 font-semibold rounded-2xl py-3.5 text-[14px]"
+            style={{
+              background: '#fff',
+              border: '1.5px solid var(--brown-100)',
+              color: 'var(--brown-700)',
+              opacity: !canSubmit ? 0.38 : 1,
+            }}
+          >
+            Borrador
+          </button>
+          <button
+            onClick={() => handleSubmit(true)}
+            disabled={!canSubmit}
+            className="flex-[2] font-bold rounded-2xl py-3.5 text-[14px]"
+            style={{
+              background: 'var(--amber)',
+              color: '#000',
+              opacity: !canSubmit ? 0.38 : 1,
+            }}
+          >
+            {submitting ? 'Publicando...' : 'Publicar ahora'}
+          </button>
         </div>
       </div>
     </div>
