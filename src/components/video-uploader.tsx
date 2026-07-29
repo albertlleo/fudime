@@ -284,6 +284,9 @@ export default function VideoUploader() {
               </div>
               <p className="text-white font-semibold">Seleccionar vídeo</p>
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Máx. 100 MB · formato 9:16</p>
+              <p className="text-xs px-8 text-center mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                En iPhone, elige "Biblioteca de fotos" en el menú que aparece
+              </p>
               {videoState.status === 'error' && (
                 <p className="text-xs px-6 text-center" style={{ color: '#f87171' }}>{videoState.message}</p>
               )}
