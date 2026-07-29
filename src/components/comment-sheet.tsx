@@ -74,7 +74,7 @@ function CommentRow({
             </svg>
             {count > 0 && <span className="text-[10px] font-semibold">{count}</span>}
           </button>
-          {!isReply && onReply && userId && (
+          {onReply && userId && (
             <button
               onClick={() => onReply(c.id, c.users.display_name)}
               className="text-[10px] font-semibold"
@@ -111,12 +111,13 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [replyingTo, setReplyingTo] = useState<{ id: string; username: string } | null>(null)
+  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(new Set())
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const visible = !!recipeId
 
   useEffect(() => {
-    if (!recipeId) { setAllComments([]); setReplyingTo(null); return }
+    if (!recipeId) { setAllComments([]); setReplyingTo(null); setText(''); setExpandedThreads(new Set()); return }
     setLoading(true)
     fetchComments(recipeId, userId ?? undefined).then(data => {
       setAllComments(data)
@@ -143,6 +144,10 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
     if (result.comment) {
       setAllComments(prev => [...prev, result.comment!])
       setText('')
+      if (result.comment.parent_id) {
+        // Auto-expand the thread so the new reply is visible
+        setExpandedThreads(prev => new Set([...prev, result.comment!.parent_id!]))
+      }
       setReplyingTo(null)
       if (recipeId && !result.comment.parent_id) onCountChange(recipeId, +1)
       setTimeout(() => listRef.current?.scrollTo({ top: 99999, behavior: 'smooth' }), 50)
@@ -171,7 +176,16 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
 
   function startReply(id: string, username: string) {
     setReplyingTo({ id, username })
-    setTimeout(() => inputRef.current?.focus(), 0)
+    setText(`@${username} `)
+    setTimeout(() => {
+      inputRef.current?.focus()
+      const len = `@${username} `.length
+      inputRef.current?.setSelectionRange(len, len)
+    }, 0)
+  }
+
+  function expandThread(commentId: string) {
+    setExpandedThreads(prev => new Set([...prev, commentId]))
   }
 
   return (
@@ -231,6 +245,10 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
             </div>
           ) : topComments.map(comment => {
             const replies = repliesByParent[comment.id] ?? []
+            const isExpanded = expandedThreads.has(comment.id)
+            const PREVIEW = 2
+            const visibleReplies = isExpanded || replies.length <= PREVIEW ? replies : replies.slice(0, PREVIEW)
+            const hiddenCount = replies.length - visibleReplies.length
             return (
               <div key={comment.id}>
                 <CommentRow
@@ -242,7 +260,7 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
                 />
                 {replies.length > 0 && (
                   <div className="ml-11 mt-3 space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--brown-100)' }}>
-                    {replies.map(reply => (
+                    {visibleReplies.map(reply => (
                       <CommentRow
                         key={reply.id}
                         c={reply}
@@ -250,8 +268,21 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
                         userId={userId}
                         onLike={handleLike}
                         onDelete={handleDelete}
+                        onReply={userId ? (_id, username) => startReply(comment.id, username) : undefined}
                       />
                     ))}
+                    {hiddenCount > 0 && (
+                      <button
+                        onClick={() => expandThread(comment.id)}
+                        className="text-[11px] font-semibold flex items-center gap-1"
+                        style={{ color: 'var(--brown-500)' }}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                          <path d="M19 9l-7 7-7-7" />
+                        </svg>
+                        Ver {hiddenCount} respuesta{hiddenCount !== 1 ? 's' : ''} más
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -267,7 +298,7 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
                 Respondiendo a{' '}
                 <span className="font-semibold" style={{ color: 'var(--brown-700)' }}>@{replyingTo.username}</span>
               </span>
-              <button onClick={() => setReplyingTo(null)} className="ml-auto" style={{ color: 'var(--brown-300)' }}>
+              <button onClick={() => { setReplyingTo(null); setText('') }} className="ml-auto" style={{ color: 'var(--brown-300)' }}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
