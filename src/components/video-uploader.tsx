@@ -18,6 +18,82 @@ type CoverState =
   | { status: 'done'; url: string }
   | { status: 'error' }
 
+const NUM_FRAMES = 14
+
+function FramePicker({ blobUrl, duration, onSelect }: {
+  blobUrl: string
+  duration: number
+  onSelect: (idx: number) => void
+}) {
+  const [frames, setFrames] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedIdx, setSelectedIdx] = useState(0)
+
+  useEffect(() => {
+    const video = document.createElement('video')
+    video.muted = true
+    video.playsInline = true
+    video.src = blobUrl
+    const captured: string[] = []
+    let idx = 0
+
+    const capture = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 54
+      canvas.height = 72
+      canvas.getContext('2d')!.drawImage(video, 0, 0, 54, 72)
+      captured.push(canvas.toDataURL('image/jpeg', 0.75))
+      idx++
+      if (idx < NUM_FRAMES) {
+        video.currentTime = (idx / (NUM_FRAMES - 1)) * duration
+      } else {
+        setFrames([...captured])
+        setLoading(false)
+        video.src = ''
+      }
+    }
+
+    video.onseeked = capture
+    video.onloadedmetadata = () => { video.currentTime = 0 }
+    video.onerror = () => setLoading(false)
+    return () => { video.src = '' }
+  }, [blobUrl, duration])
+
+  function handleSelect(i: number) {
+    setSelectedIdx(i)
+    onSelect(i)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 py-3 px-1">
+        <div className="w-3.5 h-3.5 border-2 rounded-full animate-spin flex-shrink-0"
+          style={{ borderColor: 'rgba(255,255,255,0.15)', borderTopColor: '#f59e0b' }} />
+        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Cargando frames...</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex gap-0.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+      {frames.map((dataUrl, i) => (
+        <button key={i} type="button" onClick={() => handleSelect(i)}
+          className="flex-shrink-0 rounded overflow-hidden relative"
+          style={{
+            width: 44, height: 58,
+            outline: i === selectedIdx ? '2.5px solid #f59e0b' : '2.5px solid transparent',
+            outlineOffset: '-2.5px',
+          }}>
+          <img src={dataUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+          {i === selectedIdx && (
+            <div className="absolute inset-x-0 bottom-0 h-0.5" style={{ background: '#f59e0b' }} />
+          )}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function Chip({ label, emoji, active, onClick }: { label: string; emoji: string; active: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick}
@@ -36,6 +112,7 @@ function Chip({ label, emoji, active, onClick }: { label: string; emoji: string;
 export default function VideoUploader() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverInputRef = useRef<HTMLInputElement>(null)
+  const videoBlobUrlRef = useRef<string | null>(null)
 
   const [step, setStep] = useState<1 | 2>(1)
   const [videoState, setVideoState] = useState<VideoState>({ status: 'idle' })
@@ -70,7 +147,18 @@ export default function VideoUploader() {
     if (file.size > 100 * 1024 * 1024) {
       setVideoState({ status: 'error', message: 'El vídeo pesa más de 100 MB.' }); return
     }
-    setVideoState({ status: 'preview', file, blobUrl: URL.createObjectURL(file) })
+    if (videoBlobUrlRef.current) URL.revokeObjectURL(videoBlobUrlRef.current)
+    const blobUrl = URL.createObjectURL(file)
+    videoBlobUrlRef.current = blobUrl
+    setVideoState({ status: 'preview', file, blobUrl })
+  }
+
+  function handleFrameSelect(frameIdx: number) {
+    if (videoState.status !== 'done') return
+    const duration = videoState.duration ?? 30
+    const time = (frameIdx / (NUM_FRAMES - 1)) * duration
+    const thumbUrl = videoState.videoUrl.replace('/upload/', `/upload/so_${time.toFixed(1)},w_1080,h_1920,c_fill,f_jpg/`)
+    setCoverState({ status: 'done', url: thumbUrl })
   }
 
   const uploadVideo = useCallback(async (file: File) => {
@@ -242,22 +330,20 @@ export default function VideoUploader() {
         {/* Bottom panel: cover + actions */}
         <div style={{ background: '#111', borderTop: '0.5px solid rgba(255,255,255,0.1)' }}>
 
-          {/* Cover selector */}
-          <div className="px-4 py-4">
+          {/* Cover / Frame picker */}
+          <div className="px-4 pt-4 pb-3">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-semibold text-white">Portada</p>
               <button type="button" onClick={() => coverInputRef.current?.click()}
                 className="text-xs font-semibold" style={{ color: '#f59e0b' }}>
-                {coverSrc ? 'Cambiar' : 'Subir foto'}
+                Subir foto
               </button>
             </div>
 
-            {/* Cover thumbnails row */}
-            <div className="flex gap-3 items-center">
-              {/* Auto / selected cover */}
-              <button type="button" onClick={() => coverInputRef.current?.click()}
-                className="relative flex-shrink-0 rounded-xl overflow-hidden"
-                style={{ width: 72, height: 96, background: '#222', border: `2px solid ${coverSrc ? '#f59e0b' : 'rgba(255,255,255,0.2)'}` }}>
+            <div className="flex gap-3 items-start">
+              {/* Selected cover preview */}
+              <div className="relative flex-shrink-0 rounded-xl overflow-hidden"
+                style={{ width: 60, height: 80, background: '#222', border: `2px solid ${coverSrc ? '#f59e0b' : 'rgba(255,255,255,0.15)'}` }}>
                 {coverSrc ? (
                   <img src={coverSrc} alt="" className="w-full h-full object-contain" style={{ background: '#000' }} />
                 ) : coverState.status === 'uploading' ? (
@@ -266,24 +352,34 @@ export default function VideoUploader() {
                       style={{ borderColor: 'rgba(255,255,255,0.2)', borderTopColor: '#f59e0b' }} />
                   </div>
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-                      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" /><circle cx="12" cy="13" r="4" />
-                    </svg>
-                  </div>
+                  <div className="w-full h-full flex items-center justify-center text-xl">🎬</div>
                 )}
                 {coverSrc && (
-                  <div className="absolute bottom-1 left-0 right-0 flex justify-center">
-                    <span className="text-[9px] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#f59e0b' }}>PORTADA</span>
+                  <div className="absolute bottom-0.5 left-0 right-0 flex justify-center">
+                    <span className="text-[8px] font-bold text-white px-1 py-0.5 rounded-full" style={{ background: '#f59e0b' }}>PORTADA</span>
                   </div>
                 )}
-              </button>
+              </div>
 
-              <p className="text-xs flex-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                {coverSrc
-                  ? 'Toca la portada para cambiarla'
-                  : 'Se generará automáticamente del vídeo. Puedes subir una foto personalizada.'}
-              </p>
+              {/* Frame strip — only when video is done and blob available */}
+              <div className="flex-1 min-w-0">
+                {videoState.status === 'done' && videoBlobUrlRef.current ? (
+                  <>
+                    <p className="text-[10px] mb-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                      Selecciona el frame de portada
+                    </p>
+                    <FramePicker
+                      blobUrl={videoBlobUrlRef.current}
+                      duration={videoState.duration ?? 30}
+                      onSelect={handleFrameSelect}
+                    />
+                  </>
+                ) : (
+                  <p className="text-xs pt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                    Sube el vídeo para seleccionar el frame de portada
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
