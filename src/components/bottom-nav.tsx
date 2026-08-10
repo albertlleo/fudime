@@ -98,7 +98,7 @@ export default function BottomNav({ notifCount = 0, isCreator = false }: { notif
     <>
       {/* ── Mobile: floating pill ── */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-5"
-        style={{ paddingBottom: 'max(28px, calc(env(safe-area-inset-bottom) + 16px))' }}>
+        style={{ paddingBottom: 'max(6px, calc(env(safe-area-inset-bottom) + 4px))' }}>
         <div className="flex items-center justify-around h-[62px] rounded-full"
           style={{
             background: 'rgba(250,247,242,0.80)',
