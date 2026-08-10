@@ -226,23 +226,13 @@ export default function VideoUploader() {
     return (
       <div className="relative overflow-hidden" style={{ height: '100dvh', background: '#000' }}>
 
-        {/* ── Background layer ──
-            Uploading: local video blob plays in background (like Instagram)
-            Done: selected cover image fills the screen                        */}
-        {(isUploading || isDone) && videoBlobUrlRef.current && !coverSrc && (
+        {/* ── Background: vídeo en loop siempre que esté seleccionado ── */}
+        {(isUploading || isDone) && videoBlobUrlRef.current && (
           <video
             src={videoBlobUrlRef.current}
             className="absolute inset-0 w-full h-full object-contain"
             style={{ background: '#000' }}
             playsInline muted autoPlay loop
-          />
-        )}
-        {isDone && coverSrc && (
-          <img
-            src={coverSrc}
-            alt=""
-            className="absolute inset-0 w-full h-full object-contain"
-            style={{ background: '#000' }}
           />
         )}
 
@@ -348,59 +338,6 @@ export default function VideoUploader() {
             Siguiente
           </button>
         </div>
-
-        {/* ── Bottom gradient (only when cover panel visible) ── */}
-        {isDone && (
-          <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
-            style={{ height: 300, background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%)' }} />
-        )}
-
-        {/* ── Editar portada (only when done) ── */}
-        {isDone && (
-          <div className="absolute bottom-0 left-0 right-0 z-20 px-4"
-            style={{ paddingBottom: 'max(110px, calc(env(safe-area-inset-bottom) + 96px))' }}>
-            <button
-              type="button"
-              onClick={() => coverInputRef.current?.click()}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl"
-              style={{
-                background: 'rgba(255,255,255,0.12)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-              } as React.CSSProperties}
-            >
-              {/* Cover mini preview */}
-              <div className="relative flex-shrink-0 rounded-lg overflow-hidden"
-                style={{ width: 36, height: 48, background: '#1a1a1a' }}>
-                {coverSrc
-                  ? <img src={coverSrc} alt="" className="w-full h-full object-cover" />
-                  : coverState.status === 'uploading'
-                    ? <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-3 h-3 border-2 rounded-full animate-spin"
-                          style={{ borderColor: 'rgba(255,255,255,0.2)', borderTopColor: '#f59e0b' }} />
-                      </div>
-                    : <div className="w-full h-full flex items-center justify-center" style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16 }}>🎬</div>
-                }
-              </div>
-              {/* Label */}
-              <div className="flex-1 text-left">
-                <p className="text-[13px] font-semibold text-white leading-tight">Portada del vídeo</p>
-                <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                  {coverSrc ? 'Toca para cambiar' : 'Selecciona una imagen'}
-                </p>
-              </div>
-              {/* Camera icon */}
-              <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(245,158,11,0.25)' }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
-                  <circle cx="12" cy="13" r="4" />
-                </svg>
-              </div>
-            </button>
-          </div>
-        )}
 
         {/* ── Idle: select button at bottom ── */}
         {isIdle && (
