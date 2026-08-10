@@ -47,8 +47,8 @@ export default function EditForm({ user }: { user: User }) {
     formData.set('avatar_url', avatarUrl)
     startTransition(async () => {
       try {
-        await updateProfile(formData)
-        setSuccess(true)
+        const result = await updateProfile(formData)
+        if (result?.error) setError(result.error)
       } catch {
         setError('Error al guardar los cambios. Inténtalo de nuevo.')
       }
@@ -117,12 +117,13 @@ export default function EditForm({ user }: { user: User }) {
           Nombre de usuario
         </label>
         <div className="relative">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium pointer-events-none"
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium pointer-events-none select-none"
             style={{ color: 'var(--brown-400)' }}>@</span>
           <input name="username" type="text" maxLength={20}
             defaultValue={user.username ?? ''}
             placeholder="tunombre"
-            className="input-cream pl-7" />
+            className="input-cream"
+            style={{ paddingLeft: '2rem' }} />
         </div>
         <p className="text-xs mt-1.5" style={{ color: 'var(--brown-300)' }}>
           Solo letras minúsculas, números y _ (3–20 caracteres)

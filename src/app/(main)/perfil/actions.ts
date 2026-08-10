@@ -31,10 +31,10 @@ export async function publishRecipe(recipeId: string): Promise<{ error?: string 
   return {}
 }
 
-export async function updateProfile(formData: FormData): Promise<void> {
+export async function updateProfile(formData: FormData): Promise<{ error: string } | void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return
+  if (!user) return { error: 'No autenticado' }
 
   const display_name = (formData.get('display_name') as string)?.trim()
   const rawUsername = (formData.get('username') as string)?.trim().toLowerCase()
@@ -44,7 +44,18 @@ export async function updateProfile(formData: FormData): Promise<void> {
   const tiktok_url = (formData.get('tiktok_url') as string)?.trim() || null
   const avatar_url = (formData.get('avatar_url') as string)?.trim() || null
 
-  await supabase.from('users').update({
+  // Check username uniqueness (skip if unchanged)
+  if (username) {
+    const { data: existing } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', username)
+      .neq('id', user.id)
+      .maybeSingle()
+    if (existing) return { error: 'Este nombre de usuario ya está en uso. Elige otro.' }
+  }
+
+  const { error: dbError } = await supabase.from('users').update({
     ...(display_name && { display_name }),
     ...(username && { username }),
     bio,
@@ -52,6 +63,8 @@ export async function updateProfile(formData: FormData): Promise<void> {
     tiktok_url,
     avatar_url,
   }).eq('id', user.id)
+
+  if (dbError) return { error: 'Error al guardar los cambios.' }
 
   redirect('/perfil')
 }
