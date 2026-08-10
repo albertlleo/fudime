@@ -18,78 +18,6 @@ type CoverState =
   | { status: 'done'; url: string }
   | { status: 'error' }
 
-const NUM_FRAMES = 8
-
-function FramePicker({ blobUrl, duration, onSelect }: {
-  blobUrl: string
-  duration: number
-  onSelect: (idx: number) => void
-}) {
-  const [frames, setFrames] = useState<(string | null)[]>(() => new Array(NUM_FRAMES).fill(null))
-  const [selectedIdx, setSelectedIdx] = useState(0)
-
-  useEffect(() => {
-    setFrames(new Array(NUM_FRAMES).fill(null))
-    let cancelled = false
-    const videos: HTMLVideoElement[] = []
-
-    for (let i = 0; i < NUM_FRAMES; i++) {
-      const idx = i
-      const time = (idx / (NUM_FRAMES - 1)) * duration
-      const v = document.createElement('video')
-      v.muted = true
-      v.playsInline = true
-      v.preload = 'auto'
-      v.src = blobUrl
-      videos.push(v)
-
-      const capture = () => {
-        if (cancelled) return
-        const canvas = document.createElement('canvas')
-        canvas.width = 54; canvas.height = 72
-        canvas.getContext('2d')!.drawImage(v, 0, 0, 54, 72)
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.6)
-        setFrames(prev => { const n = [...prev]; n[idx] = dataUrl; return n })
-        v.src = ''
-      }
-
-      v.onseeked = capture
-      v.onloadedmetadata = () => { v.currentTime = time }
-      v.onerror = () => { if (!cancelled) setFrames(prev => { const n = [...prev]; n[idx] = ''; return n }) }
-    }
-
-    return () => { cancelled = true; videos.forEach(v => { v.src = '' }) }
-  }, [blobUrl, duration])
-
-  function handleSelect(i: number) {
-    setSelectedIdx(i)
-    onSelect(i)
-  }
-
-  return (
-    <div className="flex gap-0.5 overflow-x-auto" style={{ scrollbarWidth: 'none' } as React.CSSProperties}>
-      {frames.map((dataUrl, i) => (
-        <button key={i} type="button" onClick={() => dataUrl && handleSelect(i)}
-          className="flex-shrink-0 rounded-lg overflow-hidden relative transition-all"
-          style={{
-            width: 40, height: 54,
-            outline: i === selectedIdx ? '2px solid #f59e0b' : '2px solid transparent',
-            outlineOffset: '-2px',
-            background: '#1a1a1a',
-            transform: i === selectedIdx ? 'scale(1.06)' : 'scale(1)',
-          }}>
-          {dataUrl
-            ? <img src={dataUrl} alt="" className="w-full h-full object-cover" draggable={false} />
-            : <div className="w-full h-full flex items-center justify-center">
-                <div className="w-2.5 h-2.5 border border-white/15 border-t-amber-400 rounded-full animate-spin" />
-              </div>
-          }
-        </button>
-      ))}
-    </div>
-  )
-}
-
 function Chip({ label, emoji, active, onClick }: { label: string; emoji: string; active: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick}
@@ -154,14 +82,6 @@ export default function VideoUploader() {
     videoBlobUrlRef.current = URL.createObjectURL(file)
     // Start upload immediately — no manual confirmation step
     uploadVideo(file)
-  }
-
-  function handleFrameSelect(frameIdx: number) {
-    if (videoState.status !== 'done') return
-    const duration = videoState.duration ?? 30
-    const time = (frameIdx / (NUM_FRAMES - 1)) * duration
-    const thumbUrl = videoState.videoUrl.replace('/upload/', `/upload/so_${time.toFixed(1)},w_1080,h_1920,c_fill,f_jpg/`)
-    setCoverState({ status: 'done', url: thumbUrl })
   }
 
   const uploadVideo = useCallback(async (file: File) => {
@@ -395,57 +315,50 @@ export default function VideoUploader() {
             style={{ height: 300, background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%)' }} />
         )}
 
-        {/* ── Cover + frame picker (only when done) ── */}
+        {/* ── Editar portada (only when done) ── */}
         {isDone && (
           <div className="absolute bottom-0 left-0 right-0 z-20 px-4"
             style={{ paddingBottom: 'max(110px, calc(env(safe-area-inset-bottom) + 96px))' }}>
-            <div className="flex items-start gap-3">
-              {/* Cover thumbnail */}
-              <div className="relative flex-shrink-0 rounded-xl overflow-hidden"
-                style={{ width: 52, height: 70, background: '#1a1a1a', border: `2px solid ${coverSrc ? '#f59e0b' : 'rgba(255,255,255,0.2)'}` }}>
-                {coverSrc ? (
-                  <img src={coverSrc} alt="" className="w-full h-full object-contain" style={{ background: '#000' }} />
-                ) : coverState.status === 'uploading' ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-3 h-3 border-2 rounded-full animate-spin"
-                      style={{ borderColor: 'rgba(255,255,255,0.15)', borderTopColor: '#f59e0b' }} />
-                  </div>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-lg opacity-30">🎬</div>
-                )}
-                {coverSrc && (
-                  <div className="absolute bottom-0.5 left-0 right-0 flex justify-center">
-                    <span className="text-[7px] font-black text-black px-1 py-0.5 rounded-full"
-                      style={{ background: '#f59e0b', letterSpacing: '0.05em' }}>PORTADA</span>
-                  </div>
-                )}
+            <button
+              type="button"
+              onClick={() => coverInputRef.current?.click()}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl"
+              style={{
+                background: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+              } as React.CSSProperties}
+            >
+              {/* Cover mini preview */}
+              <div className="relative flex-shrink-0 rounded-lg overflow-hidden"
+                style={{ width: 36, height: 48, background: '#1a1a1a' }}>
+                {coverSrc
+                  ? <img src={coverSrc} alt="" className="w-full h-full object-cover" />
+                  : coverState.status === 'uploading'
+                    ? <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-3 h-3 border-2 rounded-full animate-spin"
+                          style={{ borderColor: 'rgba(255,255,255,0.2)', borderTopColor: '#f59e0b' }} />
+                      </div>
+                    : <div className="w-full h-full flex items-center justify-center" style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16 }}>🎬</div>
+                }
               </div>
-
-              {/* Frame strip */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[11px] font-semibold tracking-widest" style={{ color: 'rgba(255,255,255,0.45)' }}>FRAME</p>
-                  <button type="button" onClick={() => coverInputRef.current?.click()}
-                    className="text-[12px] font-semibold" style={{ color: '#f59e0b' }}>
-                    Subir foto
-                  </button>
-                </div>
-                {videoBlobUrlRef.current ? (
-                  <FramePicker
-                    blobUrl={videoBlobUrlRef.current}
-                    duration={videoState.status === 'done' ? (videoState.duration ?? 30) : 30}
-                    onSelect={handleFrameSelect}
-                  />
-                ) : (
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={i} className="flex-shrink-0 rounded-lg"
-                        style={{ width: 40, height: 54, background: 'rgba(255,255,255,0.07)' }} />
-                    ))}
-                  </div>
-                )}
+              {/* Label */}
+              <div className="flex-1 text-left">
+                <p className="text-[13px] font-semibold text-white leading-tight">Portada del vídeo</p>
+                <p className="text-[11px] mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  {coverSrc ? 'Toca para cambiar' : 'Selecciona una imagen'}
+                </p>
               </div>
-            </div>
+              {/* Camera icon */}
+              <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(245,158,11,0.25)' }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                  <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+              </div>
+            </button>
           </div>
         )}
 
