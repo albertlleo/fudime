@@ -11,6 +11,7 @@ export interface User {
   role: UserRole
   instagram_url: string | null
   tiktok_url: string | null
+  website_url: string | null
   validated_at: string | null
   birthdate: string | null
   created_at: string

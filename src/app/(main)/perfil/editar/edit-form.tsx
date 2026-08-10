@@ -141,18 +141,10 @@ export default function EditForm({ user }: { user: User }) {
 
       <div>
         <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
-          Instagram
+          Web <span className="font-normal text-xs" style={{ color: 'var(--brown-300)' }}>opcional</span>
         </label>
-        <input name="instagram_url" type="url" defaultValue={user.instagram_url ?? ''}
-          placeholder="https://instagram.com/tuusuario" className="input-cream" />
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
-          TikTok
-        </label>
-        <input name="tiktok_url" type="url" defaultValue={user.tiktok_url ?? ''}
-          placeholder="https://tiktok.com/@tuusuario" className="input-cream" />
+        <input name="website_url" type="url" defaultValue={user.website_url ?? ''}
+          placeholder="https://tuweb.com" className="input-cream" />
       </div>
 
       <div className="pt-2 pb-8">

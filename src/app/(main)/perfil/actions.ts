@@ -40,8 +40,7 @@ export async function updateProfile(formData: FormData): Promise<{ error: string
   const rawUsername = (formData.get('username') as string)?.trim().toLowerCase()
   const username = rawUsername && /^[a-z0-9_]{3,20}$/.test(rawUsername) ? rawUsername : undefined
   const bio = (formData.get('bio') as string)?.trim() || null
-  const instagram_url = (formData.get('instagram_url') as string)?.trim() || null
-  const tiktok_url = (formData.get('tiktok_url') as string)?.trim() || null
+  const website_url = (formData.get('website_url') as string)?.trim() || null
   const avatar_url = (formData.get('avatar_url') as string)?.trim() || null
 
   // Check username uniqueness (skip if unchanged)
@@ -59,8 +58,7 @@ export async function updateProfile(formData: FormData): Promise<{ error: string
     ...(display_name && { display_name }),
     ...(username && { username }),
     bio,
-    instagram_url,
-    tiktok_url,
+    website_url,
     avatar_url,
   }).eq('id', user.id)
 
