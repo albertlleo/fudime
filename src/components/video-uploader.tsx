@@ -1,8 +1,22 @@
 'use client'
 
 import { useRef, useState, useCallback, useEffect } from 'react'
+import Cropper from 'react-easy-crop'
+import type { Area, Point } from 'react-easy-crop'
 import { getUploadSignature, getImageUploadSignature, createRecipe } from '@/app/(main)/subir/actions'
 import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES } from '@/lib/categories'
+
+async function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> {
+  const image = new Image()
+  image.src = imageSrc
+  await new Promise(r => { image.onload = r })
+  const canvas = document.createElement('canvas')
+  canvas.width = pixelCrop.width
+  canvas.height = pixelCrop.height
+  const ctx = canvas.getContext('2d')!
+  ctx.drawImage(image, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, pixelCrop.width, pixelCrop.height)
+  return new Promise(resolve => canvas.toBlob(b => resolve(b!), 'image/jpeg', 0.92))
+}
 
 // No 'preview' state — upload starts automatically on file select
 type VideoState =
@@ -51,6 +65,14 @@ export default function VideoUploader() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   // Separate blob URL for cover preview — persists while uploading
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null)
+
+  // Crop modal state
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 })
+  const [zoom, setZoom] = useState(1)
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
+  const [cropAspect, setCropAspect] = useState<number | undefined>(4 / 5)
+  const onCropComplete = useCallback((_: Area, pixels: Area) => { setCroppedAreaPixels(pixels) }, [])
 
   useEffect(() => {
     if (videoState.status === 'done' && coverState.status === 'idle') {
@@ -123,11 +145,27 @@ export default function VideoUploader() {
 
   function handleCoverSelect(file: File) {
     if (!file.type.startsWith('image/')) return
-    // Revoke previous preview blob and set new one before upload starts
+    const objectUrl = URL.createObjectURL(file)
+    setCropSrc(objectUrl)
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
+    setCropAspect(4 / 5)
+  }
+
+  async function handleCropConfirm() {
+    if (!cropSrc || !croppedAreaPixels) return
+    const blob = await getCroppedBlob(cropSrc, croppedAreaPixels)
+    URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
+    const blobUrl = URL.createObjectURL(blob)
     if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl)
-    const blobUrl = URL.createObjectURL(file)
     setCoverPreviewUrl(blobUrl)
-    uploadCover(file, blobUrl)
+    uploadCover(new File([blob], 'cover.jpg', { type: 'image/jpeg' }), blobUrl)
+  }
+
+  function handleCropCancel() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
   }
 
   async function uploadCover(file: File, previewBlobUrl: string) {
@@ -418,10 +456,10 @@ export default function VideoUploader() {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
 
-        {/* Cover — full-width, tall, Instagram-style */}
-        <div className="relative w-full" style={{ height: '44dvh', background: '#111', borderBottom: '1px solid var(--brown-100)' }}>
+        {/* Cover — full-width, 4:5 ratio, no black bars */}
+        <div className="relative w-full" style={{ aspectRatio: '4/5', maxHeight: '55dvh', background: '#111', borderBottom: '1px solid var(--brown-100)', overflow: 'hidden' }}>
           {coverSrc
-            ? <img src={coverSrc} alt="" className="w-full h-full object-contain" style={{ background: '#111' }} />
+            ? <img src={coverSrc} alt="" className="w-full h-full object-cover" />
             : coverState.status === 'uploading'
               ? <div className="w-full h-full flex items-center justify-center">
                   <div className="w-8 h-8 border-[3px] rounded-full animate-spin"
@@ -539,6 +577,76 @@ export default function VideoUploader() {
           </button>
         </div>
       </div>
+
+      {/* Cover file input (Step 2) */}
+      <input ref={coverInputRef} type="file" accept="image/*" className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) handleCoverSelect(f); e.target.value = '' }} />
+
+      {/* ── Crop modal ── */}
+      {cropSrc && (
+        <div className="fixed inset-0 z-[100] flex flex-col" style={{ background: '#000' }}>
+          {/* Header */}
+          <div className="flex-shrink-0 flex items-center justify-between px-4 py-3"
+            style={{ paddingTop: 'max(52px, calc(env(safe-area-inset-top) + 12px))', background: 'rgba(0,0,0,0.7)' }}>
+            <button onClick={handleCropCancel}
+              className="text-[15px] font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+              Cancelar
+            </button>
+            <p className="text-[15px] font-bold text-white">Editar portada</p>
+            <button onClick={handleCropConfirm}
+              className="text-[15px] font-bold" style={{ color: '#f59e0b' }}>
+              Listo
+            </button>
+          </div>
+
+          {/* Crop area */}
+          <div className="relative flex-1">
+            <Cropper
+              image={cropSrc}
+              crop={crop}
+              zoom={zoom}
+              aspect={cropAspect}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={onCropComplete}
+              showGrid={false}
+              style={{
+                containerStyle: { background: '#000' },
+                cropAreaStyle: { border: '2px solid rgba(245,158,11,0.8)', borderRadius: 8 },
+              }}
+            />
+          </div>
+
+          {/* Ratio chips + zoom slider */}
+          <div className="flex-shrink-0 px-4 pb-4 pt-3 flex flex-col gap-3"
+            style={{ background: 'rgba(0,0,0,0.7)', paddingBottom: 'max(28px, calc(env(safe-area-inset-bottom) + 12px))' }}>
+            <div className="flex justify-center gap-2">
+              {([
+                { label: '4:5', value: 4 / 5 },
+                { label: '1:1', value: 1 },
+                { label: '16:9', value: 16 / 9 },
+                { label: 'Libre', value: undefined },
+              ] as const).map(r => (
+                <button key={r.label} type="button"
+                  onClick={() => setCropAspect(r.value as number | undefined)}
+                  className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all"
+                  style={{
+                    background: cropAspect === r.value ? '#f59e0b' : 'rgba(255,255,255,0.12)',
+                    color: cropAspect === r.value ? '#000' : 'rgba(255,255,255,0.7)',
+                    border: `1px solid ${cropAspect === r.value ? '#f59e0b' : 'rgba(255,255,255,0.18)'}`,
+                  }}>
+                  {r.label}
+                </button>
+              ))}
+            </div>
+            <input type="range" min={1} max={3} step={0.01} value={zoom}
+              onChange={e => setZoom(Number(e.target.value))}
+              className="w-full accent-amber-400"
+              style={{ accentColor: '#f59e0b' }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
