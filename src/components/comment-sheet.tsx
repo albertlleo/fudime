@@ -14,10 +14,16 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(h / 24)}d`
 }
 
-function Avatar({ user }: { user: { display_name: string; avatar_url: string | null } }) {
+function Avatar({ user, size = 'md' }: {
+  user: { display_name: string; avatar_url: string | null }
+  size?: 'md' | 'sm' | 'xs'
+}) {
+  const cls = size === 'xs' ? 'w-6 h-6 rounded-lg text-[9px]'
+    : size === 'sm' ? 'w-7 h-7 rounded-xl text-[10px]'
+    : 'w-8 h-8 rounded-xl text-xs'
   return (
     <div
-      className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-black flex-shrink-0 overflow-hidden"
+      className={`${cls} flex items-center justify-center font-black text-black flex-shrink-0 overflow-hidden`}
       style={{ background: 'var(--amber)' }}
     >
       {user.avatar_url
@@ -30,14 +36,14 @@ function Avatar({ user }: { user: { display_name: string; avatar_url: string | n
 
 function CommentRow({
   c,
-  isReply,
+  avatarSize = 'md',
   userId,
   onLike,
   onDelete,
   onReply,
 }: {
   c: CommentWithUser
-  isReply?: boolean
+  avatarSize?: 'md' | 'sm' | 'xs'
   userId: string | null
   onLike: (id: string) => void
   onDelete: (id: string) => void
@@ -45,9 +51,10 @@ function CommentRow({
 }) {
   const liked = c.user_has_liked ?? false
   const count = c.likes_count ?? 0
+  const gap = avatarSize === 'xs' ? 'gap-2' : 'gap-3'
   return (
-    <div className="flex gap-3">
-      <Avatar user={c.users} />
+    <div className={`flex ${gap}`}>
+      <Avatar user={c.users} size={avatarSize} />
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-1.5">
           <span className="text-xs font-bold" style={{ color: 'var(--brown-700)' }}>
@@ -145,8 +152,18 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
       setAllComments(prev => [...prev, result.comment!])
       setText('')
       if (result.comment.parent_id) {
-        // Auto-expand the thread so the new reply is visible
-        setExpandedThreads(prev => new Set([...prev, result.comment!.parent_id!]))
+        // Expand the direct parent thread so the new reply is visible
+        // For level 3, also expand the grandparent (level 2 → level 1 thread)
+        const parentId = result.comment.parent_id
+        setAllComments(prev => {
+          const parent = prev.find(c => c.id === parentId)
+          setExpandedThreads(t => {
+            const next = new Set([...t, parentId])
+            if (parent?.parent_id) next.add(parent.parent_id)
+            return next
+          })
+          return prev
+        })
       }
       setReplyingTo(null)
       if (recipeId && !result.comment.parent_id) onCountChange(recipeId, +1)
@@ -244,13 +261,14 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
               <p className="text-xs mt-1" style={{ color: 'var(--brown-300)' }}>Sé el primero en comentar</p>
             </div>
           ) : topComments.map(comment => {
-            const replies = repliesByParent[comment.id] ?? []
-            const isExpanded = expandedThreads.has(comment.id)
             const PREVIEW = 2
-            const visibleReplies = isExpanded || replies.length <= PREVIEW ? replies : replies.slice(0, PREVIEW)
-            const hiddenCount = replies.length - visibleReplies.length
+            const lvl2 = repliesByParent[comment.id] ?? []
+            const lvl2Expanded = expandedThreads.has(comment.id)
+            const visibleLvl2 = lvl2Expanded || lvl2.length <= PREVIEW ? lvl2 : lvl2.slice(0, PREVIEW)
+            const hiddenLvl2 = lvl2.length - visibleLvl2.length
             return (
               <div key={comment.id}>
+                {/* ── Level 1 ── */}
                 <CommentRow
                   c={comment}
                   userId={userId}
@@ -258,20 +276,60 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
                   onDelete={handleDelete}
                   onReply={startReply}
                 />
-                {replies.length > 0 && (
+
+                {/* ── Level 2 thread ── */}
+                {lvl2.length > 0 && (
                   <div className="ml-11 mt-3 space-y-3 pl-3 border-l-2" style={{ borderColor: 'var(--brown-100)' }}>
-                    {visibleReplies.map(reply => (
-                      <CommentRow
-                        key={reply.id}
-                        c={reply}
-                        isReply
-                        userId={userId}
-                        onLike={handleLike}
-                        onDelete={handleDelete}
-                        onReply={userId ? (_id, username) => startReply(comment.id, username) : undefined}
-                      />
-                    ))}
-                    {hiddenCount > 0 && (
+                    {visibleLvl2.map(reply => {
+                      const lvl3 = repliesByParent[reply.id] ?? []
+                      const lvl3Expanded = expandedThreads.has(reply.id)
+                      const visibleLvl3 = lvl3Expanded || lvl3.length <= PREVIEW ? lvl3 : lvl3.slice(0, PREVIEW)
+                      const hiddenLvl3 = lvl3.length - visibleLvl3.length
+                      return (
+                        <div key={reply.id}>
+                          {/* ── Level 2 ── */}
+                          <CommentRow
+                            c={reply}
+                            avatarSize="sm"
+                            userId={userId}
+                            onLike={handleLike}
+                            onDelete={handleDelete}
+                            onReply={userId ? (id, username) => startReply(id, username) : undefined}
+                          />
+
+                          {/* ── Level 3 thread ── */}
+                          {lvl3.length > 0 && (
+                            <div className="ml-9 mt-2.5 space-y-2.5 pl-2.5 border-l-2"
+                              style={{ borderColor: 'var(--brown-100)', borderLeftStyle: 'dashed' }}>
+                              {visibleLvl3.map(subreply => (
+                                <CommentRow
+                                  key={subreply.id}
+                                  c={subreply}
+                                  avatarSize="xs"
+                                  userId={userId}
+                                  onLike={handleLike}
+                                  onDelete={handleDelete}
+                                  // level 3 = máximo, sin botón responder
+                                />
+                              ))}
+                              {hiddenLvl3 > 0 && (
+                                <button
+                                  onClick={() => expandThread(reply.id)}
+                                  className="text-[10px] font-semibold flex items-center gap-1"
+                                  style={{ color: 'var(--brown-400)' }}
+                                >
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
+                                    <path d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                  Ver {hiddenLvl3} más
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                    {hiddenLvl2 > 0 && (
                       <button
                         onClick={() => expandThread(comment.id)}
                         className="text-[11px] font-semibold flex items-center gap-1"
@@ -280,7 +338,7 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
                           <path d="M19 9l-7 7-7-7" />
                         </svg>
-                        Ver {hiddenCount} respuesta{hiddenCount !== 1 ? 's' : ''} más
+                        Ver {hiddenLvl2} respuesta{hiddenLvl2 !== 1 ? 's' : ''} más
                       </button>
                     )}
                   </div>
