@@ -37,6 +37,51 @@ function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, isOwn
   const [likeAnim, setLikeAnim] = useState(false)
   const [doubleTapHeart, setDoubleTapHeart] = useState<{ x: number; y: number; key: number } | null>(null)
 
+  // Swipe-to-dismiss for ingredients sheet
+  const ingredientsSheetRef = useRef<HTMLDivElement>(null)
+  const ingredientsScrollRef = useRef<HTMLDivElement>(null)
+  const swipeDragStart = useRef<number | null>(null)
+  const swipeDragOffset = useRef(0)
+  const [ingredientsDragY, setIngredientsDragY] = useState(0)
+
+  useEffect(() => {
+    const sheet = ingredientsSheetRef.current
+    if (!sheet || !showIngredients) return
+
+    const onStart = (e: TouchEvent) => {
+      swipeDragStart.current = e.touches[0].clientY
+      swipeDragOffset.current = 0
+    }
+    const onMove = (e: TouchEvent) => {
+      if (swipeDragStart.current === null) return
+      const dy = e.touches[0].clientY - swipeDragStart.current
+      if (dy <= 0) return
+      if ((ingredientsScrollRef.current?.scrollTop ?? 0) > 0) return
+      e.preventDefault()
+      swipeDragOffset.current = dy
+      setIngredientsDragY(dy)
+    }
+    const onEnd = () => {
+      if (swipeDragOffset.current > 100) {
+        setIngredientsDragY(0)
+        setShowIngredients(false)
+      } else {
+        setIngredientsDragY(0)
+      }
+      swipeDragStart.current = null
+      swipeDragOffset.current = 0
+    }
+
+    sheet.addEventListener('touchstart', onStart, { passive: true })
+    sheet.addEventListener('touchmove', onMove, { passive: false })
+    sheet.addEventListener('touchend', onEnd, { passive: true })
+    return () => {
+      sheet.removeEventListener('touchstart', onStart)
+      sheet.removeEventListener('touchmove', onMove)
+      sheet.removeEventListener('touchend', onEnd)
+    }
+  }, [showIngredients])
+
   useEffect(() => {
     if (videoRef.current) videoRef.current.muted = muted
   }, [muted])
@@ -158,8 +203,15 @@ function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, isOwn
       <div className="fixed inset-0 z-[70] pointer-events-none">
         <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
           <div className="w-full lg:max-w-[500px] h-full relative">
-            <div className="absolute left-0 right-0 bottom-0 flex flex-col pointer-events-auto transition-transform duration-300 ease-out"
-              style={{ height: '70dvh', borderRadius: '20px 20px 0 0', background: 'var(--cream)', transform: showIngredients ? 'translateY(0)' : 'translateY(100%)' }}
+            <div
+              ref={ingredientsSheetRef}
+              className={`absolute left-0 right-0 bottom-0 flex flex-col pointer-events-auto ${ingredientsDragY === 0 ? 'transition-transform duration-300 ease-out' : ''}`}
+              style={{
+                height: '70dvh',
+                borderRadius: '20px 20px 0 0',
+                background: 'var(--cream)',
+                transform: showIngredients ? `translateY(${ingredientsDragY}px)` : 'translateY(100%)',
+              }}
               onClick={e => e.stopPropagation()}>
               <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
                 <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
@@ -172,7 +224,7 @@ function Slide({ recipe, isLiked, isSaved, likeCount, commentCount, muted, isOwn
                   </svg>
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto px-5 py-4" style={{ overscrollBehavior: 'contain' }}>
+              <div ref={ingredientsScrollRef} className="flex-1 overflow-y-auto px-5 py-4" style={{ overscrollBehavior: 'contain' }}>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--brown-900)' }}>{recipe.description}</p>
               </div>
             </div>
