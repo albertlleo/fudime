@@ -49,6 +49,8 @@ export default function VideoUploader() {
   const [cookTime, setCookTime] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  // Separate blob URL for cover preview — persists while uploading
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null)
 
   useEffect(() => {
     if (videoState.status === 'done' && coverState.status === 'idle') {
@@ -58,15 +60,14 @@ export default function VideoUploader() {
   }, [videoState.status])
 
   useEffect(() => {
-    return () => {
-      if (coverState.status === 'selected') URL.revokeObjectURL(coverState.blobUrl)
-    }
+    return () => { if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl) }
   }, [])
 
   function resetVideo() {
     xhrRef.current?.abort()
     xhrRef.current = null
     if (videoBlobUrlRef.current) { URL.revokeObjectURL(videoBlobUrlRef.current); videoBlobUrlRef.current = null }
+    if (coverPreviewUrl) { URL.revokeObjectURL(coverPreviewUrl); setCoverPreviewUrl(null) }
     setVideoState({ status: 'idle' })
     setCoverState({ status: 'idle' })
   }
@@ -122,13 +123,14 @@ export default function VideoUploader() {
 
   function handleCoverSelect(file: File) {
     if (!file.type.startsWith('image/')) return
-    if (coverState.status === 'selected') URL.revokeObjectURL(coverState.blobUrl)
-    setCoverState({ status: 'selected', blobUrl: URL.createObjectURL(file) })
-    uploadCover(file)
+    // Revoke previous preview blob and set new one before upload starts
+    if (coverPreviewUrl) URL.revokeObjectURL(coverPreviewUrl)
+    const blobUrl = URL.createObjectURL(file)
+    setCoverPreviewUrl(blobUrl)
+    uploadCover(file, blobUrl)
   }
 
-  async function uploadCover(file: File) {
-    const blobUrl = URL.createObjectURL(file)
+  async function uploadCover(file: File, previewBlobUrl: string) {
     setCoverState({ status: 'uploading' })
     try {
       const sig = await getImageUploadSignature()
@@ -141,10 +143,11 @@ export default function VideoUploader() {
       const res = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, { method: 'POST', body: fd })
       if (!res.ok) throw new Error()
       const data = await res.json()
-      URL.revokeObjectURL(blobUrl)
+      URL.revokeObjectURL(previewBlobUrl)
+      setCoverPreviewUrl(null)
       setCoverState({ status: 'done', url: data.secure_url })
     } catch {
-      URL.revokeObjectURL(blobUrl)
+      // Keep preview visible even on error so user sees their selection
       setCoverState({ status: 'error' })
     }
   }
@@ -173,9 +176,8 @@ export default function VideoUploader() {
   const canSubmit = videoState.status === 'done' && !!title.trim() && !!description.trim()
     && categories.length > 0 && !!cookTime && !submitting
 
-  const coverSrc = coverState.status === 'done' ? coverState.url
-    : coverState.status === 'selected' ? coverState.blobUrl
-    : null
+  // Show Cloudinary URL when done, or local blob preview while uploading/on error
+  const coverSrc = coverState.status === 'done' ? coverState.url : coverPreviewUrl
 
   // ── Step 1: Seleccionar + subir vídeo ─────────────────────────────────────
   if (step === 1) {
@@ -416,24 +418,49 @@ export default function VideoUploader() {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto">
 
-        {/* Cover + title */}
-        <div className="flex gap-3 px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
-          <div className="flex-shrink-0 rounded-xl overflow-hidden"
-            style={{ width: 68, height: 90, background: '#111', border: '1.5px solid var(--brown-100)' }}>
-            {coverSrc
-              ? <img src={coverSrc} alt="" className="w-full h-full object-contain" style={{ background: '#000' }} />
-              : <div className="w-full h-full flex items-center justify-center text-xl opacity-30">🎬</div>
-            }
-          </div>
-          <div className="flex-1 flex flex-col justify-between py-0.5">
-            <textarea
-              value={title} onChange={e => setTitle(e.target.value)}
-              maxLength={80} placeholder="Escribe un título..." rows={3}
-              className="flex-1 text-[15px] font-medium resize-none focus:outline-none bg-transparent leading-relaxed"
-              style={{ color: 'var(--brown-900)', caretColor: '#f59e0b' }}
-            />
-            <p className="text-[11px]" style={{ color: 'var(--brown-300)' }}>{title.length}/80</p>
-          </div>
+        {/* Cover — full-width, tall, Instagram-style */}
+        <div className="relative w-full" style={{ height: '44dvh', background: '#111', borderBottom: '1px solid var(--brown-100)' }}>
+          {coverSrc
+            ? <img src={coverSrc} alt="" className="w-full h-full object-contain" style={{ background: '#111' }} />
+            : coverState.status === 'uploading'
+              ? <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-8 h-8 border-[3px] rounded-full animate-spin"
+                    style={{ borderColor: 'rgba(255,255,255,0.15)', borderTopColor: '#f59e0b' }} />
+                </div>
+              : <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                  <span className="text-4xl opacity-20">🎬</span>
+                  <p className="text-[12px]" style={{ color: 'rgba(255,255,255,0.3)' }}>Sin portada</p>
+                </div>
+          }
+          {/* Editar portada — overlay button bottom-right */}
+          <button
+            type="button"
+            onClick={() => coverInputRef.current?.click()}
+            className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-2 rounded-xl"
+            style={{
+              background: 'rgba(0,0,0,0.55)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            } as React.CSSProperties}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            <span className="text-[12px] font-semibold text-white">Editar portada</span>
+          </button>
+        </div>
+
+        {/* Title — full width below cover */}
+        <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <textarea
+            value={title} onChange={e => setTitle(e.target.value)}
+            maxLength={80} placeholder="Escribe un título..." rows={3}
+            className="w-full text-[16px] font-medium resize-none focus:outline-none bg-transparent leading-relaxed"
+            style={{ color: 'var(--brown-900)', caretColor: '#f59e0b' }}
+          />
+          <p className="text-right text-[11px] mt-1" style={{ color: 'var(--brown-300)' }}>{title.length}/80</p>
         </div>
 
         {/* Description */}
