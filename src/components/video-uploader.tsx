@@ -499,7 +499,7 @@ export default function VideoUploader() {
 
         {/* Bottom buttons */}
         <div className="px-4 py-4 flex gap-2.5"
-          style={{ paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))' }}>
+          style={{ paddingBottom: 'max(110px, calc(env(safe-area-inset-bottom) + 96px))' }}>
           <button onClick={() => handleSubmit(false)} disabled={!canSubmit}
             className="flex-1 font-semibold rounded-2xl py-3.5 text-[14px]"
             style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)', opacity: !canSubmit ? 0.38 : 1 }}>
