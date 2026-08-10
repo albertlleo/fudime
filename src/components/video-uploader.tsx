@@ -389,7 +389,7 @@ export default function VideoUploader() {
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none z-10"
           style={{
-            height: showCoverPanel ? 260 : 160,
+            height: showCoverPanel ? 340 : 230,
             background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, transparent 100%)',
           }}
         />
@@ -397,7 +397,7 @@ export default function VideoUploader() {
         {/* ── Bottom panel (floats over video) ── */}
         <div
           className="absolute bottom-0 left-0 right-0 z-20 px-4 flex flex-col gap-3"
-          style={{ paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 12px))' }}
+          style={{ paddingBottom: 'max(110px, calc(env(safe-area-inset-bottom) + 96px))' }}
         >
           {/* Cover + frame picker — only when done */}
           {showCoverPanel && (
