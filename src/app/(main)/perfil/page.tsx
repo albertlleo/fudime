@@ -126,20 +126,36 @@ export default async function PerfilPage() {
       </div>
 
       {/* Stats bar */}
-      <div className="mx-5 rounded-2xl overflow-hidden mb-6"
-        style={{ background: '#fff', border: '1.5px solid var(--brown-100)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-        <div className="grid grid-cols-3 divide-x" style={{ borderColor: 'var(--brown-100)' }}>
-          <div className="flex flex-col items-center py-4">
-            <span className="text-2xl font-black" style={{ color: 'var(--brown-900)' }}>{publishedCount}</span>
-            <span className="text-xs font-medium mt-0.5" style={{ color: 'var(--brown-500)' }}>Recetas</span>
+      <div className="mx-5 mb-5 rounded-2xl overflow-hidden"
+        style={{ background: 'rgba(255,255,255,0.75)', border: '1px solid var(--brown-100)', backdropFilter: 'blur(8px)' }}>
+        <div className="grid grid-cols-3">
+          <div className="flex flex-col items-center py-3 gap-0.5"
+            style={{ borderRight: '1px solid var(--brown-100)' }}>
+            <span className="text-[17px] font-black leading-none" style={{ color: 'var(--brown-900)' }}>
+              {publishedCount}
+            </span>
+            <span className="text-[9px] font-semibold uppercase tracking-widest mt-0.5" style={{ color: 'var(--brown-400)' }}>
+              Recetas
+            </span>
           </div>
-          <Link href="/perfil/seguidores" className="flex flex-col items-center py-4 transition-opacity hover:opacity-70">
-            <span className="text-2xl font-black" style={{ color: 'var(--brown-900)' }}>{followersCount ?? 0}</span>
-            <span className="text-xs font-medium mt-0.5" style={{ color: 'var(--brown-500)' }}>Seguidores</span>
+          <Link href="/perfil/seguidores"
+            className="flex flex-col items-center py-3 gap-0.5 active:opacity-60 transition-opacity"
+            style={{ borderRight: '1px solid var(--brown-100)' }}>
+            <span className="text-[17px] font-black leading-none" style={{ color: 'var(--brown-900)' }}>
+              {followersCount ?? 0}
+            </span>
+            <span className="text-[9px] font-semibold uppercase tracking-widest mt-0.5" style={{ color: 'var(--brown-400)' }}>
+              Seguidores
+            </span>
           </Link>
-          <Link href="/perfil/siguiendo" className="flex flex-col items-center py-4 transition-opacity hover:opacity-70">
-            <span className="text-2xl font-black" style={{ color: 'var(--brown-900)' }}>{followingCount ?? 0}</span>
-            <span className="text-xs font-medium mt-0.5" style={{ color: 'var(--brown-500)' }}>Siguiendo</span>
+          <Link href="/perfil/siguiendo"
+            className="flex flex-col items-center py-3 gap-0.5 active:opacity-60 transition-opacity">
+            <span className="text-[17px] font-black leading-none" style={{ color: 'var(--brown-900)' }}>
+              {followingCount ?? 0}
+            </span>
+            <span className="text-[9px] font-semibold uppercase tracking-widest mt-0.5" style={{ color: 'var(--brown-400)' }}>
+              Siguiendo
+            </span>
           </Link>
         </div>
       </div>
