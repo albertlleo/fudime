@@ -31,7 +31,7 @@ export default function CreatorRequestForm() {
           ¿Quieres subir recetas en vídeo?
         </h2>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--brown-500)' }}>
-          Comparte tus redes sociales para que podamos validar tu cuenta como creador.
+          Comparte tus perfiles para que podamos validar tu cuenta como creador.
           Revisamos manualmente cada solicitud.
         </p>
       </div>
@@ -44,17 +44,22 @@ export default function CreatorRequestForm() {
         )}
 
         <div>
-          <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
-            <span className="mr-2">📸</span>Instagram
+          <label className="flex items-center gap-2 text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+            Instagram
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded-full"
+              style={{ background: 'rgba(220,38,38,0.08)', color: '#dc2626' }}>
+              obligatorio
+            </span>
           </label>
-          <input name="instagram_url" type="url"
+          <input name="instagram_url" type="url" required
             placeholder="https://instagram.com/tuusuario"
             className="input-cream" />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
-            <span className="mr-2">🎵</span>TikTok
+          <label className="flex items-center gap-2 text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+            TikTok
+            <span className="text-xs font-medium" style={{ color: 'var(--brown-300)' }}>opcional</span>
           </label>
           <input name="tiktok_url" type="url"
             placeholder="https://tiktok.com/@tuusuario"
@@ -62,14 +67,25 @@ export default function CreatorRequestForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
-            <span className="mr-2">🔗</span>Otros enlaces
+          <label className="flex items-center gap-2 text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+            YouTube
+            <span className="text-xs font-medium" style={{ color: 'var(--brown-300)' }}>opcional</span>
           </label>
-          <textarea name="other_links" rows={3}
-            placeholder="YouTube, web personal, otros perfiles..."
-            className="input-cream resize-none" />
-          <p className="text-xs mt-1.5" style={{ color: 'var(--brown-300)' }}>
-            Añade al menos un enlace
+          <input name="youtube_url" type="url"
+            placeholder="https://youtube.com/@tucanal"
+            className="input-cream" />
+        </div>
+
+        {/* Nota de tiempo */}
+        <div className="flex items-start gap-2.5 px-4 py-3 rounded-2xl"
+          style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+            className="w-4 h-4 flex-shrink-0 mt-0.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4M12 16h.01" />
+          </svg>
+          <p className="text-xs leading-relaxed" style={{ color: '#92400e' }}>
+            La verificación puede tardar hasta 48 horas. Te notificaremos cuando tu cuenta sea aprobada.
           </p>
         </div>
 

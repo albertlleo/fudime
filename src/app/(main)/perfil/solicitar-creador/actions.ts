@@ -9,17 +9,17 @@ export async function submitCreatorRequest(formData: FormData): Promise<{ error?
 
   const instagram_url = (formData.get('instagram_url') as string)?.trim() || null
   const tiktok_url = (formData.get('tiktok_url') as string)?.trim() || null
-  const other_links = (formData.get('other_links') as string)?.trim() || null
+  const youtube_url = (formData.get('youtube_url') as string)?.trim() || null
 
-  if (!instagram_url && !tiktok_url && !other_links) {
-    return { error: 'Añade al menos un enlace de tus redes sociales.' }
+  if (!instagram_url) {
+    return { error: 'El enlace de Instagram es obligatorio.' }
   }
 
   const { error } = await supabase.from('creator_requests').upsert({
     user_id: user.id,
     instagram_url,
     tiktok_url,
-    other_links,
+    other_links: youtube_url,
     status: 'pending',
   }, { onConflict: 'user_id' })
 
