@@ -339,9 +339,10 @@ interface CreatorFeedProps {
   commentCountMap: Record<string, number>
   userId: string | null
   initialIndex?: number
+  initialCommentRecipeId?: string
 }
 
-export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId, initialIndex = 0 }: CreatorFeedProps) {
+export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId, initialIndex = 0, initialCommentRecipeId }: CreatorFeedProps) {
   const router = useRouter()
   const scrollRef = useRef<HTMLDivElement>(null)
   const loopSentinelRef = useRef<HTMLDivElement>(null)
@@ -350,7 +351,7 @@ export default function CreatorFeed({ recipes: initialRecipes, likedIds, savedId
   const [counts, setCounts] = useState<Record<string, number>>(() => ({ ...likeCountMap }))
   const [commentCounts] = useState<Record<string, number>>(() => ({ ...commentCountMap }))
   const [muted, setMuted] = useState(true)
-  const [commentRecipeId, setCommentRecipeId] = useState<string | null>(null)
+  const [commentRecipeId, setCommentRecipeId] = useState<string | null>(initialCommentRecipeId ?? null)
 
   useEffect(() => {
     if (initialIndex > 0 && scrollRef.current) {

@@ -14,26 +14,75 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(h / 24)}d`
 }
 
-function notifText(n: NotificationWithDetails): string {
-  switch (n.type) {
+function notifText(type: string): string {
+  switch (type) {
     case 'like': return 'dio like a tu receta'
     case 'follow': return 'empezó a seguirte'
-    case 'comment': return 'comentó en tu receta'
+    case 'comment': return 'ha escrito un comentario'
     case 'comment_like': return 'le gustó tu comentario'
-    case 'comment_reply': return 'respondió a tu comentario'
+    case 'comment_reply': return 'ha contestado a tu comentario'
     case 'new_recipe': return 'ha subido una nueva receta'
     default: return 'interactuó contigo'
   }
 }
 
-function notifIcon(type: string) {
-  if (type === 'like') return { bg: '#fff7ed', border: '#fed7aa', color: '#f59e0b', label: '♥' }
-  if (type === 'follow') return { bg: '#fffbeb', border: '#fcd34d', color: '#d97706', label: '+' }
-  if (type === 'comment') return { bg: '#f5f3ff', border: '#c4b5fd', color: '#7c3aed', label: '💬' }
-  if (type === 'comment_like') return { bg: '#fff7ed', border: '#fed7aa', color: '#f59e0b', label: '♥' }
-  if (type === 'comment_reply') return { bg: '#f5f3ff', border: '#c4b5fd', color: '#7c3aed', label: '↩' }
-  if (type === 'new_recipe') return { bg: '#f0fdf4', border: '#86efac', color: '#16a34a', label: '▶' }
-  return { bg: '#f5f5f5', border: '#e5e5e5', color: '#737373', label: '•' }
+const AMBER = '#d97706'
+const BADGE_BG = '#ede8e3'
+const BADGE_BORDER = '#e0d9d1'
+
+function BadgeIcon({ type }: { type: string }) {
+  const icon = (() => {
+    switch (type) {
+      case 'like':
+      case 'comment_like':
+        return (
+          <svg viewBox="0 0 24 24" fill={AMBER} className="w-2.5 h-2.5">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+          </svg>
+        )
+      case 'comment':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+          </svg>
+        )
+      case 'comment_reply':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
+            <polyline points="9 17 4 12 9 7" />
+            <path d="M20 18v-2a4 4 0 00-4-4H4" />
+          </svg>
+        )
+      case 'follow':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="8.5" cy="7" r="4" />
+            <line x1="20" y1="8" x2="20" y2="14" />
+            <line x1="23" y1="11" x2="17" y2="11" />
+          </svg>
+        )
+      case 'new_recipe':
+        return (
+          <svg viewBox="0 0 24 24" fill={AMBER} className="w-2.5 h-2.5">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+        )
+      default:
+        return (
+          <svg viewBox="0 0 24 24" fill={AMBER} className="w-2 h-2">
+            <circle cx="12" cy="12" r="4" />
+          </svg>
+        )
+    }
+  })()
+
+  return (
+    <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
+      style={{ background: BADGE_BG, border: `1.5px solid ${BADGE_BORDER}` }}>
+      {icon}
+    </div>
+  )
 }
 
 export default async function NotificacionesPage() {
@@ -45,7 +94,7 @@ export default async function NotificacionesPage() {
     user
       ? supabase
           .from('notifications')
-          .select('*, actor:users!actor_id(id, display_name, avatar_url), recipe:recipes!recipe_id(id, title, thumbnail_url, creator_id)')
+          .select('*, actor:users!actor_id(id, display_name, avatar_url), recipe:recipes!recipe_id(id, title, thumbnail_url, creator_id), comment:comments!comment_id(id, content)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(50)
@@ -55,6 +104,28 @@ export default async function NotificacionesPage() {
   const notifications = (rawNotifs ?? []) as NotificationWithDetails[]
   const isCreator = (profile as { role: string } | null)?.role === 'creator'
   const unreadCount = notifications.filter(n => !n.read).length
+
+  function buildHref(n: NotificationWithDetails): string {
+    if (!n.recipe) return `/creador/${n.actor.id}`
+    const recipeId = n.recipe.id
+    const comments = '&comments=1'
+    switch (n.type) {
+      case 'new_recipe':
+        return `/creador/${n.actor.id}/feed?start=${recipeId}`
+      case 'like':
+        return `/perfil/feed?start=${recipeId}`
+      case 'comment':
+      case 'comment_like':
+      case 'comment_reply':
+        if (n.recipe.creator_id === user?.id) return `/perfil/feed?start=${recipeId}${comments}`
+        return `/creador/${n.recipe.creator_id}/feed?start=${recipeId}${comments}`
+      default:
+        return `/perfil/feed?start=${recipeId}`
+    }
+  }
+
+  const showCommentPreview = (type: string) =>
+    type === 'comment' || type === 'comment_like' || type === 'comment_reply'
 
   return (
     <div className="min-h-dvh pb-28 overflow-y-auto" style={{ background: 'var(--cream)' }}>
@@ -86,68 +157,64 @@ export default async function NotificacionesPage() {
         </div>
       ) : (
         <div className="mx-5 rounded-3xl overflow-hidden" style={{ border: '1.5px solid var(--brown-100)' }}>
-          {notifications.map((n, i) => {
-            const icon = notifIcon(n.type)
-            const href = (() => {
-              if (!n.recipe) return `/creador/${n.actor.id}`
-              // new_recipe: actor es el creador que publicó
-              if (n.type === 'new_recipe') return `/creador/${n.actor.id}/feed?start=${n.recipe.id}`
-              // like/comment: la receta es tuya
-              if (n.type === 'like' || n.type === 'comment') return `/perfil/feed?start=${n.recipe.id}`
-              // comment_like/comment_reply: la receta puede ser de otro creador
-              if (n.recipe.creator_id === user?.id) return `/perfil/feed?start=${n.recipe.id}`
-              return `/creador/${n.recipe.creator_id}/feed?start=${n.recipe.id}`
-            })()
-            return (
-              <Link
-                key={n.id}
-                href={href}
-                className="flex items-center gap-3 px-4 py-3.5 transition-colors"
-                style={{
-                  background: !n.read ? '#fffbf5' : '#fff',
-                  borderTop: i > 0 ? '1px solid var(--brown-100)' : 'none',
-                }}
-              >
-                {/* Actor avatar + type badge */}
-                <div className="relative flex-shrink-0">
-                  {n.actor.avatar_url ? (
-                    <img src={n.actor.avatar_url} alt="" className="w-11 h-11 rounded-xl object-cover" />
-                  ) : (
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black text-black"
-                      style={{ background: 'var(--amber)' }}>
-                      {n.actor.display_name[0].toUpperCase()}
-                    </div>
-                  )}
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
-                    style={{ background: icon.bg, border: `1.5px solid ${icon.border}`, color: icon.color }}>
-                    {icon.label}
+          {notifications.map((n, i) => (
+            <Link
+              key={n.id}
+              href={buildHref(n)}
+              className="flex items-center gap-3 px-4 py-3.5 transition-colors active:opacity-70"
+              style={{
+                background: !n.read ? '#fffbf5' : '#fff',
+                borderTop: i > 0 ? '1px solid var(--brown-100)' : 'none',
+              }}
+            >
+              {/* Avatar + badge */}
+              <div className="relative flex-shrink-0">
+                {n.actor.avatar_url ? (
+                  <img src={n.actor.avatar_url} alt="" className="w-11 h-11 rounded-xl object-cover" />
+                ) : (
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black text-black"
+                    style={{ background: 'var(--amber)' }}>
+                    {n.actor.display_name[0].toUpperCase()}
                   </div>
-                </div>
+                )}
+                <BadgeIcon type={n.type} />
+              </div>
 
-                {/* Text */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm leading-snug" style={{ color: 'var(--brown-900)' }}>
-                    <span className="font-bold">{n.actor.display_name}</span>
-                    {' '}{notifText(n)}
-                    {n.recipe && n.type !== 'follow' && (
-                      <span className="font-semibold"> "{n.recipe.title}"</span>
-                    )}
+              {/* Text */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm leading-snug" style={{ color: 'var(--brown-900)' }}>
+                  <span className="font-bold">{n.actor.display_name}</span>
+                  {' '}{notifText(n.type)}
+                  {n.recipe && (n.type === 'like' || n.type === 'new_recipe') && (
+                    <span className="font-semibold"> "{n.recipe.title}"</span>
+                  )}
+                </p>
+                {showCommentPreview(n.type) && n.comment?.content && (
+                  <p className="text-xs mt-0.5 leading-snug"
+                    style={{
+                      color: 'var(--brown-500)',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    } as React.CSSProperties}>
+                    "{n.comment.content}"
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--brown-300)' }}>{timeAgo(n.created_at)}</p>
-                </div>
-
-                {/* Thumbnail */}
-                {n.recipe?.thumbnail_url && (
-                  <img src={n.recipe.thumbnail_url} alt="" className="w-10 h-14 rounded-xl object-cover flex-shrink-0" />
                 )}
+                <p className="text-xs mt-0.5" style={{ color: 'var(--brown-300)' }}>{timeAgo(n.created_at)}</p>
+              </div>
 
-                {/* Unread dot */}
-                {!n.read && (
-                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--amber)' }} />
-                )}
-              </Link>
-            )
-          })}
+              {/* Thumbnail */}
+              {n.recipe?.thumbnail_url && (
+                <img src={n.recipe.thumbnail_url} alt="" className="w-10 h-14 rounded-xl object-cover flex-shrink-0" />
+              )}
+
+              {/* Unread dot */}
+              {!n.read && (
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--amber)' }} />
+              )}
+            </Link>
+          ))}
         </div>
       )}
     </div>

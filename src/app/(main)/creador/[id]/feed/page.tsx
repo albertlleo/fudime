@@ -8,10 +8,10 @@ export default async function CreatorFeedPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ start?: string }>
+  searchParams: Promise<{ start?: string; comments?: string }>
 }) {
   const { id } = await params
-  const { start } = await searchParams
+  const { start, comments } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -62,6 +62,7 @@ export default async function CreatorFeedPage({
       commentCountMap={commentCountMap}
       userId={user?.id ?? null}
       initialIndex={initialIndex}
+      initialCommentRecipeId={comments === '1' && start ? start : undefined}
     />
   )
 }

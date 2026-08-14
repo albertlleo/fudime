@@ -6,9 +6,9 @@ import type { RecipeWithCreator } from '@/lib/types'
 export default async function PerfilFeedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ start?: string }>
+  searchParams: Promise<{ start?: string; comments?: string }>
 }) {
-  const { start } = await searchParams
+  const { start, comments } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -56,6 +56,7 @@ export default async function PerfilFeedPage({
       commentCountMap={commentCountMap}
       userId={user.id}
       initialIndex={initialIndex}
+      initialCommentRecipeId={comments === '1' && start ? start : undefined}
     />
   )
 }

@@ -103,6 +103,7 @@ export interface Notification {
   type: NotificationType
   actor_id: string
   recipe_id: string | null
+  comment_id: string | null
   read: boolean
   created_at: string
 }
@@ -110,4 +111,5 @@ export interface Notification {
 export interface NotificationWithDetails extends Notification {
   actor: Pick<User, 'id' | 'display_name' | 'avatar_url'>
   recipe: Pick<Recipe, 'id' | 'title' | 'thumbnail_url' | 'creator_id'> | null
+  comment: Pick<Comment, 'id' | 'content'> | null
 }

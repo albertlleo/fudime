@@ -72,17 +72,16 @@ export async function addComment(
 
   try {
     if (!parentId) {
-      // Reuse recipeCreatorId from the earlier query — no second round-trip needed
       if (recipeCreatorId && recipeCreatorId !== user.id) {
         await supabase.from('notifications').insert({
-          user_id: recipeCreatorId, type: 'comment', actor_id: user.id, recipe_id: recipeId,
+          user_id: recipeCreatorId, type: 'comment', actor_id: user.id, recipe_id: recipeId, comment_id: comment.id,
         })
       }
     } else {
       const { data: parent } = await supabase.from('comments').select('user_id').eq('id', parentId).single()
       if (parent && parent.user_id !== user.id) {
         await supabase.from('notifications').insert({
-          user_id: parent.user_id, type: 'comment_reply', actor_id: user.id, recipe_id: recipeId,
+          user_id: parent.user_id, type: 'comment_reply', actor_id: user.id, recipe_id: recipeId, comment_id: comment.id,
         })
       }
     }
@@ -132,7 +131,7 @@ export async function toggleCommentLike(commentId: string): Promise<{
       const { data: comment } = await supabase.from('comments').select('user_id, recipe_id').eq('id', commentId).single()
       if (comment && comment.user_id !== user.id) {
         await supabase.from('notifications').insert({
-          user_id: comment.user_id, type: 'comment_like', actor_id: user.id, recipe_id: comment.recipe_id,
+          user_id: comment.user_id, type: 'comment_like', actor_id: user.id, recipe_id: comment.recipe_id, comment_id: commentId,
         })
       }
     } catch {}
