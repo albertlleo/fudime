@@ -31,7 +31,7 @@ export async function publishRecipe(recipeId: string): Promise<{ error?: string 
   return {}
 }
 
-export async function updateProfile(formData: FormData): Promise<{ error: string } | void> {
+export async function updateProfile(formData: FormData): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
