@@ -7,7 +7,7 @@ import { PAGE_SIZE } from './constants'
 
 async function createNotification(supabase: Awaited<ReturnType<typeof createClient>>, data: {
   user_id: string
-  type: 'like' | 'follow' | 'comment'
+  type: 'like' | 'follow' | 'comment' | 'comment_like' | 'comment_reply' | 'new_recipe'
   actor_id: string
   recipe_id?: string | null
 }) {

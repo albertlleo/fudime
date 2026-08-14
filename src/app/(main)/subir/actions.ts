@@ -49,7 +49,7 @@ export async function createRecipe(data: {
 
   const now = new Date().toISOString()
 
-  const { error } = await supabase.from('recipes').insert({
+  const { data: recipe, error } = await supabase.from('recipes').insert({
     creator_id: user.id,
     title: data.title.trim(),
     description: data.description.trim() || null,
@@ -61,9 +61,20 @@ export async function createRecipe(data: {
     cook_time: data.cookTime,
     status: data.publish ? 'published' : 'draft',
     published_at: data.publish ? now : null,
-  })
+  }).select('id').single()
 
   if (error) return { error: error.message }
+
+  if (data.publish && recipe) {
+    try {
+      const { data: followers } = await supabase.from('follows').select('follower_id').eq('following_id', user.id)
+      if (followers && followers.length > 0) {
+        await supabase.from('notifications').insert(
+          followers.map(f => ({ user_id: f.follower_id, type: 'new_recipe', actor_id: user.id, recipe_id: recipe.id }))
+        )
+      }
+    } catch {}
+  }
 
   redirect('/')
 }

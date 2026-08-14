@@ -58,19 +58,23 @@ export async function addComment(
 
   if (error) return { error: error.message }
 
-  if (!parentId) {
-    try {
+  try {
+    if (!parentId) {
       const { data: recipe } = await supabase.from('recipes').select('creator_id').eq('id', recipeId).single()
       if (recipe && recipe.creator_id !== user.id) {
         await supabase.from('notifications').insert({
-          user_id: recipe.creator_id,
-          type: 'comment',
-          actor_id: user.id,
-          recipe_id: recipeId,
+          user_id: recipe.creator_id, type: 'comment', actor_id: user.id, recipe_id: recipeId,
         })
       }
-    } catch {}
-  }
+    } else {
+      const { data: parent } = await supabase.from('comments').select('user_id').eq('id', parentId).single()
+      if (parent && parent.user_id !== user.id) {
+        await supabase.from('notifications').insert({
+          user_id: parent.user_id, type: 'comment_reply', actor_id: user.id, recipe_id: recipeId,
+        })
+      }
+    }
+  } catch {}
 
   return {
     comment: { ...comment, parent_id: comment.parent_id ?? null, likes_count: 0, user_has_liked: false } as CommentWithUser,
@@ -112,6 +116,14 @@ export async function toggleCommentLike(commentId: string): Promise<{
     await supabase.from('comment_likes').delete().eq('comment_id', commentId).eq('user_id', user.id)
   } else {
     await supabase.from('comment_likes').insert({ comment_id: commentId, user_id: user.id })
+    try {
+      const { data: comment } = await supabase.from('comments').select('user_id, recipe_id').eq('id', commentId).single()
+      if (comment && comment.user_id !== user.id) {
+        await supabase.from('notifications').insert({
+          user_id: comment.user_id, type: 'comment_like', actor_id: user.id, recipe_id: comment.recipe_id,
+        })
+      }
+    } catch {}
   }
 
   const { count } = await supabase
