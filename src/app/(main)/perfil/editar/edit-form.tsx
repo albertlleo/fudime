@@ -130,22 +130,26 @@ export default function EditForm({ user }: { user: User }) {
         </p>
       </div>
 
-      <div>
-        <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
-          Bio
-        </label>
-        <textarea name="bio" defaultValue={user.bio ?? ''} maxLength={400} rows={5}
-          placeholder="Cuéntanos algo sobre ti..."
-          className="input-cream resize-none" />
-      </div>
+      {user.role === 'creator' && (
+        <>
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+              Bio
+            </label>
+            <textarea name="bio" defaultValue={user.bio ?? ''} maxLength={400} rows={5}
+              placeholder="Cuéntanos algo sobre ti..."
+              className="input-cream resize-none" />
+          </div>
 
-      <div>
-        <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
-          Web <span className="font-normal text-xs" style={{ color: 'var(--brown-300)' }}>opcional</span>
-        </label>
-        <input name="website_url" type="url" defaultValue={user.website_url ?? ''}
-          placeholder="https://tuweb.com" className="input-cream" />
-      </div>
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+              Web <span className="font-normal text-xs" style={{ color: 'var(--brown-300)' }}>opcional</span>
+            </label>
+            <input name="website_url" type="url" defaultValue={user.website_url ?? ''}
+              placeholder="https://tuweb.com" className="input-cream" />
+          </div>
+        </>
+      )}
 
       <div className="pt-2 pb-8">
         <button type="submit" disabled={isPending || uploading}
