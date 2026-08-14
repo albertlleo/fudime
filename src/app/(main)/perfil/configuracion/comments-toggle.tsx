@@ -20,19 +20,18 @@ export default function CommentsToggle({ initialEnabled }: { initialEnabled: boo
     <button
       onClick={handleToggle}
       disabled={isPending}
-      className="relative w-11 h-6 rounded-full transition-colors flex-shrink-0"
+      aria-pressed={enabled}
+      className="relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors"
       style={{
         background: enabled ? 'var(--amber)' : '#d4c9be',
         opacity: isPending ? 0.6 : 1,
         transition: 'background 0.2s',
       }}
-      aria-pressed={enabled}
     >
       <span
-        className="absolute top-0.5 w-5 h-5 rounded-full shadow-sm"
+        className="inline-block h-4 w-4 rounded-full bg-white shadow-sm"
         style={{
-          background: '#fff',
-          transform: enabled ? 'translateX(21px)' : 'translateX(2px)',
+          transform: enabled ? 'translateX(24px)' : 'translateX(4px)',
           transition: 'transform 0.2s',
         }}
       />
