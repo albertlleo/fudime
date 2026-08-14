@@ -109,5 +109,5 @@ export interface Notification {
 
 export interface NotificationWithDetails extends Notification {
   actor: Pick<User, 'id' | 'display_name' | 'avatar_url'>
-  recipe: Pick<Recipe, 'id' | 'title' | 'thumbnail_url'> | null
+  recipe: Pick<Recipe, 'id' | 'title' | 'thumbnail_url' | 'creator_id'> | null
 }

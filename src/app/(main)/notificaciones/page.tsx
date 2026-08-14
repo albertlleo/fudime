@@ -45,7 +45,7 @@ export default async function NotificacionesPage() {
     user
       ? supabase
           .from('notifications')
-          .select('*, actor:users!actor_id(id, display_name, avatar_url), recipe:recipes!recipe_id(id, title, thumbnail_url)')
+          .select('*, actor:users!actor_id(id, display_name, avatar_url), recipe:recipes!recipe_id(id, title, thumbnail_url, creator_id)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(50)
@@ -88,7 +88,16 @@ export default async function NotificacionesPage() {
         <div className="mx-5 rounded-3xl overflow-hidden" style={{ border: '1.5px solid var(--brown-100)' }}>
           {notifications.map((n, i) => {
             const icon = notifIcon(n.type)
-            const href = n.recipe ? `/perfil/feed?start=${n.recipe.id}` : `/creador/${n.actor.id}`
+            const href = (() => {
+              if (!n.recipe) return `/creador/${n.actor.id}`
+              // new_recipe: actor es el creador que publicó
+              if (n.type === 'new_recipe') return `/creador/${n.actor.id}/feed?start=${n.recipe.id}`
+              // like/comment: la receta es tuya
+              if (n.type === 'like' || n.type === 'comment') return `/perfil/feed?start=${n.recipe.id}`
+              // comment_like/comment_reply: la receta puede ser de otro creador
+              if (n.recipe.creator_id === user?.id) return `/perfil/feed?start=${n.recipe.id}`
+              return `/creador/${n.recipe.creator_id}/feed?start=${n.recipe.id}`
+            })()
             return (
               <Link
                 key={n.id}
