@@ -1,11 +1,13 @@
 'use client'
 
 import { useTransition, useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { updateProfile } from '../actions'
 import { getImageUploadSignature } from '@/app/(main)/subir/actions'
 import type { User } from '@/lib/types'
 
 export default function EditForm({ user }: { user: User }) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -46,11 +48,11 @@ export default function EditForm({ user }: { user: User }) {
     const formData = new FormData(e.currentTarget)
     formData.set('avatar_url', avatarUrl)
     startTransition(async () => {
-      try {
-        const result = await updateProfile(formData)
-        if (result?.error) setError(result.error)
-      } catch {
-        setError('Error al guardar los cambios. Inténtalo de nuevo.')
+      const result = await updateProfile(formData)
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        router.push('/perfil')
       }
     })
   }
@@ -145,7 +147,7 @@ export default function EditForm({ user }: { user: User }) {
             <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
               Web <span className="font-normal text-xs" style={{ color: 'var(--brown-300)' }}>opcional</span>
             </label>
-            <input name="website_url" type="url" defaultValue={user.website_url ?? ''}
+            <input name="website_url" type="text" defaultValue={user.website_url ?? ''}
               placeholder="https://tuweb.com" className="input-cream" />
           </div>
         </>

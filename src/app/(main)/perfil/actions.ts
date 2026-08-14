@@ -40,7 +40,10 @@ export async function updateProfile(formData: FormData): Promise<{ error: string
   const rawUsername = (formData.get('username') as string)?.trim().toLowerCase()
   const username = rawUsername && /^[a-z0-9_]{3,20}$/.test(rawUsername) ? rawUsername : undefined
   const bio = (formData.get('bio') as string)?.trim() || null
-  const website_url = (formData.get('website_url') as string)?.trim() || null
+  let website_url = (formData.get('website_url') as string)?.trim() || null
+  if (website_url && !/^https?:\/\//i.test(website_url)) {
+    website_url = 'https://' + website_url
+  }
   const avatar_url = (formData.get('avatar_url') as string)?.trim() || null
 
   // Check username uniqueness (skip if unchanged)
@@ -64,7 +67,7 @@ export async function updateProfile(formData: FormData): Promise<{ error: string
 
   if (dbError) return { error: 'Error al guardar los cambios.' }
 
-  redirect('/perfil')
+  return { success: true }
 }
 
 export async function deleteRecipe(recipeId: string): Promise<{ error?: string }> {
