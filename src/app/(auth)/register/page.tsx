@@ -82,8 +82,8 @@ export default function RegisterPage() {
             <label htmlFor="username" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
               Nombre de usuario <span style={{ color: '#dc2626' }}>*</span>
             </label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium pointer-events-none"
+            <div className="input-cream flex items-center gap-1">
+              <span className="text-sm font-medium flex-shrink-0 select-none"
                 style={{ color: 'var(--brown-400)' }}>@</span>
               <input
                 id="username"
@@ -94,7 +94,6 @@ export default function RegisterPage() {
                 onChange={e => handleUsernameInput(e.target.value)}
                 autoComplete="username"
                 placeholder="tunombre"
-                className="input-cream pl-7"
                 maxLength={20}
               />
             </div>

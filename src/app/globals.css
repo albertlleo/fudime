@@ -53,3 +53,7 @@ body {
 }
 .input-cream::placeholder { color: var(--brown-300); }
 .input-cream:focus { border-color: var(--amber); }
+.input-cream:focus-within { border-color: var(--amber); }
+.input-cream[type="date"] { -webkit-appearance: none; appearance: none; line-height: 1.5; }
+.input-cream input { background: transparent; outline: none; width: 100%; font-size: 15px; color: var(--brown-900); }
+.input-cream input::placeholder { color: var(--brown-300); }
