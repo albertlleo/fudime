@@ -53,7 +53,9 @@ export async function addComment(
     .eq('id', recipeId)
     .single()
   const creatorData = recipeCheck?.users as { comments_enabled?: boolean } | null
-  if (creatorData && creatorData.comments_enabled === false) {
+  const recipeCreatorId = recipeCheck?.creator_id
+  // Block comments only if disabled AND the commenter is not the creator
+  if (creatorData && creatorData.comments_enabled === false && recipeCreatorId !== user.id) {
     return { error: 'El creador ha desactivado los comentarios en sus publicaciones.' }
   }
 
@@ -70,10 +72,10 @@ export async function addComment(
 
   try {
     if (!parentId) {
-      const { data: recipe } = await supabase.from('recipes').select('creator_id').eq('id', recipeId).single()
-      if (recipe && recipe.creator_id !== user.id) {
+      // Reuse recipeCreatorId from the earlier query — no second round-trip needed
+      if (recipeCreatorId && recipeCreatorId !== user.id) {
         await supabase.from('notifications').insert({
-          user_id: recipe.creator_id, type: 'comment', actor_id: user.id, recipe_id: recipeId,
+          user_id: recipeCreatorId, type: 'comment', actor_id: user.id, recipe_id: recipeId,
         })
       }
     } else {

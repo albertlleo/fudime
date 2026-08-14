@@ -142,22 +142,20 @@ export default async function ConfiguracionPage() {
               </svg>
             }
           />
-          <div style={{ borderBottom: 'none' }}>
-            <SettingRow
-              href="/perfil/eliminar-cuenta"
-              label="Eliminar cuenta"
-              danger
-              icon={
-                <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-                  className="w-4 h-4">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                  <path d="M10 11v6M14 11v6" />
-                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-                </svg>
-              }
-            />
-          </div>
+          <SettingRow
+            href="/perfil/eliminar-cuenta"
+            label="Eliminar cuenta"
+            danger
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+                className="w-4 h-4">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+              </svg>
+            }
+          />
         </div>
       </div>
 
