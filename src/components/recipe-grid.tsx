@@ -15,7 +15,7 @@ function RecipeCard({ recipe, href }: { recipe: RecipeWithCreator; href: string 
           <div className="w-full h-full flex items-center justify-center text-2xl">🍴</div>
         )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2.5">
-          <p className="text-white text-xs font-bold line-clamp-1 leading-tight">{recipe.title}</p>
+          <p className="text-white text-xs font-bold line-clamp-1 leading-tight uppercase">{recipe.title}</p>
           <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>@{recipe.users.display_name}</p>
         </div>
         {(recipe.likes_count ?? 0) > 0 && (

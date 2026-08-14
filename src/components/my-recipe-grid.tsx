@@ -20,7 +20,7 @@ function RecipeCard({ recipe, onPublish }: { recipe: Recipe; onPublish: (id: str
 
       {/* Title overlay */}
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-        <p className="text-white text-[10px] font-semibold line-clamp-1 leading-tight">{recipe.title}</p>
+        <p className="text-white text-[10px] font-semibold line-clamp-1 leading-tight uppercase">{recipe.title}</p>
       </div>
 
       {/* Draft badge + publish button */}
