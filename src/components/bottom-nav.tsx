@@ -84,15 +84,46 @@ const tabs = [
   },
 ]
 
+const cuentaIcon = (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+    <circle cx="18" cy="8" r="3" fill="currentColor" stroke="none" className="hidden" />
+    <path d="M17 5v6M14 8h6" strokeWidth={2.5} />
+  </svg>
+)
+const cuentaIconFilled = (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+    <path d="M17 5v6M14 8h6" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" />
+  </svg>
+)
+
 export default function BottomNav({ notifCount = 0, isCreator = false }: { notifCount?: number; isCreator?: boolean }) {
   const pathname = usePathname()
 
   const items = tabs
     .filter(tab => tab.href !== '/subir' || isCreator)
-    .map(tab => ({
-      ...tab,
-      active: pathname === tab.href,
-    }))
+    .map(tab => {
+      // Consumers: swap "Perfil" → "Cuenta" → /perfil/configuracion
+      if (tab.href === '/perfil' && !isCreator) {
+        return {
+          ...tab,
+          href: '/perfil/configuracion',
+          label: 'Cuenta',
+          icon: cuentaIcon,
+          iconFilled: cuentaIconFilled,
+          active: pathname.startsWith('/perfil'),
+        }
+      }
+      return {
+        ...tab,
+        active: tab.href === '/perfil'
+          ? pathname.startsWith('/perfil')
+          : pathname === tab.href,
+      }
+    })
 
   return (
     <>
@@ -115,7 +146,7 @@ export default function BottomNav({ notifCount = 0, isCreator = false }: { notif
                 style={{ color: active ? 'var(--brown-700)' : 'var(--brown-300)' }}>
                 {label}
               </span>
-              {href === '/perfil' && notifCount > 0 && (
+              {href === '/perfil/configuracion' && notifCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
               )}
             </Link>
@@ -148,7 +179,7 @@ export default function BottomNav({ notifCount = 0, isCreator = false }: { notif
                 background: active ? 'rgba(245,158,11,0.1)' : 'transparent',
               }}>
               {active ? iconFilled : icon}
-              {href === '/perfil' && notifCount > 0 && (
+              {href === '/perfil/configuracion' && notifCount > 0 && (
                 <span className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
               )}
             </Link>
