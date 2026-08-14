@@ -170,18 +170,18 @@ export default function CategoriaClient({ activeQ, activeDiet, activeTiempo, act
             <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
               Dietas e intolerancias
             </p>
-            <div className="flex flex-wrap gap-2 mb-5">
+            <div className="grid grid-cols-2 gap-2 mb-5">
               {DIETS.map(d => {
                 const active = activeDiet === d.key
                 return (
                   <button key={d.key} onClick={() => toggleDiet(d.key)}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
                     style={{
-                      background: active ? 'var(--amber)' : '#fff',
+                      background: active ? '#fffbeb' : '#fff',
                       border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
                     }}>
-                    <span className="text-base">{d.emoji}</span>
-                    <span className="text-sm font-semibold" style={{ color: active ? '#fff' : 'var(--brown-700)' }}>
+                    <span className="text-xl leading-none">{d.emoji}</span>
+                    <span className="text-sm font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>
                       {d.label}
                     </span>
                   </button>
@@ -193,18 +193,18 @@ export default function CategoriaClient({ activeQ, activeDiet, activeTiempo, act
             <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
               Tiempo de cocción
             </p>
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="grid grid-cols-2 gap-2 mb-6">
               {TIMES.map(t => {
                 const active = activeTiempo === t.key
                 return (
                   <button key={t.key} onClick={() => toggleTiempo(t.key)}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
                     style={{
-                      background: active ? 'var(--amber)' : '#fff',
+                      background: active ? '#fffbeb' : '#fff',
                       border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
                     }}>
-                    <span className="text-base">{t.emoji}</span>
-                    <span className="text-sm font-semibold" style={{ color: active ? '#fff' : 'var(--brown-700)' }}>
+                    <span className="text-xl leading-none">{t.emoji}</span>
+                    <span className="text-sm font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>
                       {t.label}
                     </span>
                   </button>
