@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { fetchComments, addComment, deleteComment, toggleCommentLike } from '@/app/(main)/receta/[id]/comment-actions'
 import type { CommentWithUser } from '@/lib/types'
+import { getVerifiedBadgeColor } from '@/lib/verified-badge'
 
 function timeAgo(dateStr: string): string {
   const s = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -60,13 +61,16 @@ function CommentRow({
           <span className="text-xs font-bold" style={{ color: 'var(--brown-700)' }}>
             {c.users.username ?? c.users.display_name}
           </span>
-          {c.users.validated_at && (
-            <svg viewBox="0 0 24 24" fill="none" className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--amber)' }}>
-              <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={1.5} />
-              <path d="M7.5 12l3 3 6-6" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
+          {c.users.validated_at && (() => {
+            const color = getVerifiedBadgeColor(c.users.followers_count ?? 0)
+            return (
+              <svg viewBox="0 0 24 24" fill="none" className="w-3 h-3 flex-shrink-0">
+                <circle cx="12" cy="12" r="10" fill={color} opacity="0.15" />
+                <circle cx="12" cy="12" r="10" stroke={color} strokeWidth={1.5} />
+                <path d="M7.5 12l3 3 6-6" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )
+          })()}
           <span className="text-[10px]" style={{ color: 'var(--brown-300)' }}>
             {timeAgo(c.created_at)}
           </span>

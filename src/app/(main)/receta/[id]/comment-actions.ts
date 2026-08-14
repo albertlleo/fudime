@@ -14,11 +14,12 @@ export async function fetchComments(recipeId: string, currentUserId?: string): P
   if (!comments || comments.length === 0) return []
 
   const commentIds = comments.map((c: any) => c.id)
+  const commenterIds = [...new Set(comments.map((c: any) => c.user_id as string))]
 
-  const { data: likes } = await supabase
-    .from('comment_likes')
-    .select('comment_id, user_id')
-    .in('comment_id', commentIds)
+  const [{ data: likes }, { data: followRows }] = await Promise.all([
+    supabase.from('comment_likes').select('comment_id, user_id').in('comment_id', commentIds),
+    supabase.from('follows').select('following_id').in('following_id', commenterIds),
+  ])
 
   const likesCount: Record<string, number> = {}
   const userLikedSet = new Set<string>()
@@ -30,11 +31,18 @@ export async function fetchComments(recipeId: string, currentUserId?: string): P
     }
   }
 
+  const followerCountMap: Record<string, number> = {}
+  for (const row of (followRows ?? [])) {
+    const id = (row as any).following_id as string
+    followerCountMap[id] = (followerCountMap[id] ?? 0) + 1
+  }
+
   return comments.map((c: any) => ({
     ...c,
     parent_id: c.parent_id ?? null,
     likes_count: likesCount[c.id] ?? 0,
     user_has_liked: userLikedSet.has(c.id),
+    users: { ...c.users, followers_count: followerCountMap[c.user_id] ?? 0 },
   })) as CommentWithUser[]
 }
 
@@ -70,6 +78,11 @@ export async function addComment(
 
   if (error) return { error: error.message }
 
+  const { count: myFollowers } = await supabase
+    .from('follows')
+    .select('*', { count: 'exact', head: true })
+    .eq('following_id', user.id)
+
   try {
     if (!parentId) {
       if (recipeCreatorId && recipeCreatorId !== user.id) {
@@ -88,7 +101,13 @@ export async function addComment(
   } catch {}
 
   return {
-    comment: { ...comment, parent_id: comment.parent_id ?? null, likes_count: 0, user_has_liked: false } as CommentWithUser,
+    comment: {
+      ...comment,
+      parent_id: comment.parent_id ?? null,
+      likes_count: 0,
+      user_has_liked: false,
+      users: { ...comment.users, followers_count: myFollowers ?? 0 },
+    } as CommentWithUser,
   }
 }
 

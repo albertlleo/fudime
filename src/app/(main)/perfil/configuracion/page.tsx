@@ -142,20 +142,6 @@ export default async function ConfiguracionPage() {
               </svg>
             }
           />
-          <SettingRow
-            href="/perfil/eliminar-cuenta"
-            label="Eliminar cuenta"
-            danger
-            icon={
-              <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-                className="w-4 h-4">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                <path d="M10 11v6M14 11v6" />
-                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
-              </svg>
-            }
-          />
         </div>
       </div>
 
@@ -193,12 +179,10 @@ export default async function ConfiguracionPage() {
               className="flex items-center justify-between px-4 py-3.5 transition-colors active:opacity-70"
               style={{ background: creatorRequest?.status === 'pending' ? '#fffbeb' : 'transparent' }}>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#fffbeb' }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-                    className="w-4 h-4" style={{ color: '#d97706' }}>
-                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'var(--brown-100)' }}>
+                  <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4" style={{ color: 'var(--brown-500)' }}>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={1.8} />
+                    <path d="M7.5 12l3 3 6-6" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
                 <div>
@@ -291,6 +275,27 @@ export default async function ConfiguracionPage() {
               {user.role === 'creator' ? 'Creador' : 'Consumidor'}
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Gestionar cuenta */}
+      <div className="mx-5 mb-4">
+        <p className="text-xs font-semibold uppercase tracking-widest mb-2 px-1" style={{ color: 'var(--brown-400)' }}>Gestionar cuenta</p>
+        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
+          <SettingRow
+            href="/perfil/eliminar-cuenta"
+            label="Eliminar cuenta"
+            danger
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+                className="w-4 h-4">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+              </svg>
+            }
+          />
         </div>
       </div>
 
