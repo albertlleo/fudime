@@ -4,27 +4,12 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import VerifiedBadge from '@/components/verified-badge'
+import TrendingCard from '@/components/trending-card'
 import type { User, RecipeWithCreator } from '@/lib/types'
 
 import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES } from '@/lib/categories'
 
 // ── Sub-components ────────────────────────────────────────────────────────────
-
-function RecipeThumbH({ recipe }: { recipe: RecipeWithCreator }) {
-  return (
-    <Link href={`/buscar/feed?start=${recipe.id}`} className="flex-shrink-0 w-28 block">
-      <div className="relative w-28 rounded-2xl overflow-hidden bg-stone-900" style={{ aspectRatio: '9/16' }}>
-        {recipe.thumbnail_url
-          ? <img src={recipe.thumbnail_url} alt={recipe.title} className="w-full h-full object-cover" />
-          : <div className="w-full h-full flex items-center justify-center text-2xl">🍴</div>
-        }
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-          <p className="text-white text-[10px] font-semibold line-clamp-1 leading-tight">{recipe.title}</p>
-        </div>
-      </div>
-    </Link>
-  )
-}
 
 function RecipeThumbGrid({ recipe }: { recipe: RecipeWithCreator }) {
   return (
@@ -193,17 +178,13 @@ export default function ChefsPageClient({
                 {/* Tendencias – fila horizontal deslizable */}
                 {trending.length > 0 && (
                   <div className="mb-6">
-                    <div className="flex items-center justify-between px-5 mb-3">
+                    <div className="px-5 mb-3">
                       <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--brown-300)' }}>
                         🔥 Tendencias
                       </p>
-                      <button onClick={() => router.push('/chefs?sort=trending')}
-                        className="text-xs font-semibold" style={{ color: 'var(--brown-500)' }}>
-                        Ver más
-                      </button>
                     </div>
                     <div className="flex gap-3 overflow-x-auto px-5 pb-1" style={{ scrollbarWidth: 'none' }}>
-                      {trending.map(r => <RecipeThumbH key={r.id} recipe={r} />)}
+                      {trending.map(r => <TrendingCard key={r.id} recipe={r} href={`/buscar/feed?start=${r.id}`} />)}
                       {/* Ver más card */}
                       <button onClick={() => router.push('/chefs?sort=trending')}
                         className="flex-shrink-0 w-28 active:opacity-70 transition-opacity">
