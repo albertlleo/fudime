@@ -47,6 +47,16 @@ export async function addComment(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
+  const { data: recipeCheck } = await supabase
+    .from('recipes')
+    .select('creator_id, users!creator_id(comments_enabled)')
+    .eq('id', recipeId)
+    .single()
+  const creatorData = recipeCheck?.users as { comments_enabled?: boolean } | null
+  if (creatorData && creatorData.comments_enabled === false) {
+    return { error: 'El creador ha desactivado los comentarios en sus publicaciones.' }
+  }
+
   const payload: any = { recipe_id: recipeId, user_id: user.id, content: content.trim() }
   if (parentId) payload.parent_id = parentId
 

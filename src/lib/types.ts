@@ -14,6 +14,7 @@ export interface User {
   website_url: string | null
   validated_at: string | null
   birthdate: string | null
+  comments_enabled?: boolean
   created_at: string
 }
 
