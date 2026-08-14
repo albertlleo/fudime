@@ -89,7 +89,7 @@ export interface Comment {
 }
 
 export interface CommentWithUser extends Comment {
-  users: Pick<User, 'id' | 'display_name' | 'avatar_url'>
+  users: Pick<User, 'id' | 'display_name' | 'username' | 'avatar_url' | 'validated_at'>
   likes_count?: number
   user_has_liked?: boolean
 }

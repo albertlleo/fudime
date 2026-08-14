@@ -7,7 +7,7 @@ export async function fetchComments(recipeId: string, currentUserId?: string): P
   const supabase = await createClient()
   const { data: comments } = await supabase
     .from('comments')
-    .select('*, users!user_id(id, display_name, avatar_url)')
+    .select('*, users!user_id(id, display_name, username, avatar_url, validated_at)')
     .eq('recipe_id', recipeId)
     .order('created_at', { ascending: true })
 
@@ -53,7 +53,7 @@ export async function addComment(
   const { data: comment, error } = await supabase
     .from('comments')
     .insert(payload)
-    .select('*, users!user_id(id, display_name, avatar_url)')
+    .select('*, users!user_id(id, display_name, username, avatar_url, validated_at)')
     .single()
 
   if (error) return { error: error.message }

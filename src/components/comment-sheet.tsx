@@ -56,10 +56,17 @@ function CommentRow({
     <div className={`flex ${gap}`}>
       <Avatar user={c.users} size={avatarSize} />
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-xs font-bold" style={{ color: 'var(--brown-700)' }}>
-            {c.users.display_name}
+            {c.users.username ?? c.users.display_name}
           </span>
+          {c.users.validated_at && (
+            <svg viewBox="0 0 24 24" fill="none" className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--amber)' }}>
+              <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={1.5} />
+              <path d="M7.5 12l3 3 6-6" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
           <span className="text-[10px]" style={{ color: 'var(--brown-300)' }}>
             {timeAgo(c.created_at)}
           </span>
@@ -83,7 +90,7 @@ function CommentRow({
           </button>
           {onReply && userId && (
             <button
-              onClick={() => onReply(c.id, c.users.display_name)}
+              onClick={() => onReply(c.id, c.users.username ?? c.users.display_name)}
               className="text-[10px] font-semibold"
               style={{ color: 'var(--brown-400)' }}
             >
