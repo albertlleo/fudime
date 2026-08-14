@@ -17,7 +17,7 @@ export default async function FeedPage() {
   const recipeList = (recipes ?? []) as RecipeWithCreator[]
   const recipeIds = recipeList.map(r => r.id)
 
-  const [{ data: likes }, { data: saves }, { data: allComments }, { data: allLikes }] = await Promise.all([
+  const [{ data: likes }, { data: saves }, { data: allComments }, { data: allLikes }, { count: unreadCount }] = await Promise.all([
     recipeIds.length > 0 && user
       ? supabase.from('likes').select('recipe_id').eq('user_id', user.id).in('recipe_id', recipeIds)
       : Promise.resolve({ data: [] }),
@@ -30,6 +30,9 @@ export default async function FeedPage() {
     recipeIds.length > 0
       ? supabase.from('likes').select('recipe_id').in('recipe_id', recipeIds)
       : Promise.resolve({ data: [] }),
+    user
+      ? supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false)
+      : Promise.resolve({ count: 0 }),
   ])
 
   const likeCountMap = (allLikes ?? []).reduce<Record<string, number>>((acc, l) => {
@@ -50,6 +53,7 @@ export default async function FeedPage() {
       likeCountMap={likeCountMap}
       commentCountMap={commentCountMap}
       userId={user?.id ?? null}
+      unreadNotifCount={unreadCount ?? 0}
     />
   )
 }

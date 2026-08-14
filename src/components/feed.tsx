@@ -14,9 +14,10 @@ interface FeedProps {
   likeCountMap: Record<string, number>
   commentCountMap: Record<string, number>
   userId: string | null
+  unreadNotifCount?: number
 }
 
-export default function Feed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId }: FeedProps) {
+export default function Feed({ recipes: initialRecipes, likedIds, savedIds, likeCountMap, commentCountMap, userId, unreadNotifCount = 0 }: FeedProps) {
   const [mode, setMode] = useState<'recent' | 'trending' | 'following'>('recent')
   const [switching, setSwitching] = useState(false)
   const [recipes, setRecipes] = useState(initialRecipes)
@@ -110,6 +111,21 @@ export default function Feed({ recipes: initialRecipes, likedIds, savedIds, like
 
   return (
     <div className="relative h-dvh">
+      {/* Bell icon → notifications */}
+      <Link
+        href="/notificaciones"
+        className="absolute top-12 left-3 z-30 w-9 h-9 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center transition-colors"
+        aria-label="Notificaciones"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 01-3.46 0" />
+        </svg>
+        {unreadNotifCount > 0 && (
+          <span className="absolute top-1 right-1 w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
+        )}
+      </Link>
+
       {/* Mode tabs */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 flex bg-black/40 backdrop-blur-sm rounded-full p-0.5 gap-0.5">
         {([['recent', 'Recomendado'], ['following', 'Siguiendo']] as const).map(([m, label]) => (

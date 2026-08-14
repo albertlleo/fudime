@@ -94,7 +94,7 @@ export interface CommentWithUser extends Comment {
   user_has_liked?: boolean
 }
 
-export type NotificationType = 'like' | 'follow' | 'comment'
+export type NotificationType = 'like' | 'follow' | 'comment' | 'comment_like' | 'comment_reply' | 'new_recipe'
 
 export interface Notification {
   id: string

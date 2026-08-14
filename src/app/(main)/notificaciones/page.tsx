@@ -19,30 +19,41 @@ function notifText(n: NotificationWithDetails): string {
     case 'like': return 'dio like a tu receta'
     case 'follow': return 'empezó a seguirte'
     case 'comment': return 'comentó en tu receta'
+    case 'comment_like': return 'le gustó tu comentario'
+    case 'comment_reply': return 'respondió a tu comentario'
+    case 'new_recipe': return 'ha subido una nueva receta'
+    default: return 'interactuó contigo'
   }
 }
 
 function notifIcon(type: string) {
   if (type === 'like') return { bg: '#fff7ed', border: '#fed7aa', color: '#f59e0b', label: '♥' }
   if (type === 'follow') return { bg: '#fffbeb', border: '#fcd34d', color: '#d97706', label: '+' }
-  return { bg: '#f5f3ff', border: '#c4b5fd', color: '#7c3aed', label: '💬' }
+  if (type === 'comment') return { bg: '#f5f3ff', border: '#c4b5fd', color: '#7c3aed', label: '💬' }
+  if (type === 'comment_like') return { bg: '#fff7ed', border: '#fed7aa', color: '#f59e0b', label: '♥' }
+  if (type === 'comment_reply') return { bg: '#f5f3ff', border: '#c4b5fd', color: '#7c3aed', label: '↩' }
+  if (type === 'new_recipe') return { bg: '#f0fdf4', border: '#86efac', color: '#16a34a', label: '▶' }
+  return { bg: '#f5f5f5', border: '#e5e5e5', color: '#737373', label: '•' }
 }
 
 export default async function NotificacionesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  let notifications: NotificationWithDetails[] = []
-  try {
-    const { data } = await supabase
-      .from('notifications')
-      .select('*, actor:users!actor_id(id, display_name, avatar_url), recipe:recipes!recipe_id(id, title, thumbnail_url)')
-      .eq('user_id', user!.id)
-      .order('created_at', { ascending: false })
-      .limit(50)
-    notifications = (data ?? []) as NotificationWithDetails[]
-  } catch {}
+  const [{ data: profile }, { data: rawNotifs }] = await Promise.all([
+    user ? supabase.from('users').select('role').eq('id', user.id).single() : Promise.resolve({ data: null }),
+    user
+      ? supabase
+          .from('notifications')
+          .select('*, actor:users!actor_id(id, display_name, avatar_url), recipe:recipes!recipe_id(id, title, thumbnail_url)')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(50)
+      : Promise.resolve({ data: [] }),
+  ])
 
+  const notifications = (rawNotifs ?? []) as NotificationWithDetails[]
+  const isCreator = (profile as { role: string } | null)?.role === 'creator'
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
@@ -51,7 +62,7 @@ export default async function NotificacionesPage() {
 
       {/* Header */}
       <div className="px-5 pt-14 pb-4 flex items-center gap-3">
-        <BackButton fallback="/perfil" />
+        <BackButton fallback="/" />
         <div>
           <h1 className="text-2xl font-black" style={{ color: 'var(--brown-900)' }}>Notificaciones</h1>
           {unreadCount > 0 && (
@@ -64,19 +75,24 @@ export default async function NotificacionesPage() {
 
       {notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center px-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 text-3xl"
-            style={{ background: 'var(--brown-100)' }}>🔔</div>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+            style={{ background: 'var(--brown-100)', fontSize: '1.75rem' }}>🔔</div>
           <h2 className="font-bold text-base mb-1" style={{ color: 'var(--brown-900)' }}>Sin notificaciones</h2>
-          <p className="text-sm" style={{ color: 'var(--brown-500)' }}>Aquí aparecerán tus likes, comentarios y nuevos seguidores</p>
+          <p className="text-sm" style={{ color: 'var(--brown-500)' }}>
+            {isCreator
+              ? 'Aquí verás likes, comentarios, nuevos seguidores y nuevas recetas'
+              : 'Aquí verás cuando un creador suba una nueva receta o alguien interactúe con tus comentarios'}
+          </p>
         </div>
       ) : (
         <div className="mx-5 rounded-3xl overflow-hidden" style={{ border: '1.5px solid var(--brown-100)' }}>
           {notifications.map((n, i) => {
             const icon = notifIcon(n.type)
+            const href = n.recipe ? `/perfil/feed?start=${n.recipe.id}` : `/creador/${n.actor.id}`
             return (
               <Link
                 key={n.id}
-                href={n.recipe ? `/perfil/feed?start=${n.recipe.id}` : `/creador/${n.actor.id}`}
+                href={href}
                 className="flex items-center gap-3 px-4 py-3.5 transition-colors"
                 style={{
                   background: !n.read ? '#fffbf5' : '#fff',
@@ -104,7 +120,9 @@ export default async function NotificacionesPage() {
                   <p className="text-sm leading-snug" style={{ color: 'var(--brown-900)' }}>
                     <span className="font-bold">{n.actor.display_name}</span>
                     {' '}{notifText(n)}
-                    {n.recipe && <span className="font-semibold"> "{n.recipe.title}"</span>}
+                    {n.recipe && n.type !== 'follow' && (
+                      <span className="font-semibold"> "{n.recipe.title}"</span>
+                    )}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--brown-300)' }}>{timeAgo(n.created_at)}</p>
                 </div>
