@@ -17,15 +17,34 @@ export async function toggleCommentsEnabled(enabled: boolean): Promise<{ error?:
 export async function changePassword(formData: FormData): Promise<{ error?: string; success?: boolean }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'No autenticado' }
+  if (!user?.email) return { error: 'No autenticado' }
 
+  const currentPassword = (formData.get('current_password') as string)?.trim()
   const password = (formData.get('password') as string)?.trim()
   const confirm = (formData.get('confirm') as string)?.trim()
 
-  if (!password || password.length < 6) return { error: 'La contraseña debe tener al menos 6 caracteres.' }
+  if (!currentPassword) return { error: 'Introduce tu contraseña actual.' }
+  if (!password || password.length < 6) return { error: 'La nueva contraseña debe tener al menos 6 caracteres.' }
   if (password !== confirm) return { error: 'Las contraseñas no coinciden.' }
+  if (password === currentPassword) return { error: 'La nueva contraseña debe ser diferente a la actual.' }
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: currentPassword,
+  })
+  if (signInError) return { error: 'La contraseña actual no es correcta.' }
 
   const { error } = await supabase.auth.updateUser({ password })
+  if (error) return { error: error.message }
+  return { success: true }
+}
+
+export async function sendPasswordReset(): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return { error: 'No autenticado' }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(user.email)
   if (error) return { error: error.message }
   return { success: true }
 }
