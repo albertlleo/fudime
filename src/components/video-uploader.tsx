@@ -455,11 +455,21 @@ export default function VideoUploader() {
           <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
             Categoría <span style={{ color: '#dc2626' }}>*</span>
           </p>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map(c => (
-              <Chip key={c} label={c} emoji={CAT_EMOJIS[c.toLowerCase()] ?? '🍴'}
-                active={categories.includes(c)} onClick={() => toggleCategory(c)} />
-            ))}
+          <div className="grid grid-cols-2 gap-2">
+            {CATEGORIES.map(c => {
+              const active = categories.includes(c)
+              return (
+                <button key={c} type="button" onClick={() => toggleCategory(c)}
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
+                  style={{
+                    background: active ? '#fffbeb' : '#fff',
+                    border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
+                  }}>
+                  <span className="text-xl leading-none">{CAT_EMOJIS[c.toLowerCase()] ?? '🍴'}</span>
+                  <span className="text-[15px] font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{c}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
 
