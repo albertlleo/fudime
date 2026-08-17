@@ -429,11 +429,14 @@ export default function VideoUploader() {
 
         {/* Title — full width below cover */}
         <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-2.5" style={{ color: 'var(--brown-400)' }}>
+            Título <span style={{ color: '#dc2626' }}>*</span>
+          </p>
           <textarea
             value={title} onChange={e => setTitle(e.target.value)}
             maxLength={80} placeholder="Escribe un título..." rows={3}
-            className="w-full text-[16px] font-medium resize-none focus:outline-none bg-transparent leading-relaxed"
-            style={{ color: 'var(--brown-900)', caretColor: '#f59e0b' }}
+            className="w-full text-[14px] rounded-2xl px-4 py-3 resize-none focus:outline-none"
+            style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', caretColor: '#f59e0b' }}
           />
           <p className="text-right text-[11px] mt-1" style={{ color: 'var(--brown-300)' }}>{title.length}/80</p>
         </div>
