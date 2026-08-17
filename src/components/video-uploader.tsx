@@ -456,7 +456,7 @@ export default function VideoUploader() {
           <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
             Categoría <span style={{ color: '#dc2626' }}>*</span>
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {CATEGORIES.map(c => (
               <Chip key={c} label={c} emoji={CAT_EMOJIS[c.toLowerCase()] ?? '🍴'}
                 active={categories.includes(c)} onClick={() => toggleCategory(c)} />
@@ -469,7 +469,7 @@ export default function VideoUploader() {
           <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
             Tiempo de cocción <span style={{ color: '#dc2626' }}>*</span>
           </p>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {TIMES.map(t => (
               <Chip key={t.key} label={t.label} emoji={t.emoji}
                 active={cookTime === t.key} onClick={() => toggleTime(t.key)} />
@@ -483,7 +483,7 @@ export default function VideoUploader() {
             Dieta e intolerancias
             <span className="ml-1.5 font-normal normal-case text-[11px]" style={{ color: 'var(--brown-300)' }}>opcional</span>
           </p>
-          <div className="flex flex-wrap gap-2 mt-2.5">
+          <div className="grid grid-cols-2 gap-2 mt-2.5">
             {DIETS.map(d => (
               <Chip key={d.key} label={d.label} emoji={d.emoji}
                 active={diet.includes(d.key)} onClick={() => toggleDiet(d.key)} />
