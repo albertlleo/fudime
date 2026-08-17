@@ -229,8 +229,7 @@ export default function VideoUploader() {
         {(isUploading || isDone) && videoBlobUrlRef.current && (
           <video
             src={videoBlobUrlRef.current}
-            className="absolute inset-0 w-full h-full object-contain"
-            style={{ background: '#000' }}
+            className="absolute inset-0 w-full h-full object-cover"
             playsInline muted autoPlay loop
           />
         )}
@@ -332,7 +331,7 @@ export default function VideoUploader() {
             onClick={() => setStep(2)}
             disabled={!canGoNext}
             className="text-[15px] font-bold transition-opacity"
-            style={{ color: canGoNext ? '#f59e0b' : 'rgba(245,158,11,0.28)' }}
+            style={{ color: canGoNext ? '#ffffff' : 'rgba(255,255,255,0.3)' }}
           >
             Siguiente
           </button>
