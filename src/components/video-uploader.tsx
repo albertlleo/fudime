@@ -71,7 +71,7 @@ export default function VideoUploader() {
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null)
-  const [cropAspect, setCropAspect] = useState<number | undefined>(4 / 5)
+  const cropAspect = 4 / 5
   const onCropComplete = useCallback((_: Area, pixels: Area) => { setCroppedAreaPixels(pixels) }, [])
 
   useEffect(() => {
@@ -149,7 +149,6 @@ export default function VideoUploader() {
     setCropSrc(objectUrl)
     setCrop({ x: 0, y: 0 })
     setZoom(1)
-    setCropAspect(4 / 5)
   }
 
   async function handleCropConfirm() {
@@ -567,34 +566,6 @@ export default function VideoUploader() {
             />
           </div>
 
-          {/* Ratio chips + zoom slider */}
-          <div className="flex-shrink-0 px-4 pb-4 pt-3 flex flex-col gap-3"
-            style={{ background: 'rgba(0,0,0,0.7)', paddingBottom: 'max(28px, calc(env(safe-area-inset-bottom) + 12px))' }}>
-            <div className="flex justify-center gap-2">
-              {([
-                { label: '4:5', value: 4 / 5 },
-                { label: '1:1', value: 1 },
-                { label: '16:9', value: 16 / 9 },
-                { label: 'Libre', value: undefined },
-              ] as const).map(r => (
-                <button key={r.label} type="button"
-                  onClick={() => setCropAspect(r.value as number | undefined)}
-                  className="px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all"
-                  style={{
-                    background: cropAspect === r.value ? '#f59e0b' : 'rgba(255,255,255,0.12)',
-                    color: cropAspect === r.value ? '#000' : 'rgba(255,255,255,0.7)',
-                    border: `1px solid ${cropAspect === r.value ? '#f59e0b' : 'rgba(255,255,255,0.18)'}`,
-                  }}>
-                  {r.label}
-                </button>
-              ))}
-            </div>
-            <input type="range" min={1} max={3} step={0.01} value={zoom}
-              onChange={e => setZoom(Number(e.target.value))}
-              className="w-full accent-amber-400"
-              style={{ accentColor: '#f59e0b' }}
-            />
-          </div>
         </div>
       )}
     </div>
