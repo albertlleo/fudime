@@ -144,11 +144,11 @@ export default async function BuscarPage({
                 <Link
                   key={d.key}
                   href={`/dieta/${encodeURIComponent(d.key)}`}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                   style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
                 >
-                  <span className="text-base leading-none">{d.emoji}</span>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--brown-700)' }}>{d.label}</span>
+                  <span className="text-xl leading-none">{d.emoji}</span>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{d.label}</span>
                 </Link>
               ))}
             </div>
@@ -164,11 +164,11 @@ export default async function BuscarPage({
                 <Link
                   key={t.key}
                   href={`/tiempo/${t.key}`}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+                  className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                   style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
                 >
-                  <span className="text-base leading-none">{t.emoji}</span>
-                  <span className="text-xs font-semibold" style={{ color: 'var(--brown-700)' }}>{t.label}</span>
+                  <span className="text-xl leading-none">{t.emoji}</span>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{t.label}</span>
                 </Link>
               ))}
             </div>

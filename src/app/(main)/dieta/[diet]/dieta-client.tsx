@@ -152,10 +152,10 @@ export default function DietaClient({ activeQ, activeCat, activeTiempo, activeCo
                     const active = activeTiempo === t.key
                     return (
                       <button key={t.key} onClick={() => toggleTiempo(t.key)}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
                         style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
-                        <span className="text-base leading-none">{t.emoji}</span>
-                        <span className="text-xs font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{t.label}</span>
+                        <span className="text-xl leading-none">{t.emoji}</span>
+                        <span className="text-sm font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{t.label}</span>
                       </button>
                     )
                   })}
