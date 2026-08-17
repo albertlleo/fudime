@@ -137,10 +137,10 @@ export default function DietaClient({ activeQ, activeCat, activeTiempo, activeCo
                     const active = activeCat.toLowerCase() === cat.toLowerCase()
                     return (
                       <button key={cat} onClick={() => toggleCat(cat)}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors"
+                        className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left transition-colors"
                         style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
-                        <span className="text-base leading-none flex-shrink-0">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
-                        <span className="text-xs font-semibold leading-tight" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{cat}</span>
+                        <span className="text-xl leading-none flex-shrink-0">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
+                        <span className="text-sm font-semibold leading-tight" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{cat}</span>
                       </button>
                     )
                   })}

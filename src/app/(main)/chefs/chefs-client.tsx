@@ -212,10 +212,10 @@ export default function ChefsPageClient({
                     {CATEGORIES.map(cat => (
                       <Link key={cat}
                         href={`/categoria/${encodeURIComponent(cat.toLowerCase())}`}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl"
+                        className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                         style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
-                        <span className="text-base leading-none">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
-                        <span className="text-xs font-semibold" style={{ color: 'var(--brown-700)' }}>{cat}</span>
+                        <span className="text-xl leading-none">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
+                        <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{cat}</span>
                       </Link>
                     ))}
                   </div>
