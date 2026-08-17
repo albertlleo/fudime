@@ -117,54 +117,56 @@ export default function DietaClient({ activeQ, activeCat, activeTiempo, activeCo
       <div className="fixed inset-0 z-[70] pointer-events-none">
         <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
           <div className="w-full lg:max-w-[500px] h-full relative">
-            <div className="absolute left-0 right-0 bottom-0 pointer-events-auto transition-transform duration-300 ease-out px-5 pt-4"
+            <div className="absolute left-0 right-0 bottom-0 pointer-events-auto transition-transform duration-300 ease-out overflow-y-auto"
               style={{ background: 'var(--cream)', borderRadius: '20px 20px 0 0',
                 transform: showFilters ? 'translateY(0)' : 'translateY(100%)',
-                paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))' }}
+                maxHeight: '85dvh' }}
               onClick={e => e.stopPropagation()}>
-              <div className="flex justify-center mb-4">
-                <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
-              </div>
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="font-black text-base" style={{ color: 'var(--brown-900)' }}>Filtros</h3>
-                {hasFilters && <button onClick={clearAll} className="text-xs font-semibold" style={{ color: 'var(--terracotta)' }}>Limpiar todo</button>}
-              </div>
+              <div className="px-5 pt-4" style={{ paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))' }}>
+                <div className="flex justify-center mb-4">
+                  <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
+                </div>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-black text-base" style={{ color: 'var(--brown-900)' }}>Filtros</h3>
+                  {hasFilters && <button onClick={clearAll} className="text-xs font-semibold" style={{ color: 'var(--terracotta)' }}>Limpiar todo</button>}
+                </div>
 
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>Categoría</p>
-              <div className="grid grid-cols-2 gap-2 mb-5 max-h-48 overflow-y-auto">
-                {CATEGORIES.map(cat => {
-                  const active = activeCat.toLowerCase() === cat.toLowerCase()
-                  return (
-                    <button key={cat} onClick={() => toggleCat(cat)}
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors"
-                      style={{ background: active ? 'var(--amber)' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
-                      <span className="text-base leading-none flex-shrink-0">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
-                      <span className="text-xs font-semibold leading-tight" style={{ color: active ? '#fff' : 'var(--brown-700)' }}>{cat}</span>
-                    </button>
-                  )
-                })}
-              </div>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>Categoría</p>
+                <div className="grid grid-cols-2 gap-2 mb-5">
+                  {CATEGORIES.map(cat => {
+                    const active = activeCat.toLowerCase() === cat.toLowerCase()
+                    return (
+                      <button key={cat} onClick={() => toggleCat(cat)}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-colors"
+                        style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
+                        <span className="text-base leading-none flex-shrink-0">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
+                        <span className="text-xs font-semibold leading-tight" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{cat}</span>
+                      </button>
+                    )
+                  })}
+                </div>
 
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>Tiempo de cocción</p>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {TIMES.map(t => {
-                  const active = activeTiempo === t.key
-                  return (
-                    <button key={t.key} onClick={() => toggleTiempo(t.key)}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-colors"
-                      style={{ background: active ? 'var(--amber)' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
-                      <span className="text-base">{t.emoji}</span>
-                      <span className="text-sm font-semibold" style={{ color: active ? '#fff' : 'var(--brown-700)' }}>{t.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>Tiempo de cocción</p>
+                <div className="grid grid-cols-2 gap-2 mb-6">
+                  {TIMES.map(t => {
+                    const active = activeTiempo === t.key
+                    return (
+                      <button key={t.key} onClick={() => toggleTiempo(t.key)}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl transition-colors"
+                        style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
+                        <span className="text-base leading-none">{t.emoji}</span>
+                        <span className="text-xs font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{t.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
 
-              <button onClick={() => setShowFilters(false)}
-                className="w-full py-3.5 rounded-2xl text-sm font-bold text-white"
-                style={{ background: 'var(--brown-900)' }}>
-                Ver {activeCount} receta{activeCount !== 1 ? 's' : ''}
-              </button>
+                <button onClick={() => setShowFilters(false)}
+                  className="w-full py-3.5 rounded-2xl text-sm font-bold text-white"
+                  style={{ background: 'var(--brown-900)' }}>
+                  Ver {activeCount} receta{activeCount !== 1 ? 's' : ''}
+                </button>
+              </div>
             </div>
           </div>
         </div>
