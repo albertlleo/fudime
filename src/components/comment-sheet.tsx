@@ -387,7 +387,7 @@ export default function CommentSheet({ recipeId, userId, onClose, onCountChange 
                 maxLength={300}
                 placeholder={replyingTo ? `Responder a @${replyingTo.username}...` : 'Añade un comentario...'}
                 className="input-cream flex-1"
-                style={{ fontSize: 15 }}
+                style={{ fontSize: 16 }}
               />
               <button
                 type="submit"
