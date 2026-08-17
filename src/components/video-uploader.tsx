@@ -542,7 +542,7 @@ export default function VideoUploader() {
             </button>
             <p className="text-[15px] font-bold text-white">Editar portada</p>
             <button onClick={handleCropConfirm}
-              className="text-[15px] font-bold" style={{ color: '#f59e0b' }}>
+              className="text-[15px] font-bold" style={{ color: '#ffffff' }}>
               Listo
             </button>
           </div>
