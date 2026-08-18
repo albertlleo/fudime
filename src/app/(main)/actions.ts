@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import type { RecipeWithCreator } from '@/lib/types'
 import { PAGE_SIZE } from './constants'
@@ -61,8 +62,10 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
   if (!user) throw new Error('Not authenticated')
   if (user.id === creatorId) return { isFollowing: false }
 
-  // Try delete first — if it removes a row we were following → unfollow done
-  const { count, error: delError } = await supabase
+  // Use admin client to bypass RLS on follows table
+  const admin = createAdminClient()
+
+  const { count, error: delError } = await admin
     .from('follows')
     .delete({ count: 'exact' })
     .eq('follower_id', user.id)
@@ -74,8 +77,7 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
     return { isFollowing: false }
   }
 
-  // No row deleted → wasn't following → insert
-  const { error: insError } = await supabase
+  const { error: insError } = await admin
     .from('follows')
     .insert({ follower_id: user.id, following_id: creatorId })
 

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import CreadorClient from './creador-client'
@@ -25,6 +26,8 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
 
   const isOwnProfile = authUser?.id === id
 
+  const admin = createAdminClient()
+
   const [recipesRes, followersRes, followRowRes] = await Promise.allSettled([
     supabase
       .from('recipes')
@@ -32,12 +35,12 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
       .eq('creator_id', id)
       .eq('status', 'published')
       .order('published_at', { ascending: false }),
-    supabase
+    admin
       .from('follows')
       .select('id')
       .eq('following_id', id),
     authUser && !isOwnProfile
-      ? supabase.from('follows').select('id').eq('follower_id', authUser.id).eq('following_id', id).maybeSingle()
+      ? admin.from('follows').select('id').eq('follower_id', authUser.id).eq('following_id', id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
   ])
 
