@@ -57,42 +57,35 @@ export async function toggleSave(recipeId: string): Promise<void> {
 
 export async function toggleFollow(creatorId: string): Promise<{ isFollowing: boolean }> {
   const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) throw new Error('Not authenticated')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
   if (user.id === creatorId) return { isFollowing: false }
 
-  // Check current follow state
-  const { data: existing, error: selectError } = await supabase
+  // Try delete first — if it removes a row we were following → unfollow done
+  const { count, error: delError } = await supabase
     .from('follows')
-    .select('id')
+    .delete({ count: 'exact' })
     .eq('follower_id', user.id)
     .eq('following_id', creatorId)
-    .maybeSingle()
 
-  console.log('[toggleFollow] user:', user.id, 'creator:', creatorId, 'existing:', existing, 'selectError:', selectError)
+  if (delError) throw new Error(delError.message)
 
-  if (existing) {
-    // Unfollow
-    const { error } = await supabase
-      .from('follows')
-      .delete()
-      .eq('follower_id', user.id)
-      .eq('following_id', creatorId)
-    console.log('[toggleFollow] delete error:', error)
-    if (error) throw new Error(error.message)
+  if ((count ?? 0) > 0) {
+    // Was following → now unfollowed
     revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: false }
-  } else {
-    // Follow
-    const { error } = await supabase
-      .from('follows')
-      .insert({ follower_id: user.id, following_id: creatorId })
-    console.log('[toggleFollow] insert error:', error)
-    if (error) throw new Error(error.message)
-    await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
-    revalidatePath(`/creador/${creatorId}`)
-    return { isFollowing: true }
   }
+
+  // No row deleted → wasn't following → insert
+  const { error: insError } = await supabase
+    .from('follows')
+    .insert({ follower_id: user.id, following_id: creatorId })
+
+  if (insError) throw new Error(insError.message)
+
+  await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
+  revalidatePath(`/creador/${creatorId}`)
+  return { isFollowing: true }
 }
 
 export async function fetchFollowingRecipes(): Promise<{
