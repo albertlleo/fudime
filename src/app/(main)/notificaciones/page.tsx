@@ -36,42 +36,33 @@ function BadgeIcon({ type }: { type: string }) {
       case 'like':
       case 'comment_like':
         return (
-          <svg viewBox="0 0 24 24" fill={AMBER} className="w-2.5 h-2.5">
+          <svg viewBox="0 0 24 24" fill={AMBER} className="w-3 h-3">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>
         )
       case 'comment':
-        return (
-          <svg viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-          </svg>
-        )
       case 'comment_reply':
         return (
-          <svg viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
-            <polyline points="9 17 4 12 9 7" />
-            <path d="M20 18v-2a4 4 0 00-4-4H4" />
+          <svg viewBox="0 0 24 24" fill={AMBER} className="w-3 h-3">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
           </svg>
         )
       case 'follow':
         return (
-          <svg viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-2.5 h-2.5">
-            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-            <circle cx="8.5" cy="7" r="4" />
-            <line x1="20" y1="8" x2="20" y2="14" />
-            <line x1="23" y1="11" x2="17" y2="11" />
+          <svg viewBox="0 0 24 24" fill={AMBER} className="w-3 h-3">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
           </svg>
         )
       case 'new_recipe':
         return (
-          <svg viewBox="0 0 24 24" fill={AMBER} className="w-2.5 h-2.5">
+          <svg viewBox="0 0 24 24" fill={AMBER} className="w-3 h-3">
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
         )
       default:
         return (
-          <svg viewBox="0 0 24 24" fill={AMBER} className="w-2 h-2">
-            <circle cx="12" cy="12" r="4" />
+          <svg viewBox="0 0 24 24" fill={AMBER} className="w-3 h-3">
+            <circle cx="12" cy="12" r="6" />
           </svg>
         )
     }
@@ -94,14 +85,36 @@ export default async function NotificacionesPage() {
     user
       ? supabase
           .from('notifications')
-          .select('*, actor:users!actor_id(id, display_name, avatar_url), recipe:recipes!recipe_id(id, title, thumbnail_url, creator_id), comment:comments!comment_id(id, content)')
+          .select('*, actor:users!actor_id(id, display_name, avatar_url), recipe:recipes!recipe_id(id, title, thumbnail_url, creator_id)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(50)
       : Promise.resolve({ data: [] }),
   ])
 
-  const notifications = (rawNotifs ?? []) as NotificationWithDetails[]
+  const notifs = (rawNotifs ?? []) as any[]
+
+  // Fetch comment content separately (avoids FK join issues)
+  const commentIds = notifs
+    .filter(n => n.comment_id)
+    .map(n => n.comment_id as string)
+
+  let commentMap: Record<string, string> = {}
+  if (commentIds.length > 0) {
+    const { data: comments } = await supabase
+      .from('comments')
+      .select('id, content')
+      .in('id', commentIds)
+    for (const c of comments ?? []) {
+      commentMap[c.id] = c.content
+    }
+  }
+
+  const notifications = notifs.map(n => ({
+    ...n,
+    commentContent: n.comment_id ? (commentMap[n.comment_id] ?? null) : null,
+  })) as (NotificationWithDetails & { commentContent: string | null })[]
+
   const isCreator = (profile as { role: string } | null)?.role === 'creator'
   const unreadCount = notifications.filter(n => !n.read).length
 
@@ -189,16 +202,10 @@ export default async function NotificacionesPage() {
                     <span className="font-semibold"> "{n.recipe.title}"</span>
                   )}
                 </p>
-                {showCommentPreview(n.type) && n.comment?.content && (
-                  <p className="text-xs mt-0.5 leading-snug"
-                    style={{
-                      color: 'var(--brown-500)',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    } as React.CSSProperties}>
-                    "{n.comment.content}"
+                {showCommentPreview(n.type) && n.commentContent && (
+                  <p className="text-xs mt-0.5 leading-snug line-clamp-2"
+                    style={{ color: 'var(--brown-500)' }}>
+                    "{n.commentContent}"
                   </p>
                 )}
                 <p className="text-xs mt-0.5" style={{ color: 'var(--brown-300)' }}>{timeAgo(n.created_at)}</p>
