@@ -35,14 +35,13 @@ type CoverState =
 function Chip({ label, emoji, active, onClick }: { label: string; emoji: string; active: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
+      className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left transition-colors"
       style={{
-        background: active ? 'var(--amber)' : 'transparent',
-        color: active ? '#000' : 'var(--brown-600)',
+        background: active ? '#fffbeb' : '#fff',
         border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
       }}>
-      <span className="text-base leading-none">{emoji}</span>
-      <span className="leading-none whitespace-nowrap">{label}</span>
+      <span className="text-xl leading-none">{emoji}</span>
+      <span className="text-[15px] font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{label}</span>
     </button>
   )
 }
