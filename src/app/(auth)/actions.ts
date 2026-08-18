@@ -57,6 +57,8 @@ export async function registerAction(
   const displayName = (formData.get('display_name') as string).trim()
   const username = (formData.get('username') as string).trim().toLowerCase()
   const birthdate = formData.get('birthdate') as string
+  const country = (formData.get('country') as string)?.trim() || null
+  const city = (formData.get('city') as string)?.trim() || null
 
   if (!displayName) return { error: 'El nombre completo es obligatorio.' }
   if (!isValidUsername(username)) {
@@ -64,6 +66,8 @@ export async function registerAction(
   }
   if (!birthdate) return { error: 'La fecha de nacimiento es obligatoria.' }
   if (getAge(birthdate) < 18) return { error: 'Debes tener al menos 18 años para registrarte.' }
+  if (!country) return { error: 'El país es obligatorio.' }
+  if (!city) return { error: 'La ciudad es obligatoria.' }
 
   // Check username availability
   const admin = createAdminClient()
@@ -99,6 +103,8 @@ export async function registerAction(
     display_name: displayName,
     username,
     birthdate,
+    country,
+    city,
     role: 'consumer',
     validated_at: null,
   }, { onConflict: 'id' })

@@ -114,6 +114,48 @@ export default function EditForm({ user }: { user: User }) {
           defaultValue={user.display_name} className="input-cream" />
       </div>
 
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+            País
+          </label>
+          <select name="country" className="input-cream" style={{ colorScheme: 'light' }}
+            defaultValue={user.country ?? ''}>
+            <option value="">Selecciona</option>
+            <option value="España">España</option>
+            <option value="México">México</option>
+            <option value="Argentina">Argentina</option>
+            <option value="Colombia">Colombia</option>
+            <option value="Chile">Chile</option>
+            <option value="Perú">Perú</option>
+            <option value="Venezuela">Venezuela</option>
+            <option value="Ecuador">Ecuador</option>
+            <option value="Bolivia">Bolivia</option>
+            <option value="Uruguay">Uruguay</option>
+            <option value="Paraguay">Paraguay</option>
+            <option value="Costa Rica">Costa Rica</option>
+            <option value="Guatemala">Guatemala</option>
+            <option value="Cuba">Cuba</option>
+            <option value="Honduras">Honduras</option>
+            <option value="El Salvador">El Salvador</option>
+            <option value="Nicaragua">Nicaragua</option>
+            <option value="Panamá">Panamá</option>
+            <option value="Rep. Dominicana">Rep. Dominicana</option>
+            <option value="Puerto Rico">Puerto Rico</option>
+            <option value="Estados Unidos">Estados Unidos</option>
+            <option value="Andorra">Andorra</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
+            Ciudad
+          </label>
+          <input name="city" type="text" maxLength={80}
+            defaultValue={user.city ?? ''} placeholder="Barcelona" className="input-cream" />
+        </div>
+      </div>
+
       <div>
         <label className="block text-sm font-semibold mb-1.5" style={{ color: 'var(--brown-700)' }}>
           Nombre de usuario

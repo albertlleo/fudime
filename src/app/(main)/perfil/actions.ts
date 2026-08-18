@@ -41,6 +41,8 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
   const rawUsername = (formData.get('username') as string)?.trim().toLowerCase()
   const username = rawUsername && /^[a-z0-9_]{3,20}$/.test(rawUsername) ? rawUsername : undefined
   const bio = (formData.get('bio') as string)?.trim() || null
+  const country = (formData.get('country') as string)?.trim() || null
+  const city = (formData.get('city') as string)?.trim() || null
   let website_url = (formData.get('website_url') as string)?.trim() || null
   if (website_url && !/^https?:\/\//i.test(website_url)) {
     website_url = 'https://' + website_url
@@ -64,6 +66,8 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
     ...(display_name && { display_name }),
     ...(username && { username }),
     bio,
+    country,
+    city,
     website_url,
     avatar_url,
   }).eq('id', user.id)

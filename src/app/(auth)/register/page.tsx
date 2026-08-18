@@ -128,6 +128,48 @@ export default function RegisterPage() {
               minLength={6} placeholder="Mínimo 6 caracteres" className="input-cream" />
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="country" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
+                País <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <select id="country" name="country" required className="input-cream"
+                style={{ colorScheme: 'light' }}>
+                <option value="">Selecciona</option>
+                <option value="España">España</option>
+                <option value="México">México</option>
+                <option value="Argentina">Argentina</option>
+                <option value="Colombia">Colombia</option>
+                <option value="Chile">Chile</option>
+                <option value="Perú">Perú</option>
+                <option value="Venezuela">Venezuela</option>
+                <option value="Ecuador">Ecuador</option>
+                <option value="Bolivia">Bolivia</option>
+                <option value="Uruguay">Uruguay</option>
+                <option value="Paraguay">Paraguay</option>
+                <option value="Costa Rica">Costa Rica</option>
+                <option value="Guatemala">Guatemala</option>
+                <option value="Cuba">Cuba</option>
+                <option value="Honduras">Honduras</option>
+                <option value="El Salvador">El Salvador</option>
+                <option value="Nicaragua">Nicaragua</option>
+                <option value="Panamá">Panamá</option>
+                <option value="Rep. Dominicana">Rep. Dominicana</option>
+                <option value="Puerto Rico">Puerto Rico</option>
+                <option value="Estados Unidos">Estados Unidos</option>
+                <option value="Andorra">Andorra</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="city" className="block text-sm font-medium mb-1.5" style={{ color: 'var(--brown-700)' }}>
+                Ciudad <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <input id="city" name="city" type="text" required
+                placeholder="Barcelona" className="input-cream" maxLength={80} />
+            </div>
+          </div>
+
           {/* Creator disclaimer */}
           <div className="rounded-2xl p-3.5" style={{ background: 'var(--brown-50, #fdfaf7)', border: '1.5px solid var(--brown-100)' }}>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--brown-500)' }}>
