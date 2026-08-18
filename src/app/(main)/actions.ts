@@ -57,17 +57,19 @@ export async function toggleSave(recipeId: string): Promise<void> {
 
 export async function toggleFollow(creatorId: string): Promise<{ isFollowing: boolean }> {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) throw new Error('Not authenticated')
   if (user.id === creatorId) return { isFollowing: false }
 
   // Check current follow state
-  const { data: existing } = await supabase
+  const { data: existing, error: selectError } = await supabase
     .from('follows')
     .select('id')
     .eq('follower_id', user.id)
     .eq('following_id', creatorId)
     .maybeSingle()
+
+  console.log('[toggleFollow] user:', user.id, 'creator:', creatorId, 'existing:', existing, 'selectError:', selectError)
 
   if (existing) {
     // Unfollow
@@ -76,6 +78,7 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
       .delete()
       .eq('follower_id', user.id)
       .eq('following_id', creatorId)
+    console.log('[toggleFollow] delete error:', error)
     if (error) throw new Error(error.message)
     revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: false }
@@ -84,6 +87,7 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
     const { error } = await supabase
       .from('follows')
       .insert({ follower_id: user.id, following_id: creatorId })
+    console.log('[toggleFollow] insert error:', error)
     if (error) throw new Error(error.message)
     await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
     revalidatePath(`/creador/${creatorId}`)
