@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import RecipeGrid from '@/components/recipe-grid'
+import CreadorClient from './creador-client'
 import FollowButton from './follow-button'
 import ShareCreator from './share-creator'
 import BackButton from '@/components/back-button'
@@ -164,14 +164,8 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
         )}
       </div>
 
-      {/* Recipe grid — clicks open creator feed starting at the tapped recipe */}
-      <RecipeGrid
-        recipes={recipeList}
-        emptyIcon="🍳"
-        emptyTitle="Sin recetas aún"
-        emptyText="Este creador no ha publicado recetas todavía"
-        feedBase={`/creador/${id}/feed`}
-      />
+      {/* Search + filter + recipe grid */}
+      <CreadorClient recipes={recipeList} creatorId={id} />
     </div>
   )
 }
