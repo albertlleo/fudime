@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { toggleFollow } from '@/app/(main)/actions'
 
 export default function FollowButton({
@@ -14,44 +14,43 @@ export default function FollowButton({
 }) {
   const [following, setFollowing] = useState(initialFollowing)
   const [count, setCount] = useState(initialCount)
-  const [pending, startTransition] = useTransition()
+  const [loading, setLoading] = useState(false)
 
-  function handleToggle() {
-    if (pending) return
+  async function handleToggle() {
+    if (loading) return
     const prev = following
     const next = !prev
 
     // Optimistic update
     setFollowing(next)
     setCount(c => c + (next ? 1 : -1))
+    setLoading(true)
 
-    startTransition(async () => {
-      try {
-        const { isFollowing } = await toggleFollow(creatorId)
-        // Sync to actual DB state (corrects any mismatch)
-        setFollowing(isFollowing)
-        if (isFollowing !== next) {
-          setCount(c => c - (next ? 1 : -1) + (isFollowing ? 1 : -1))
-        }
-      } catch {
-        // Rollback on error
-        setFollowing(prev)
-        setCount(c => c + (prev ? 1 : -1))
-      }
-    })
+    try {
+      const { isFollowing } = await toggleFollow(creatorId)
+      // Sync to real DB state
+      setFollowing(isFollowing)
+      setCount(c => c + (isFollowing ? 1 : -1) - (next ? 1 : -1))
+    } catch {
+      // Rollback
+      setFollowing(prev)
+      setCount(c => c + (prev ? 1 : -1) - (next ? 1 : -1))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <button
       onClick={handleToggle}
-      disabled={pending}
+      disabled={loading}
       className="w-full py-2.5 rounded-2xl font-semibold text-sm transition-all active:scale-[0.98] disabled:opacity-60"
       style={following
         ? { background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }
         : { background: 'var(--amber)', color: '#000' }
       }
     >
-      {following ? 'Siguiendo' : 'Seguir'}
+      {loading ? '...' : following ? 'Siguiendo' : 'Seguir'}
     </button>
   )
 }
