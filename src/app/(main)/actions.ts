@@ -71,8 +71,6 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
   if (delError) throw new Error(delError.message)
 
   if ((count ?? 0) > 0) {
-    // Was following → now unfollowed
-    revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: false }
   }
 
@@ -84,7 +82,6 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
   if (insError) throw new Error(insError.message)
 
   await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
-  revalidatePath(`/creador/${creatorId}`)
   return { isFollowing: true }
 }
 

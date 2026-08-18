@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { toggleFollow } from '@/app/(main)/actions'
 
 export default function FollowButton({
@@ -12,6 +13,7 @@ export default function FollowButton({
   isFollowing: boolean
   followersCount: number
 }) {
+  const router = useRouter()
   const [following, setFollowing] = useState(initialFollowing)
   const [count, setCount] = useState(initialCount)
   const [loading, setLoading] = useState(false)
@@ -21,18 +23,16 @@ export default function FollowButton({
     const prev = following
     const next = !prev
 
-    // Optimistic update
     setFollowing(next)
     setCount(c => c + (next ? 1 : -1))
     setLoading(true)
 
     try {
       const { isFollowing } = await toggleFollow(creatorId)
-      // Sync to real DB state
       setFollowing(isFollowing)
       setCount(c => c + (isFollowing ? 1 : -1) - (next ? 1 : -1))
+      router.refresh()
     } catch {
-      // Rollback
       setFollowing(prev)
       setCount(c => c + (prev ? 1 : -1) - (next ? 1 : -1))
     } finally {
