@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { v2 as cloudinary } from 'cloudinary'
 
@@ -46,9 +47,11 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
   }
   const avatar_url = (formData.get('avatar_url') as string)?.trim() || null
 
+  const admin = createAdminClient()
+
   // Check username uniqueness (skip if unchanged)
   if (username) {
-    const { data: existing } = await supabase
+    const { data: existing } = await admin
       .from('users')
       .select('id')
       .eq('username', username)
@@ -57,7 +60,7 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
     if (existing) return { error: 'Este nombre de usuario ya está en uso. Elige otro.' }
   }
 
-  const { error: dbError } = await supabase.from('users').update({
+  const { error: dbError } = await admin.from('users').update({
     ...(display_name && { display_name }),
     ...(username && { username }),
     bio,
@@ -65,7 +68,10 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
     avatar_url,
   }).eq('id', user.id)
 
-  if (dbError) return { error: 'Error al guardar los cambios.' }
+  if (dbError) {
+    console.error('[updateProfile]', dbError.code, dbError.message, dbError.details)
+    return { error: dbError.message || 'Error al guardar los cambios.' }
+  }
 
   return { success: true }
 }
