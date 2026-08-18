@@ -426,7 +426,7 @@ export default function VideoUploader() {
         </div>
 
         {/* Title — full width below cover */}
-        <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+        <div className="px-4 pt-6 pb-2" style={{ borderBottom: '1px solid var(--brown-100)' }}>
           <p className="text-[11px] font-bold uppercase tracking-widest mb-2.5" style={{ color: 'var(--brown-400)' }}>
             Título <span style={{ color: '#dc2626' }}>*</span>
           </p>
@@ -436,7 +436,7 @@ export default function VideoUploader() {
             className="w-full text-[14px] rounded-2xl px-4 py-3 resize-none focus:outline-none"
             style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', caretColor: '#f59e0b' }}
           />
-          <p className="text-right text-[11px] mt-1" style={{ color: 'var(--brown-300)' }}>{title.length}/80</p>
+          <p className="text-right text-[11px] mt-1 mb-1" style={{ color: 'var(--brown-300)' }}>{title.length}/80</p>
         </div>
 
         {/* Description */}
