@@ -84,23 +84,25 @@ export default function ConsumerProfile({
       </div>
 
       {/* Header: avatar + nom + username */}
-      <div className="pt-24 pb-5 px-5">
+      <div className="pt-24 pb-5 px-5 flex items-center gap-4">
         {user.avatar_url ? (
           <img src={user.avatar_url} alt={user.display_name}
-            className="w-20 h-20 rounded-full object-cover mb-3"
+            className="w-20 h-20 rounded-full object-cover flex-shrink-0"
             style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
         ) : (
-          <div className="w-20 h-20 rounded-full flex items-center justify-center text-xl font-black text-black mb-3"
+          <div className="w-20 h-20 rounded-full flex items-center justify-center text-xl font-black text-black flex-shrink-0"
             style={{ background: 'var(--amber)', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}>
             {initials}
           </div>
         )}
-        <h1 className="text-xl font-black leading-tight" style={{ color: 'var(--brown-900)' }}>
-          {user.display_name}
-        </h1>
-        <span className="text-sm mt-0.5 block" style={{ color: 'var(--brown-400)' }}>
-          @{user.username ?? user.display_name}
-        </span>
+        <div className="min-w-0">
+          <h1 className="text-xl font-black leading-tight" style={{ color: 'var(--brown-900)' }}>
+            {user.display_name}
+          </h1>
+          <span className="text-sm mt-0.5 block" style={{ color: 'var(--brown-400)' }}>
+            @{user.username ?? user.display_name}
+          </span>
+        </div>
       </div>
 
       {/* Siguiendo */}
