@@ -24,7 +24,7 @@ export default async function FolderPage({ params }: { params: Promise<{ id: str
     supabase.from('saves')
       .select('recipe_id, recipes(*, users!creator_id(id, display_name, avatar_url, validated_at))')
       .eq('user_id', user.id)
-      .neq('folder_id', id)
+      .or(`folder_id.is.null,folder_id.neq.${id}`)
       .order('saved_at', { ascending: false }),
   ])
 
