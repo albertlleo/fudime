@@ -80,6 +80,27 @@ export async function updateProfile(formData: FormData): Promise<{ error?: strin
   return { success: true }
 }
 
+export async function createFolder(name: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const admin = createAdminClient()
+  const { error } = await admin.from('folders').insert({ user_id: user.id, name: name.trim() })
+  if (error) return { error: error.message }
+  return {}
+}
+
+export async function deleteFolder(folderId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const admin = createAdminClient()
+  await admin.from('saves').update({ folder_id: null }).eq('folder_id', folderId).eq('user_id', user.id)
+  const { error } = await admin.from('folders').delete().eq('id', folderId).eq('user_id', user.id)
+  if (error) return { error: error.message }
+  return {}
+}
+
 export async function deleteRecipe(recipeId: string): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

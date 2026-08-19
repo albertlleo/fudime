@@ -106,14 +106,12 @@ export default function BottomNav({ notifCount = 0, isCreator = false }: { notif
   const items = tabs
     .filter(tab => tab.href !== '/subir' || isCreator)
     .map(tab => {
-      // Consumers: swap "Perfil" → "Cuenta" → /perfil/configuracion
+      // Consumers: "Perfil" → /perfil (configuracion accessible from gear in profile page)
       if (tab.href === '/perfil' && !isCreator) {
         return {
           ...tab,
-          href: '/perfil/configuracion',
-          label: 'Cuenta',
-          icon: cuentaIcon,
-          iconFilled: cuentaIconFilled,
+          href: '/perfil',
+          label: 'Perfil',
           active: pathname.startsWith('/perfil'),
         }
       }
@@ -146,7 +144,7 @@ export default function BottomNav({ notifCount = 0, isCreator = false }: { notif
                 style={{ color: active ? 'var(--brown-700)' : 'var(--brown-300)' }}>
                 {label}
               </span>
-              {href === '/perfil/configuracion' && notifCount > 0 && (
+              {href === '/perfil' && notifCount > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
               )}
             </Link>
@@ -179,7 +177,7 @@ export default function BottomNav({ notifCount = 0, isCreator = false }: { notif
                 background: active ? 'rgba(245,158,11,0.1)' : 'transparent',
               }}>
               {active ? iconFilled : icon}
-              {href === '/perfil/configuracion' && notifCount > 0 && (
+              {href === '/perfil' && notifCount > 0 && (
                 <span className="absolute top-2 right-2 w-2 h-2 rounded-full" style={{ background: '#dc2626' }} />
               )}
             </Link>
