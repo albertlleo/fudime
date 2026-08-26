@@ -6,6 +6,7 @@ import { publishRecipe } from './actions'
 import FolderGrid from './folder-grid'
 import VerifiedBadge from '@/components/verified-badge'
 import WebsiteLink from '@/components/website-link'
+import { DIETS } from '@/lib/categories'
 import type { User, Recipe } from '@/lib/types'
 import type { FolderInfo } from './consumer-profile'
 
@@ -60,6 +61,7 @@ export default function CreatorProfile({
   const [recipes, setRecipes] = useState(initialRecipes)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('todas')
+  const [dietFilter, setDietFilter] = useState<string | null>(null)
 
   const initials = user.display_name
     .split(' ').map(w => w[0] ?? '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'
@@ -70,12 +72,13 @@ export default function CreatorProfile({
     let list = recipes
     if (filter === 'publicadas') list = list.filter(r => r.status === 'published')
     if (filter === 'borradores') list = list.filter(r => r.status !== 'published')
+    if (dietFilter) list = list.filter(r => r.diet?.includes(dietFilter))
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(r => r.title.toLowerCase().includes(q))
     }
     return list
-  }, [recipes, filter, search])
+  }, [recipes, filter, dietFilter, search])
 
   async function handlePublish(id: string) {
     const result = await publishRecipe(id)
@@ -220,6 +223,23 @@ export default function CreatorProfile({
                   {f}
                 </button>
               ))}
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
+              {DIETS.map(d => {
+                const active = dietFilter === d.key
+                return (
+                  <button key={d.key}
+                    onClick={() => setDietFilter(active ? null : d.key)}
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors"
+                    style={{
+                      background: active ? 'var(--amber)' : 'var(--brown-100)',
+                      color: active ? '#000' : 'var(--brown-600)',
+                    }}>
+                    <span>{d.emoji}</span>
+                    {d.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
