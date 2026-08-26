@@ -7,7 +7,7 @@ import VerifiedBadge from '@/components/verified-badge'
 import TrendingCard from '@/components/trending-card'
 import type { User, RecipeWithCreator } from '@/lib/types'
 
-import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES } from '@/lib/categories'
+import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES, isLongLabel } from '@/lib/categories'
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -215,7 +215,7 @@ export default function ChefsPageClient({
                         className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                         style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
                         <span className="text-xl leading-none">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
-                        <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{cat}</span>
+                        <span className={`${isLongLabel(cat) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{cat}</span>
                       </Link>
                     ))}
                   </div>
@@ -233,7 +233,7 @@ export default function ChefsPageClient({
                         className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                         style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
                         <span className="text-xl leading-none">{d.emoji}</span>
-                        <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{d.label}</span>
+                        <span className={`${isLongLabel(d.label) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{d.label}</span>
                       </Link>
                     ))}
                   </div>
@@ -251,7 +251,7 @@ export default function ChefsPageClient({
                         className="flex items-center gap-2.5 px-4 py-3 rounded-2xl"
                         style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
                         <span className="text-xl leading-none">{t.emoji}</span>
-                        <span className="text-sm font-semibold" style={{ color: 'var(--brown-700)' }}>{t.label}</span>
+                        <span className={`${isLongLabel(t.label) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{t.label}</span>
                       </Link>
                     ))}
                   </div>

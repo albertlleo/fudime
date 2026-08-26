@@ -26,3 +26,8 @@ export const TIMES = [
   { key: '30-60', label: '30–60 min', emoji: '⏱️' },
   { key: 'mas-1h', label: 'Más de 1 hora', emoji: '🍳' },
 ]
+
+// Labels with >14 chars that wrap to 2 lines in a 2-col mobile grid
+export function isLongLabel(label: string): boolean {
+  return label.length > 14
+}

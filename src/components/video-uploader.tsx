@@ -4,7 +4,7 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 import Cropper from 'react-easy-crop'
 import type { Area, Point } from 'react-easy-crop'
 import { getUploadSignature, getImageUploadSignature, createRecipe } from '@/app/(main)/subir/actions'
-import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES } from '@/lib/categories'
+import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES, isLongLabel } from '@/lib/categories'
 
 async function getCroppedBlob(imageSrc: string, pixelCrop: Area): Promise<Blob> {
   const image = new Image()
@@ -41,7 +41,7 @@ function Chip({ label, emoji, active, onClick }: { label: string; emoji: string;
         border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
       }}>
       <span className="text-xl leading-none">{emoji}</span>
-      <span className="text-[15px] font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{label}</span>
+      <span className={`${isLongLabel(label) ? 'text-[11px] sm:text-[15px]' : 'text-[15px]'} font-semibold leading-tight`} style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{label}</span>
     </button>
   )
 }

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { updateRecipe } from './actions'
 import { getImageUploadSignature } from '@/app/(main)/subir/actions'
 import type { Recipe } from '@/lib/types'
-import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES } from '@/lib/categories'
+import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES, isLongLabel } from '@/lib/categories'
 
 function normalizeTag(t: string) {
   return CATEGORIES.find(c => c.toLowerCase() === t.toLowerCase()) ?? t
@@ -33,7 +33,7 @@ function IconGrid({ options, selected, onToggle, single = false }: {
               border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
             }}>
             <span className="text-lg leading-none flex-shrink-0">{emoji}</span>
-            <span className="leading-tight">{label}</span>
+            <span className={`${isLongLabel(label) ? 'text-[11px] sm:text-sm' : 'text-sm'} leading-tight`}>{label}</span>
           </button>
         )
       })}
