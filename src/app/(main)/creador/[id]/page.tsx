@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import WebsiteLink from '@/components/website-link'
 import CreadorClient from './creador-client'
 import FollowButton from './follow-button'
 import ShareCreator from './share-creator'
@@ -118,15 +119,9 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
 
             {creator.website_url && (
               <div className="mt-2.5">
-                <a href={creator.website_url} target="_blank" rel="noopener noreferrer"
+                <WebsiteLink url={creator.website_url}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-opacity active:opacity-60"
-                  style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
-                  </svg>
-                  {new URL(creator.website_url).hostname.replace('www.', '')}
-                </a>
+                  style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }} />
               </div>
             )}
           </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { publishRecipe, createFolder, deleteFolder } from './actions'
 import VerifiedBadge from '@/components/verified-badge'
+import WebsiteLink from '@/components/website-link'
 import type { User, Recipe } from '@/lib/types'
 import type { FolderInfo } from './consumer-profile'
 
@@ -200,15 +201,9 @@ export default function CreatorProfile({
         </div>
         {user.website_url && (
           <div className="mt-3">
-            <a href={user.website_url} target="_blank" rel="noopener noreferrer"
+            <WebsiteLink url={user.website_url}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-opacity active:opacity-60"
-              style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
-              </svg>
-              {(() => { try { return new URL(user.website_url).hostname.replace('www.', '') } catch { return user.website_url } })()}
-            </a>
+              style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-700)' }} />
           </div>
         )}
       </div>
