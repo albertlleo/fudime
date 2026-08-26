@@ -6,7 +6,7 @@ import { publishRecipe } from './actions'
 import FolderGrid from './folder-grid'
 import VerifiedBadge from '@/components/verified-badge'
 import WebsiteLink from '@/components/website-link'
-import { DIETS } from '@/lib/categories'
+import { DIETS, TIMES } from '@/lib/categories'
 import type { User, Recipe } from '@/lib/types'
 import type { FolderInfo } from './consumer-profile'
 
@@ -62,23 +62,27 @@ export default function CreatorProfile({
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('todas')
   const [dietFilter, setDietFilter] = useState<string | null>(null)
+  const [tiempoFilter, setTiempoFilter] = useState<string | null>(null)
+  const [showFilters, setShowFilters] = useState(false)
 
   const initials = user.display_name
     .split(' ').map(w => w[0] ?? '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'
 
   const publishedCount = recipes.filter(r => r.status === 'published').length
+  const activeFilterCount = (dietFilter ? 1 : 0) + (tiempoFilter ? 1 : 0)
 
   const filteredRecipes = useMemo(() => {
     let list = recipes
     if (filter === 'publicadas') list = list.filter(r => r.status === 'published')
     if (filter === 'borradores') list = list.filter(r => r.status !== 'published')
     if (dietFilter) list = list.filter(r => r.diet?.includes(dietFilter))
+    if (tiempoFilter) list = list.filter(r => r.cook_time === tiempoFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(r => r.title.toLowerCase().includes(q))
     }
     return list
-  }, [recipes, filter, dietFilter, search])
+  }, [recipes, filter, dietFilter, tiempoFilter, search])
 
   async function handlePublish(id: string) {
     const result = await publishRecipe(id)
@@ -201,17 +205,39 @@ export default function CreatorProfile({
       {tab === 'recetas' && (
         <div>
           {/* Search + filter */}
-          <div className="px-4 pt-4 pb-3 flex flex-col gap-3">
-            <div className="relative">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--brown-400)' }}>
-                <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-              </svg>
-              <input type="search" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Buscar mis recetas..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl text-sm focus:outline-none"
-                style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', caretColor: '#f59e0b' }} />
+          <div className="px-4 pt-4 pb-2 flex flex-col gap-2.5">
+            {/* Row 1: search bar + filter button */}
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--brown-300)' }}>
+                  <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+                </svg>
+                <input type="search" value={search} onChange={e => setSearch(e.target.value)}
+                  placeholder="Buscar mis recetas..."
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none"
+                  style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', fontSize: 16 }} />
+              </div>
+              <button onClick={() => setShowFilters(true)}
+                className="relative flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-colors"
+                style={{
+                  background: activeFilterCount > 0 ? 'var(--amber)' : '#fff',
+                  border: `1.5px solid ${activeFilterCount > 0 ? 'var(--amber)' : 'var(--brown-100)'}`,
+                }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+                  className="w-4.5 h-4.5" style={{ color: activeFilterCount > 0 ? '#fff' : 'var(--brown-500)' }}>
+                  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+                </svg>
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                    style={{ background: '#dc2626' }}>
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
             </div>
+
+            {/* Row 2: todas/publicadas/borradores pills */}
             <div className="flex gap-2">
               {(['todas', 'publicadas', 'borradores'] as Filter[]).map(f => (
                 <button key={f} onClick={() => setFilter(f)}
@@ -224,23 +250,26 @@ export default function CreatorProfile({
                 </button>
               ))}
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
-              {DIETS.map(d => {
-                const active = dietFilter === d.key
-                return (
-                  <button key={d.key}
-                    onClick={() => setDietFilter(active ? null : d.key)}
-                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors"
-                    style={{
-                      background: active ? 'var(--amber)' : 'var(--brown-100)',
-                      color: active ? '#000' : 'var(--brown-600)',
-                    }}>
-                    <span>{d.emoji}</span>
-                    {d.label}
-                  </button>
-                )
-              })}
-            </div>
+
+            {/* Active filter pills */}
+            {(dietFilter || tiempoFilter) && (
+              <div className="flex flex-wrap gap-2 items-center">
+                {dietFilter && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
+                    style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
+                    {DIETS.find(d => d.key === dietFilter)?.emoji} {DIETS.find(d => d.key === dietFilter)?.label}
+                    <button onClick={() => setDietFilter(null)} className="leading-none">×</button>
+                  </span>
+                )}
+                {tiempoFilter && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
+                    style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
+                    {TIMES.find(t => t.key === tiempoFilter)?.emoji} {TIMES.find(t => t.key === tiempoFilter)?.label}
+                    <button onClick={() => setTiempoFilter(null)} className="leading-none">×</button>
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {filteredRecipes.length === 0 ? (
@@ -264,6 +293,91 @@ export default function CreatorProfile({
           <FolderGrid folders={initialFolders} />
         </div>
       )}
+
+      {/* Filter sheet backdrop */}
+      <div className="fixed inset-0 z-[60] transition-opacity duration-300"
+        style={{ background: 'rgba(0,0,0,0.45)', opacity: showFilters ? 1 : 0, pointerEvents: showFilters ? 'auto' : 'none' }}
+        onClick={() => setShowFilters(false)} />
+
+      {/* Filter sheet */}
+      <div className="fixed inset-0 z-[70] pointer-events-none">
+        <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
+          <div className="w-full lg:max-w-[500px] h-full relative">
+            <div className="absolute left-0 right-0 bottom-0 pointer-events-auto transition-transform duration-300 ease-out px-5 pt-4"
+              style={{
+                background: 'var(--cream)', borderRadius: '20px 20px 0 0',
+                transform: showFilters ? 'translateY(0)' : 'translateY(100%)',
+                paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))',
+              }}
+              onClick={e => e.stopPropagation()}>
+
+              <div className="flex justify-center mb-4">
+                <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
+              </div>
+
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="font-black text-base" style={{ color: 'var(--brown-900)' }}>Filtros</h3>
+                {activeFilterCount > 0 && (
+                  <button onClick={() => { setDietFilter(null); setTiempoFilter(null) }}
+                    className="text-xs font-semibold" style={{ color: 'var(--terracotta)' }}>
+                    Limpiar todo
+                  </button>
+                )}
+              </div>
+
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
+                Dietas e intolerancias
+              </p>
+              <div className="grid grid-cols-2 gap-2 mb-5">
+                {DIETS.map(d => {
+                  const active = dietFilter === d.key
+                  return (
+                    <button key={d.key} onClick={() => setDietFilter(active ? null : d.key)}
+                      className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
+                      style={{
+                        background: active ? '#fffbeb' : '#fff',
+                        border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
+                      }}>
+                      <span className="text-xl leading-none">{d.emoji}</span>
+                      <span className="text-sm font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>
+                        {d.label}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
+                Tiempo de cocción
+              </p>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                {TIMES.map(t => {
+                  const active = tiempoFilter === t.key
+                  return (
+                    <button key={t.key} onClick={() => setTiempoFilter(active ? null : t.key)}
+                      className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
+                      style={{
+                        background: active ? '#fffbeb' : '#fff',
+                        border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
+                      }}>
+                      <span className="text-xl leading-none">{t.emoji}</span>
+                      <span className="text-sm font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>
+                        {t.label}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <button onClick={() => setShowFilters(false)}
+                className="w-full py-3.5 rounded-2xl text-sm font-bold text-white"
+                style={{ background: 'var(--brown-900)' }}>
+                Ver {filteredRecipes.length} receta{filteredRecipes.length !== 1 ? 's' : ''}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
