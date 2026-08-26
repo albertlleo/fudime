@@ -46,6 +46,7 @@ export default async function PerfilPage() {
       id: f.id, name: f.name,
       count: countMap[f.id] ?? 0,
       cover: coverMap[f.id] ?? null,
+      cover_url: f.cover_url ?? null,
     }))
 
     return <ConsumerProfile user={user} followingCount={followingCount ?? 0} folders={folders} />
@@ -78,6 +79,7 @@ export default async function PerfilPage() {
     id: f.id, name: f.name,
     count: countMap[f.id] ?? 0,
     cover: coverMap[f.id] ?? null,
+    cover_url: f.cover_url ?? null,
   }))
 
   return (

@@ -1,5 +1,6 @@
 'use server'
 
+import crypto from 'crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
@@ -99,6 +100,26 @@ export async function deleteFolder(folderId: string): Promise<{ error?: string }
   const { error } = await admin.from('folders').delete().eq('id', folderId).eq('user_id', user.id)
   if (error) return { error: error.message }
   return {}
+}
+
+export async function updateFolder(folderId: string, updates: { name?: string; cover_url?: string }): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const admin = createAdminClient()
+  const { error } = await admin.from('folders').update(updates).eq('id', folderId).eq('user_id', user.id)
+  if (error) return { error: error.message }
+  return {}
+}
+
+export async function getFolderCoverSignature(): Promise<{
+  signature: string; timestamp: number; folder: string; cloudName: string; apiKey: string
+}> {
+  const timestamp = Math.round(Date.now() / 1000)
+  const folder = 'fudime/folders'
+  const toSign = `folder=${folder}&timestamp=${timestamp}${process.env.CLOUDINARY_API_SECRET!}`
+  const signature = crypto.createHash('sha1').update(toSign).digest('hex')
+  return { signature, timestamp, folder, cloudName: process.env.CLOUDINARY_CLOUD_NAME!, apiKey: process.env.CLOUDINARY_API_KEY! }
 }
 
 export async function deleteRecipe(recipeId: string): Promise<{ error?: string }> {

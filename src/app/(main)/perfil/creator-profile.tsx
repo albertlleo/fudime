@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useTransition, useRef, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { publishRecipe, createFolder, deleteFolder } from './actions'
+import { publishRecipe } from './actions'
+import FolderGrid from './folder-grid'
 import VerifiedBadge from '@/components/verified-badge'
 import WebsiteLink from '@/components/website-link'
 import type { User, Recipe } from '@/lib/types'
@@ -40,40 +40,6 @@ function RecipeCard({ recipe, onPublish }: { recipe: Recipe; onPublish: (id: str
   )
 }
 
-// ── Folder card ────────────────────────────────────────────────────────────────
-function FolderCard({ folder, editMode, onDelete }: { folder: FolderInfo; editMode: boolean; onDelete: () => void }) {
-  return (
-    <div className="relative">
-      <Link href={editMode ? '#' : `/perfil/carpeta/${folder.id}`}
-        onClick={e => { if (editMode) e.preventDefault() }}
-        className="block rounded-2xl overflow-hidden transition-opacity active:opacity-70"
-        style={{ border: '1.5px solid var(--brown-100)', opacity: editMode ? 0.85 : 1 }}>
-        <div className="relative w-full" style={{ paddingTop: '75%' }}>
-          {folder.cover
-            ? <img src={folder.cover} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            : <div className="absolute inset-0 flex items-center justify-center text-3xl" style={{ background: 'var(--brown-100)' }}>📁</div>
-          }
-        </div>
-        <div className="px-3 py-2.5" style={{ background: '#fff' }}>
-          <p className="text-sm font-semibold truncate" style={{ color: 'var(--brown-900)' }}>{folder.name}</p>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--brown-400)' }}>
-            {folder.count} receta{folder.count !== 1 ? 's' : ''}
-          </p>
-        </div>
-      </Link>
-      {editMode && (
-        <button onClick={onDelete}
-          className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
-          style={{ background: '#dc2626' }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
-      )}
-    </div>
-  )
-}
-
 // ── Main component ─────────────────────────────────────────────────────────────
 export default function CreatorProfile({
   user,
@@ -88,7 +54,6 @@ export default function CreatorProfile({
   followingCount: number
   folders: FolderInfo[]
 }) {
-  const router = useRouter()
   const [tab, setTab] = useState<Tab>('recetas')
 
   // Recipe tab state
@@ -96,21 +61,10 @@ export default function CreatorProfile({
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('todas')
 
-  // Folder tab state
-  const [showCreate, setShowCreate] = useState(false)
-  const [folderName, setFolderName] = useState('')
-  const [editMode, setEditMode] = useState(false)
-  const [isPending, startTransition] = useTransition()
-  const inputRef = useRef<HTMLInputElement>(null)
-
   const initials = user.display_name
     .split(' ').map(w => w[0] ?? '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'
 
   const publishedCount = recipes.filter(r => r.status === 'published').length
-
-  useEffect(() => {
-    if (showCreate) setTimeout(() => inputRef.current?.focus(), 120)
-  }, [showCreate])
 
   const filteredRecipes = useMemo(() => {
     let list = recipes
@@ -128,25 +82,6 @@ export default function CreatorProfile({
     if (!result.error) {
       setRecipes(prev => prev.map(r => r.id === id ? { ...r, status: 'published' as const, published_at: new Date().toISOString() } : r))
     }
-  }
-
-  function handleCreateFolder(e: React.FormEvent) {
-    e.preventDefault()
-    const name = folderName.trim()
-    if (!name) return
-    startTransition(async () => {
-      await createFolder(name)
-      setFolderName('')
-      setShowCreate(false)
-      router.refresh()
-    })
-  }
-
-  function handleDeleteFolder(folderId: string) {
-    startTransition(async () => {
-      await deleteFolder(folderId)
-      router.refresh()
-    })
   }
 
   return (
@@ -307,84 +242,9 @@ export default function CreatorProfile({
       {/* ── Mis carpetas tab ── */}
       {tab === 'carpetas' && (
         <div className="px-5 pt-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-black" style={{ color: 'var(--brown-900)' }}>Mis carpetas</h2>
-            <div className="flex items-center gap-2">
-              {initialFolders.length > 0 && (
-                <button onClick={() => setEditMode(e => !e)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors active:opacity-70"
-                  style={{
-                    background: editMode ? 'var(--brown-900)' : 'var(--brown-100)',
-                    color: editMode ? '#fff' : 'var(--brown-600)',
-                  }}>
-                  {editMode ? 'Hecho' : 'Editar'}
-                </button>
-              )}
-              <button onClick={() => setShowCreate(true)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors active:opacity-70"
-                style={{ background: 'var(--amber)', color: '#000' }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Nueva
-              </button>
-            </div>
-          </div>
-
-          {initialFolders.length === 0 ? (
-            <div className="flex flex-col items-center py-14 text-center">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 text-3xl" style={{ background: 'var(--brown-100)' }}>📁</div>
-              <p className="font-semibold text-sm" style={{ color: 'var(--brown-700)' }}>Sin carpetas aún</p>
-              <p className="text-xs mt-1 max-w-[220px]" style={{ color: 'var(--brown-400)' }}>
-                Crea carpetas para organizar tus recetas guardadas
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {initialFolders.map(folder => (
-                <FolderCard key={folder.id} folder={folder} editMode={editMode}
-                  onDelete={() => handleDeleteFolder(folder.id)} />
-              ))}
-            </div>
-          )}
+          <FolderGrid folders={initialFolders} />
         </div>
       )}
-
-      {/* Backdrop */}
-      <div className="fixed inset-0 z-[60] transition-opacity duration-300"
-        style={{ background: 'rgba(0,0,0,0.45)', opacity: showCreate ? 1 : 0, pointerEvents: showCreate ? 'auto' : 'none' }}
-        onClick={() => { setShowCreate(false); setFolderName('') }} />
-
-      {/* Create folder sheet */}
-      <div className="fixed inset-0 z-[70] pointer-events-none">
-        <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
-          <div className="w-full lg:max-w-[500px] h-full relative">
-            <div className="absolute left-0 right-0 bottom-0 pointer-events-auto transition-transform duration-300 ease-out"
-              style={{ background: 'var(--cream)', borderRadius: '20px 20px 0 0', transform: showCreate ? 'translateY(0)' : 'translateY(100%)' }}>
-              <form onSubmit={handleCreateFolder}>
-                <div className="px-5 pt-4" style={{ paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))' }}>
-                  <div className="flex justify-center mb-4">
-                    <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
-                  </div>
-                  <h3 className="font-black text-base mb-5" style={{ color: 'var(--brown-900)' }}>Nueva carpeta</h3>
-                  <div className="mb-4">
-                    <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--brown-400)' }}>Nombre</label>
-                    <input ref={inputRef} type="text" value={folderName} onChange={e => setFolderName(e.target.value)}
-                      placeholder="Navidad, Desayunos, Verano…" maxLength={40}
-                      className="w-full px-4 py-3 rounded-2xl text-sm focus:outline-none"
-                      style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', fontSize: 16 }} />
-                  </div>
-                  <button type="submit" disabled={isPending || !folderName.trim()}
-                    className="w-full py-3.5 rounded-2xl text-sm font-bold transition-opacity"
-                    style={{ background: 'var(--amber)', color: '#000', opacity: isPending || !folderName.trim() ? 0.5 : 1 }}>
-                    {isPending ? 'Creando…' : 'Crear carpeta'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
