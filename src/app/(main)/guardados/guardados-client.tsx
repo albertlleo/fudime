@@ -42,7 +42,7 @@ function CategoryCard({ cat, recipes }: { cat: string; recipes: RecipeWithCreato
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-2.5 pt-10 pb-3">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-base leading-none">{emoji}</span>
-            <p className="text-white text-sm font-bold uppercase line-clamp-1">{cat}</p>
+            <p className="text-white text-[10px] font-bold uppercase line-clamp-1">{cat}</p>
           </div>
           <p className="text-white/60 text-xs">{recipes.length} receta{recipes.length !== 1 ? 's' : ''}</p>
         </div>
