@@ -122,7 +122,6 @@ export default function CreatorProfile({
               </a>
             </div>
             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-              <span className="text-sm" style={{ color: 'var(--brown-400)' }}>@{user.username ?? user.display_name}</span>
               {user.validated_at && <VerifiedBadge size="sm" />}
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold"
                 style={{ background: '#fffbeb', color: '#92400e', border: '1px solid #fcd34d' }}>
