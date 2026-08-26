@@ -1,8 +1,10 @@
 'use client'
 
-import { useRef, useEffect, useState, useCallback } from 'react'
+import { useRef, useEffect, useState, useCallback, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toggleLike, toggleSave, fetchMoreRecipes, fetchTrendingRecipes, fetchFollowingRecipes } from '@/app/(main)/actions'
+import { deleteRecipe } from '@/app/(main)/perfil/actions'
 import { PAGE_SIZE } from '@/app/(main)/constants'
 import CommentSheet from '@/components/comment-sheet'
 import type { RecipeWithCreator } from '@/lib/types'
@@ -250,6 +252,9 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
   const [descExpanded, setDescExpanded] = useState(false)
   const [showIngredients, setShowIngredients] = useState(false)
   const [showOptions, setShowOptions] = useState(false)
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
+  const [isDeleting, startDelete] = useTransition()
+  const router = useRouter()
   const [shareToast, setShareToast] = useState(false)
   const [likeAnim, setLikeAnim] = useState(false)
   const [doubleTapHeart, setDoubleTapHeart] = useState<{ x: number; y: number; key: number } | null>(null)
@@ -445,12 +450,55 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
                     </svg>
                     <span className="text-base font-medium" style={{ color: 'var(--brown-900)' }}>Editar publicación</span>
                   </Link>
+                  <button onClick={() => { setShowOptions(false); setShowConfirmDelete(true) }}
+                    className="w-full flex items-center gap-3.5 px-5 py-4 active:opacity-70 transition-opacity"
+                    style={{ borderTop: '1px solid var(--brown-100)' }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+                      className="w-5 h-5 flex-shrink-0" style={{ color: '#dc2626' }}>
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                      <path d="M10 11v6M14 11v6" />
+                      <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                    </svg>
+                    <span className="text-base font-medium" style={{ color: '#dc2626' }}>Borrar publicación</span>
+                  </button>
                   <button onClick={() => setShowOptions(false)}
                     className="w-full flex items-center justify-center py-4 text-sm font-medium"
                     style={{ borderTop: '1px solid var(--brown-100)', color: 'var(--brown-400)', marginBottom: 'env(safe-area-inset-bottom)' }}>
                     Cancelar
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Confirm delete dialog */}
+      {isOwner && showConfirmDelete && (
+        <>
+          <div className="fixed inset-0 z-[60]" style={{ background: 'rgba(0,0,0,0.55)' }}
+            onClick={() => setShowConfirmDelete(false)} />
+          <div className="fixed inset-0 z-[70] flex items-center justify-center px-6 pointer-events-none">
+            <div className="w-full max-w-sm rounded-3xl p-6 pointer-events-auto" style={{ background: '#fff' }}>
+              <h3 className="text-lg font-black mb-1" style={{ color: 'var(--brown-900)' }}>¿Borrar publicación?</h3>
+              <p className="text-sm mb-5" style={{ color: 'var(--brown-500)' }}>Esta acción no se puede deshacer.</p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowConfirmDelete(false)}
+                  className="flex-1 py-3 rounded-2xl text-sm font-semibold"
+                  style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
+                  Cancelar
+                </button>
+                <button
+                  disabled={isDeleting}
+                  onClick={() => startDelete(async () => {
+                    await deleteRecipe(recipe.id)
+                    router.push('/perfil')
+                  })}
+                  className="flex-1 py-3 rounded-2xl text-sm font-semibold transition-opacity"
+                  style={{ background: '#dc2626', color: '#fff', opacity: isDeleting ? 0.6 : 1 }}>
+                  {isDeleting ? 'Borrando…' : 'Sí, borrar'}
+                </button>
               </div>
             </div>
           </div>
