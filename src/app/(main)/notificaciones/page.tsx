@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import MarkRead from './mark-read'
 import BackButton from '@/components/back-button'
@@ -101,7 +102,8 @@ export default async function NotificacionesPage() {
 
   let commentMap: Record<string, string> = {}
   if (commentIds.length > 0) {
-    const { data: comments } = await supabase
+    const admin = createAdminClient()
+    const { data: comments } = await admin
       .from('comments')
       .select('id, content')
       .in('id', commentIds)
