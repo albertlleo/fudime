@@ -6,7 +6,7 @@ import { publishRecipe } from './actions'
 import FolderGrid from './folder-grid'
 import VerifiedBadge from '@/components/verified-badge'
 import WebsiteLink from '@/components/website-link'
-import { DIETS, TIMES } from '@/lib/categories'
+import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES, isLongLabel } from '@/lib/categories'
 import type { User, Recipe } from '@/lib/types'
 import type { FolderInfo } from './consumer-profile'
 
@@ -61,6 +61,7 @@ export default function CreatorProfile({
   const [recipes, setRecipes] = useState(initialRecipes)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('todas')
+  const [catFilter, setCatFilter] = useState<string | null>(null)
   const [dietFilter, setDietFilter] = useState<string | null>(null)
   const [tiempoFilter, setTiempoFilter] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
@@ -69,12 +70,13 @@ export default function CreatorProfile({
     .split(' ').map(w => w[0] ?? '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?'
 
   const publishedCount = recipes.filter(r => r.status === 'published').length
-  const activeFilterCount = (dietFilter ? 1 : 0) + (tiempoFilter ? 1 : 0)
+  const activeFilterCount = (catFilter ? 1 : 0) + (dietFilter ? 1 : 0) + (tiempoFilter ? 1 : 0)
 
   const filteredRecipes = useMemo(() => {
     let list = recipes
     if (filter === 'publicadas') list = list.filter(r => r.status === 'published')
     if (filter === 'borradores') list = list.filter(r => r.status !== 'published')
+    if (catFilter) list = list.filter(r => r.tags?.some(t => t.toLowerCase() === catFilter.toLowerCase()))
     if (dietFilter) list = list.filter(r => r.diet?.includes(dietFilter))
     if (tiempoFilter) list = list.filter(r => r.cook_time === tiempoFilter)
     if (search.trim()) {
@@ -82,7 +84,7 @@ export default function CreatorProfile({
       list = list.filter(r => r.title.toLowerCase().includes(q))
     }
     return list
-  }, [recipes, filter, dietFilter, tiempoFilter, search])
+  }, [recipes, filter, catFilter, dietFilter, tiempoFilter, search])
 
   async function handlePublish(id: string) {
     const result = await publishRecipe(id)
@@ -252,8 +254,15 @@ export default function CreatorProfile({
             </div>
 
             {/* Active filter pills */}
-            {(dietFilter || tiempoFilter) && (
+            {(catFilter || dietFilter || tiempoFilter) && (
               <div className="flex flex-wrap gap-2 items-center">
+                {catFilter && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
+                    style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
+                    {CAT_EMOJIS[catFilter.toLowerCase()] ?? '🍴'} {catFilter}
+                    <button onClick={() => setCatFilter(null)} className="leading-none">×</button>
+                  </span>
+                )}
                 {dietFilter && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
                     style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
@@ -303,14 +312,14 @@ export default function CreatorProfile({
       <div className="fixed inset-0 z-[70] pointer-events-none">
         <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
           <div className="w-full lg:max-w-[500px] h-full relative">
-            <div className="absolute left-0 right-0 bottom-0 pointer-events-auto transition-transform duration-300 ease-out px-5 pt-4"
+            <div className="absolute left-0 right-0 bottom-0 pointer-events-auto transition-transform duration-300 ease-out overflow-y-auto"
               style={{
                 background: 'var(--cream)', borderRadius: '20px 20px 0 0',
                 transform: showFilters ? 'translateY(0)' : 'translateY(100%)',
-                paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))',
+                maxHeight: '85dvh',
               }}
               onClick={e => e.stopPropagation()}>
-
+              <div className="px-5 pt-4" style={{ paddingBottom: 'max(32px, calc(env(safe-area-inset-bottom) + 16px))' }}>
               <div className="flex justify-center mb-4">
                 <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
               </div>
@@ -318,11 +327,29 @@ export default function CreatorProfile({
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-black text-base" style={{ color: 'var(--brown-900)' }}>Filtros</h3>
                 {activeFilterCount > 0 && (
-                  <button onClick={() => { setDietFilter(null); setTiempoFilter(null) }}
+                  <button onClick={() => { setCatFilter(null); setDietFilter(null); setTiempoFilter(null) }}
                     className="text-xs font-semibold" style={{ color: 'var(--terracotta)' }}>
                     Limpiar todo
                   </button>
                 )}
+              </div>
+
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
+                Categoría
+              </p>
+              <div className="grid grid-cols-2 gap-2 mb-5">
+                {CATEGORIES.map(cat => {
+                  const active = catFilter?.toLowerCase() === cat.toLowerCase()
+                  return (
+                    <button key={cat} onClick={() => { setCatFilter(active ? null : cat); setShowFilters(false) }}
+                      className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left transition-colors"
+                      style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
+                      <span className="text-xl leading-none flex-shrink-0">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
+                      <span className={`${isLongLabel(cat) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`}
+                        style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{cat}</span>
+                    </button>
+                  )
+                })}
               </div>
 
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
@@ -374,6 +401,7 @@ export default function CreatorProfile({
                 style={{ background: 'var(--brown-900)' }}>
                 Ver {filteredRecipes.length} receta{filteredRecipes.length !== 1 ? 's' : ''}
               </button>
+              </div>
             </div>
           </div>
         </div>
