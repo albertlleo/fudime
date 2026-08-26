@@ -429,8 +429,8 @@ export default function VideoUploader() {
           <textarea
             value={title} onChange={e => setTitle(e.target.value)}
             maxLength={80} placeholder="Escribe un título..." rows={3}
-            className="w-full text-[14px] rounded-2xl px-4 py-3 resize-none focus:outline-none"
-            style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', caretColor: '#f59e0b' }}
+            className="w-full rounded-2xl px-4 py-3 resize-none focus:outline-none"
+            style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', caretColor: '#f59e0b', fontSize: 16 }}
           />
           <p className="text-right text-[11px] mt-1 mb-1" style={{ color: 'var(--brown-300)' }}>{title.length}/80</p>
         </div>
@@ -442,8 +442,8 @@ export default function VideoUploader() {
           </p>
           <textarea value={description} onChange={e => setDescription(e.target.value)}
             rows={6} placeholder="Lista de ingredientes, pasos de la receta, trucos..."
-            className="w-full text-[14px] rounded-2xl px-4 py-3 resize-none focus:outline-none"
-            style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', caretColor: '#f59e0b' }}
+            className="w-full rounded-2xl px-4 py-3 resize-none focus:outline-none"
+            style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', caretColor: '#f59e0b', fontSize: 16 }}
           />
         </div>
 
