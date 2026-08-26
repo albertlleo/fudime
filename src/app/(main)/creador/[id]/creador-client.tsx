@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import RecipeGrid from '@/components/recipe-grid'
-import { CATEGORIES, CAT_EMOJIS, TIMES, isLongLabel } from '@/lib/categories'
+import { CATEGORIES, CAT_EMOJIS, DIETS, TIMES, isLongLabel } from '@/lib/categories'
 import type { RecipeWithCreator } from '@/lib/types'
 
 interface Props {
@@ -13,23 +13,26 @@ interface Props {
 export default function CreadorClient({ recipes, creatorId }: Props) {
   const [q, setQ] = useState('')
   const [activeCat, setActiveCat] = useState('')
+  const [activeDiet, setActiveDiet] = useState('')
   const [activeTiempo, setActiveTiempo] = useState('')
   const [showFilters, setShowFilters] = useState(false)
 
-  const hasFilters = !!(activeCat || activeTiempo)
-  const filterCount = (activeCat ? 1 : 0) + (activeTiempo ? 1 : 0)
+  const hasFilters = !!(activeCat || activeDiet || activeTiempo)
+  const filterCount = (activeCat ? 1 : 0) + (activeDiet ? 1 : 0) + (activeTiempo ? 1 : 0)
 
   const filtered = useMemo(() => {
     return recipes.filter(r => {
       if (q && !r.title.toLowerCase().includes(q.toLowerCase())) return false
       if (activeCat && !r.tags.some(t => t.toLowerCase() === activeCat.toLowerCase())) return false
+      if (activeDiet && !r.diet?.includes(activeDiet)) return false
       if (activeTiempo && r.cook_time !== activeTiempo) return false
       return true
     })
-  }, [recipes, q, activeCat, activeTiempo])
+  }, [recipes, q, activeCat, activeDiet, activeTiempo])
 
   function clearAll() {
     setActiveCat('')
+    setActiveDiet('')
     setActiveTiempo('')
     setShowFilters(false)
   }
@@ -83,6 +86,13 @@ export default function CreadorClient({ recipes, creatorId }: Props) {
               style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
               {CAT_EMOJIS[activeCat.toLowerCase()] ?? '🍴'} {activeCat}
               <button onClick={() => setActiveCat('')} className="leading-none">×</button>
+            </span>
+          )}
+          {activeDiet && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium"
+              style={{ background: 'var(--brown-100)', color: 'var(--brown-700)' }}>
+              {DIETS.find(d => d.key === activeDiet)?.emoji} {DIETS.find(d => d.key === activeDiet)?.label}
+              <button onClick={() => setActiveDiet('')} className="leading-none">×</button>
             </span>
           )}
           {activeTiempo && (
@@ -140,6 +150,21 @@ export default function CreadorClient({ recipes, creatorId }: Props) {
                         style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
                         <span className="text-xl leading-none flex-shrink-0">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
                         <span className={`${isLongLabel(cat) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`} style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{cat}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>Dietas e intolerancias</p>
+                <div className="grid grid-cols-2 gap-2 mb-5">
+                  {DIETS.map(d => {
+                    const active = activeDiet === d.key
+                    return (
+                      <button key={d.key} onClick={() => { setActiveDiet(active ? '' : d.key); setShowFilters(false) }}
+                        className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
+                        style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
+                        <span className="text-xl leading-none">{d.emoji}</span>
+                        <span className="text-sm font-semibold" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{d.label}</span>
                       </button>
                     )
                   })}
