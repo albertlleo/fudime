@@ -128,7 +128,7 @@ export default async function BuscarPage({
                   style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
                 >
                   <span className="text-xl leading-none">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
-                  <span className={`${isLongLabel(cat) ? 'text-[11px] sm:text-[15px]' : 'text-[15px]'} font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{cat}</span>
+                  <span className={`text-[13px] font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{cat}</span>
                 </Link>
               ))}
             </div>
@@ -148,7 +148,7 @@ export default async function BuscarPage({
                   style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
                 >
                   <span className="text-xl leading-none">{d.emoji}</span>
-                  <span className={`${isLongLabel(d.label) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{d.label}</span>
+                  <span className={`text-[13px] font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{d.label}</span>
                 </Link>
               ))}
             </div>
@@ -168,7 +168,7 @@ export default async function BuscarPage({
                   style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}
                 >
                   <span className="text-xl leading-none">{t.emoji}</span>
-                  <span className={`${isLongLabel(t.label) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{t.label}</span>
+                  <span className={`text-[13px] font-semibold leading-tight`} style={{ color: 'var(--brown-700)' }}>{t.label}</span>
                 </Link>
               ))}
             </div>

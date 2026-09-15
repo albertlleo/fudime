@@ -149,7 +149,7 @@ export default function CreadorClient({ recipes, creatorId }: Props) {
                         className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left transition-colors"
                         style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
                         <span className="text-xl leading-none flex-shrink-0">{CAT_EMOJIS[cat.toLowerCase()] ?? '🍴'}</span>
-                        <span className={`${isLongLabel(cat) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`} style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{cat}</span>
+                        <span className={`text-[13px] font-semibold leading-tight`} style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{cat}</span>
                       </button>
                     )
                   })}
@@ -179,7 +179,7 @@ export default function CreadorClient({ recipes, creatorId }: Props) {
                         className="flex items-center gap-2.5 px-4 py-3 rounded-2xl transition-colors"
                         style={{ background: active ? '#fffbeb' : '#fff', border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}` }}>
                         <span className="text-xl leading-none">{t.emoji}</span>
-                        <span className={`${isLongLabel(t.label) ? 'text-[11px] sm:text-sm' : 'text-sm'} font-semibold leading-tight`} style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{t.label}</span>
+                        <span className={`text-[13px] font-semibold leading-tight`} style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{t.label}</span>
                       </button>
                     )
                   })}

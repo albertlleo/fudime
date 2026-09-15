@@ -41,7 +41,7 @@ function Chip({ label, emoji, active, onClick }: { label: string; emoji: string;
         border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
       }}>
       <span className="text-xl leading-none">{emoji}</span>
-      <span className={`${isLongLabel(label) ? 'text-[11px] sm:text-[15px]' : 'text-[15px]'} font-semibold leading-tight`} style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{label}</span>
+      <span className="text-[13px] font-semibold leading-tight" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{label}</span>
     </button>
   )
 }

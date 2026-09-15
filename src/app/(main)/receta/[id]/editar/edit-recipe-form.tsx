@@ -33,7 +33,7 @@ function IconGrid({ options, selected, onToggle, single = false }: {
               border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
             }}>
             <span className="text-lg leading-none flex-shrink-0">{emoji}</span>
-            <span className={`${isLongLabel(label) ? 'text-[11px] sm:text-sm' : 'text-sm'} leading-tight`}>{label}</span>
+            <span className="text-[13px] leading-tight">{label}</span>
           </button>
         )
       })}
