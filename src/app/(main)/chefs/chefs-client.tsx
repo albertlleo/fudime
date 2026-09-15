@@ -101,7 +101,21 @@ export default function ChefsPageClient({
 
       {/* Fixed header: title + tabs + search */}
       <div className="flex-shrink-0 px-5 pt-14 pb-6">
-        <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>Descubrir</h1>
+        {isTrending ? (
+          <div className="flex items-center gap-3 mb-4">
+            <button onClick={() => router.push('/chefs')}
+              className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: 'var(--brown-100)' }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
+                className="w-4.5 h-4.5" style={{ color: 'var(--brown-700)' }}>
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <h1 className="text-2xl font-black" style={{ color: 'var(--brown-900)' }}>🔥 Tendencias</h1>
+          </div>
+        ) : (
+          <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>Descubrir</h1>
+        )}
 
         {/* Tab strip */}
         <div className="flex gap-1 p-1 rounded-2xl mb-3" style={{ background: 'var(--brown-100)' }}>
@@ -129,17 +143,13 @@ export default function ChefsPageClient({
               className="input-cream"
             />
             {isFiltered && (
-              <div className="flex items-center justify-between mt-2">
+              <div className="mt-2">
                 <p className="text-xs" style={{ color: 'var(--brown-500)' }}>
                   {activeLabel
                     ? `${activeLabel} · ${searchResults.length} receta${searchResults.length !== 1 ? 's' : ''}`
                     : `${searchResults.length} resultado${searchResults.length !== 1 ? 's' : ''} para "${searchQuery}"`
                   }
                 </p>
-                <button onClick={() => { setSearchValue(''); router.push('/chefs') }}
-                  className="text-xs font-semibold" style={{ color: 'var(--terracotta)' }}>
-                  Quitar filtro
-                </button>
               </div>
             )}
           </div>

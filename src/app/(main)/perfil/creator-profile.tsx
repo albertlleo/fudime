@@ -25,6 +25,19 @@ function RecipeCard({ recipe, onPublish }: { recipe: Recipe; onPublish: (id: str
       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
         <p className="text-white text-[10px] font-semibold line-clamp-1 leading-tight uppercase">{recipe.title}</p>
       </div>
+      {isPublished && (recipe.likes_count ?? 0) > 0 && (
+        <div className="absolute top-1.5 right-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded-full"
+          style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <svg viewBox="0 0 24 24" fill="#f59e0b" className="w-3 h-3">
+            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+          </svg>
+          <span className="text-white text-[10px] font-bold">
+            {(recipe.likes_count ?? 0) >= 1000
+              ? ((recipe.likes_count ?? 0) / 1000).toFixed(1).replace('.0', '') + 'K'
+              : recipe.likes_count}
+          </span>
+        </div>
+      )}
       {!isPublished && (
         <div className="absolute top-1.5 left-1.5 flex flex-col gap-1">
           <span className="bg-stone-900/80 text-white text-[10px] font-medium px-2 py-0.5 rounded-full">Borrador</span>

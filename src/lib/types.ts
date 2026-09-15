@@ -44,6 +44,7 @@ export interface Recipe {
   tags: string[]
   diet: string[]
   cook_time: string | null
+  likes_count?: number
 }
 
 export interface Follow {
