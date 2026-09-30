@@ -62,18 +62,18 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
   if (!user) throw new Error('Not authenticated')
   if (user.id === creatorId) return { isFollowing: false }
 
-  // Use admin client to bypass RLS on follows table
   const admin = createAdminClient()
 
-  const { count, error: delError } = await admin
+  const { data: existing } = await admin
     .from('follows')
-    .delete({ count: 'exact' })
+    .select('id')
     .eq('follower_id', user.id)
     .eq('following_id', creatorId)
+    .maybeSingle()
 
-  if (delError) throw new Error(delError.message)
-
-  if ((count ?? 0) > 0) {
+  if (existing) {
+    await admin.from('follows').delete().eq('id', existing.id)
+    revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: false }
   }
 
@@ -84,6 +84,7 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
   if (insError) throw new Error(insError.message)
 
   await createNotification(supabase, { user_id: creatorId, type: 'follow', actor_id: user.id })
+  revalidatePath(`/creador/${creatorId}`)
   return { isFollowing: true }
 }
 

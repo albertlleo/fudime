@@ -7,7 +7,7 @@ import { toggleFollow } from '@/app/(main)/actions'
 export default function FollowButton({
   creatorId,
   isFollowing: initialFollowing,
-  followersCount: initialCount,
+  followersCount: _followersCount,
 }: {
   creatorId: string
   isFollowing: boolean
@@ -15,26 +15,20 @@ export default function FollowButton({
 }) {
   const router = useRouter()
   const [following, setFollowing] = useState(initialFollowing)
-  const [count, setCount] = useState(initialCount)
   const [loading, setLoading] = useState(false)
 
   async function handleToggle() {
     if (loading) return
     const prev = following
-    const next = !prev
-
-    setFollowing(next)
-    setCount(c => c + (next ? 1 : -1))
+    setFollowing(!prev)
     setLoading(true)
 
     try {
       const { isFollowing } = await toggleFollow(creatorId)
       setFollowing(isFollowing)
-      setCount(c => c + (isFollowing ? 1 : -1) - (next ? 1 : -1))
       router.refresh()
     } catch {
       setFollowing(prev)
-      setCount(c => c + (prev ? 1 : -1) - (next ? 1 : -1))
     } finally {
       setLoading(false)
     }

@@ -60,10 +60,23 @@ async function main() {
   }
 
   // 4. Delete related rows first (in case no CASCADE)
-  for (const table of ['notifications', 'comments', 'likes', 'saves']) {
+  // Tables with id column
+  for (const table of ['notifications', 'comments', 'saves']) {
     const { error } = await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000')
     if (error) console.warn(`Warning deleting ${table}:`, error.message)
     else console.log(`Cleared ${table}`)
+  }
+  // likes uses (user_id, recipe_id) composite PK
+  {
+    const { error } = await supabase.from('likes').delete().neq('user_id', '00000000-0000-0000-0000-000000000000')
+    if (error) console.warn('Warning deleting likes:', error.message)
+    else console.log('Cleared likes')
+  }
+  // follows uses (follower_id, following_id) composite PK
+  {
+    const { error } = await supabase.from('follows').delete().neq('follower_id', '00000000-0000-0000-0000-000000000000')
+    if (error) console.warn('Warning deleting follows:', error.message)
+    else console.log('Cleared follows')
   }
 
   // 5. Delete all recipes

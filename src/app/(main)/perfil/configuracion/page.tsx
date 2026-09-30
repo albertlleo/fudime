@@ -201,6 +201,25 @@ export default async function ConfiguracionPage() {
         </div>
       )}
 
+      {/* Comunidad */}
+      <div className="mx-5 mb-4">
+        <p className="text-xs font-semibold uppercase tracking-widest mb-2 px-1" style={{ color: 'var(--brown-400)' }}>Comunidad</p>
+        <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
+          <SettingRow
+            href="/perfil/configuracion/ranking"
+            label="Ranking de Creadores"
+            sublabel="Top 30 por likes + guardados"
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"
+                className="w-4 h-4" style={{ color: 'var(--brown-500)' }}>
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+            }
+          />
+        </div>
+      </div>
+
       {/* Admin */}
       {isAdmin && (
         <div className="mx-5 mb-4">
