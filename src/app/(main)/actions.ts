@@ -66,13 +66,15 @@ export async function toggleFollow(creatorId: string): Promise<{ isFollowing: bo
 
   const { data: existing } = await admin
     .from('follows')
-    .select('id')
+    .select('follower_id')
     .eq('follower_id', user.id)
     .eq('following_id', creatorId)
     .maybeSingle()
 
   if (existing) {
-    await admin.from('follows').delete().eq('id', existing.id)
+    await admin.from('follows').delete()
+      .eq('follower_id', user.id)
+      .eq('following_id', creatorId)
     revalidatePath(`/creador/${creatorId}`)
     return { isFollowing: false }
   }
