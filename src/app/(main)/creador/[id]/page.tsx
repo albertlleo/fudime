@@ -38,10 +38,10 @@ export default async function CreadorPage({ params }: { params: Promise<{ id: st
       .order('published_at', { ascending: false }),
     admin
       .from('follows')
-      .select('id')
+      .select('follower_id')
       .eq('following_id', id),
     authUser && !isOwnProfile
-      ? admin.from('follows').select('id').eq('follower_id', authUser.id).eq('following_id', id).maybeSingle()
+      ? admin.from('follows').select('follower_id').eq('follower_id', authUser.id).eq('following_id', id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
   ])
 
