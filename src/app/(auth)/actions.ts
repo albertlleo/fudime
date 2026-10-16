@@ -107,10 +107,12 @@ export async function registerAction(
     city,
     role: 'consumer',
     validated_at: null,
+    comments_enabled: true,
   }, { onConflict: 'id' })
 
   if (upsertError) {
-    return { error: 'Error al guardar el perfil. Intenta de nuevo.' }
+    console.error('[register] upsert error:', upsertError.message, upsertError.details, upsertError.hint, upsertError.code)
+    return { error: `Error al guardar el perfil: ${upsertError.message}` }
   }
 
   if (!authData.session) {
