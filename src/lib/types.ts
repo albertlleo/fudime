@@ -30,6 +30,13 @@ export interface CreatorRequest {
   created_at: string
 }
 
+export interface RecipeMacros {
+  kcal: number
+  protein: number
+  fat: number
+  carbs: number
+}
+
 export interface Recipe {
   id: string
   creator_id: string
@@ -44,6 +51,9 @@ export interface Recipe {
   tags: string[]
   diet: string[]
   cook_time: string | null
+  servings: string | null
+  macros: RecipeMacros | null
+  views_count: number
   likes_count?: number
 }
 

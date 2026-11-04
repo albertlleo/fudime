@@ -13,6 +13,7 @@ interface RankingRow {
   recipe_count: number
   total_likes: number
   total_saves: number
+  total_views: number
   score: number
 }
 
@@ -43,7 +44,7 @@ export default async function RankingPage() {
         <div className="flex-1 min-w-0">
           <h1 className="text-xl font-black" style={{ color: 'var(--brown-900)' }}>Ranking de Creadores</h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--brown-400)' }}>
-            Top 30 · Puntos = likes + guardados
+            Top 30 · Score = (likes + 2×guardados) / reproducciones × 1000
           </p>
         </div>
       </div>

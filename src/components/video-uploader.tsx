@@ -52,11 +52,19 @@ export default function VideoUploader() {
   const videoBlobUrlRef = useRef<string | null>(null)
   const xhrRef = useRef<XMLHttpRequest | null>(null)
 
+  const SERVINGS_OPTIONS = [
+    { key: '1', label: '1 persona', emoji: '🍽️' },
+    { key: '2', label: '2 personas', emoji: '👫' },
+    { key: '4', label: '4 personas', emoji: '👨‍👩‍👦' },
+    { key: 'mas4', label: 'Más de 4', emoji: '🥳' },
+  ]
+
   const [step, setStep] = useState<1 | 2>(1)
   const [videoState, setVideoState] = useState<VideoState>({ status: 'idle' })
   const [coverState, setCoverState] = useState<CoverState>({ status: 'idle' })
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [servings, setServings] = useState('')
   const [categories, setCategories] = useState<string[]>([])
   const [diet, setDiet] = useState<string[]>([])
   const [cookTime, setCookTime] = useState('')
@@ -203,6 +211,7 @@ export default function VideoUploader() {
       tags: categories.map(c => c.toLowerCase()),
       diet: diet.map(d => d.toLowerCase()),
       cookTime: cookTime || null,
+      servings: servings || null,
       publish,
     })
     if (result?.error) { setSubmitError(result.error); setSubmitting(false) }
@@ -210,7 +219,7 @@ export default function VideoUploader() {
 
   const canGoNext = videoState.status === 'done'
   const canSubmit = videoState.status === 'done' && !!title.trim() && !!description.trim()
-    && categories.length > 0 && !!cookTime && !submitting
+    && categories.length > 0 && !!cookTime && !!servings && !submitting
 
   // Show Cloudinary URL when done, or local blob preview while uploading/on error
   const coverSrc = coverState.status === 'done' ? coverState.url : coverPreviewUrl
@@ -445,6 +454,19 @@ export default function VideoUploader() {
             className="w-full rounded-2xl px-4 py-3 resize-none focus:outline-none"
             style={{ background: '#fff', border: '1.5px solid var(--brown-100)', color: 'var(--brown-900)', caretColor: '#f59e0b', fontSize: 16 }}
           />
+        </div>
+
+        {/* Servings */}
+        <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--brown-400)' }}>
+            ¿Para cuántas personas? <span style={{ color: '#dc2626' }}>*</span>
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {SERVINGS_OPTIONS.map(s => (
+              <Chip key={s.key} label={s.label} emoji={s.emoji}
+                active={servings === s.key} onClick={() => setServings(p => p === s.key ? '' : s.key)} />
+            ))}
+          </div>
         </div>
 
         {/* Categoría */}

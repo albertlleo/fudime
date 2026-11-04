@@ -182,6 +182,13 @@ export async function fetchTrendingRecipes(): Promise<{
   }
 }
 
+export async function incrementView(recipeId: string): Promise<void> {
+  try {
+    const admin = createAdminClient()
+    await admin.rpc('increment_view', { p_recipe_id: recipeId })
+  } catch {}
+}
+
 export async function fetchMoreRecipes(cursor: string): Promise<{
   recipes: RecipeWithCreator[]
   likedIds: string[]

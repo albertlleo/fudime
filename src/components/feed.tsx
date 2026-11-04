@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { toggleLike, toggleSave, fetchMoreRecipes, fetchTrendingRecipes, fetchFollowingRecipes } from '@/app/(main)/actions'
+import { toggleLike, toggleSave, fetchMoreRecipes, fetchTrendingRecipes, fetchFollowingRecipes, incrementView } from '@/app/(main)/actions'
 import { deleteRecipe } from '@/app/(main)/perfil/actions'
 import { PAGE_SIZE } from '@/app/(main)/constants'
 import CommentSheet from '@/components/comment-sheet'
@@ -251,7 +251,9 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
   const lastTapRef = useRef<number>(0)
   const [descExpanded, setDescExpanded] = useState(false)
   const [showIngredients, setShowIngredients] = useState(false)
+  const [showMacros, setShowMacros] = useState(false)
   const [showOptions, setShowOptions] = useState(false)
+  const viewedRef = useRef(false)
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [isDeleting, startDelete] = useTransition()
   const router = useRouter()
@@ -292,11 +294,16 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
     if (!videoRef.current) return
     if (entry.isIntersecting) {
       videoRef.current.play().catch(() => {})
+      if (!viewedRef.current) {
+        viewedRef.current = true
+        incrementView(recipe.id)
+      }
     } else {
       videoRef.current.pause()
       videoRef.current.currentTime = 0
       setDescExpanded(false)
       setShowIngredients(false)
+      setShowMacros(false)
     }
   }, [])
 
@@ -377,19 +384,32 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
         </a>
         {/* 2. Recipe title */}
         <p className="text-white font-semibold text-base leading-snug mb-2 truncate uppercase">{recipe.title}</p>
-        {/* 3. INGREDIENTES Y PASO A PASO button */}
-        {hasDesc && (
-          <button
-            onClick={() => setShowIngredients(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium active:opacity-70 transition-opacity"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
-              <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
-            </svg>
-            INGREDIENTES Y PASO A PASO
-          </button>
-        )}
+        {/* 3. Action buttons */}
+        <div className="flex flex-wrap gap-2">
+          {hasDesc && (
+            <button
+              onClick={() => setShowIngredients(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium active:opacity-70 transition-opacity"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+              </svg>
+              INGREDIENTES Y PASO A PASO
+            </button>
+          )}
+          {recipe.macros && (
+            <button
+              onClick={() => setShowMacros(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-white text-xs font-medium active:opacity-70 transition-opacity"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 flex-shrink-0">
+                <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+              MACROS
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Ingredients bottom sheet */}
@@ -410,8 +430,13 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
                 <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
               </div>
               <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '1px solid var(--brown-100)' }}>
-                <h3 className="font-black text-base" style={{ color: 'var(--brown-900)' }}>INGREDIENTES Y PASO A PASO</h3>
-                <button onClick={() => setShowIngredients(false)} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--brown-100)' }}>
+                <div className="flex-1 min-w-0 mr-3">
+                  <h3 className="font-black text-base leading-tight truncate" style={{ color: 'var(--brown-900)' }}>{recipe.title.toUpperCase()}</h3>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--brown-400)' }}>
+                    {recipe.servings ? `Para ${recipe.servings === 'mas4' ? 'más de 4' : recipe.servings} persona${recipe.servings !== '1' ? 's' : ''} · ` : ''}Ingredientes y paso a paso
+                  </p>
+                </div>
+                <button onClick={() => setShowIngredients(false)} className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--brown-100)' }}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{ color: 'var(--brown-500)' }}>
                     <path d="M18 6L6 18M6 6l12 12" />
                   </svg>
@@ -420,6 +445,60 @@ function VideoCard({ recipe, isLiked, isSaved, likeCount, commentCount, muted, i
               <div className="flex-1 overflow-y-auto px-5 py-4" style={{ overscrollBehavior: 'contain' }}>
                 <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--brown-900)' }}>{recipe.description}</p>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Macros bottom sheet */}
+      <div
+        className="fixed inset-0 z-[60] transition-opacity duration-300"
+        style={{ background: 'rgba(0,0,0,0.5)', opacity: showMacros ? 1 : 0, pointerEvents: showMacros ? 'auto' : 'none' }}
+        onClick={() => setShowMacros(false)}
+      />
+      <div className="fixed inset-0 z-[70] pointer-events-none">
+        <div className="h-full lg:pl-[72px] lg:flex lg:justify-center">
+          <div className="w-full lg:max-w-[500px] h-full relative">
+            <div
+              className="absolute left-0 right-0 bottom-0 flex flex-col pointer-events-auto transition-transform duration-300 ease-out"
+              style={{ borderRadius: '20px 20px 0 0', background: 'var(--cream)', transform: showMacros ? 'translateY(0)' : 'translateY(100%)' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+                <div className="w-10 h-1 rounded-full" style={{ background: 'var(--brown-300)' }} />
+              </div>
+              <div className="flex items-center justify-between px-5 py-3 flex-shrink-0" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+                <div>
+                  <h3 className="font-black text-base" style={{ color: 'var(--brown-900)' }}>MACROS POR RACIÓN</h3>
+                  {recipe.servings && (
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--brown-400)' }}>
+                      Para {recipe.servings === 'mas4' ? 'más de 4' : recipe.servings} persona{recipe.servings !== '1' ? 's' : ''}
+                    </p>
+                  )}
+                </div>
+                <button onClick={() => setShowMacros(false)} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: 'var(--brown-100)' }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" style={{ color: 'var(--brown-500)' }}>
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {recipe.macros && (
+                <div className="p-5 grid grid-cols-2 gap-3">
+                  {([
+                    { label: 'KCAL', value: String(recipe.macros.kcal), unit: '' },
+                    { label: 'PROTEÍNA', value: String(recipe.macros.protein), unit: 'g' },
+                    { label: 'GRASAS', value: String(recipe.macros.fat), unit: 'g' },
+                    { label: 'HIDRATOS', value: String(recipe.macros.carbs), unit: 'g' },
+                  ] as const).map(({ label, value, unit }) => (
+                    <div key={label} className="rounded-2xl p-4 flex flex-col gap-1" style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
+                      <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--brown-400)' }}>{label}</p>
+                      <p className="text-2xl font-black leading-none" style={{ color: 'var(--brown-900)' }}>
+                        {value}<span className="text-sm font-semibold ml-0.5" style={{ color: 'var(--brown-500)' }}>{unit}</span>
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
