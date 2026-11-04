@@ -32,7 +32,7 @@ type CoverState =
   | { status: 'done'; url: string }
   | { status: 'error' }
 
-function Chip({ label, emoji, active, onClick }: { label: string; emoji: string; active: boolean; onClick: () => void }) {
+function Chip({ label, emoji, active, onClick }: { label: string; emoji?: string; active: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick}
       className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-left transition-colors"
@@ -40,7 +40,7 @@ function Chip({ label, emoji, active, onClick }: { label: string; emoji: string;
         background: active ? '#fffbeb' : '#fff',
         border: `1.5px solid ${active ? 'var(--amber)' : 'var(--brown-100)'}`,
       }}>
-      <span className="text-xl leading-none">{emoji}</span>
+      {emoji && <span className="text-xl leading-none">{emoji}</span>}
       <span className="text-[13px] font-semibold leading-tight" style={{ color: active ? 'var(--brown-900)' : 'var(--brown-700)' }}>{label}</span>
     </button>
   )
@@ -53,10 +53,10 @@ export default function VideoUploader() {
   const xhrRef = useRef<XMLHttpRequest | null>(null)
 
   const SERVINGS_OPTIONS = [
-    { key: '1', label: '1 persona', emoji: '🍽️' },
-    { key: '2', label: '2 personas', emoji: '👫' },
-    { key: '4', label: '4 personas', emoji: '👨‍👩‍👦' },
-    { key: 'mas4', label: 'Más de 4', emoji: '🥳' },
+    { key: '1', label: '1 persona' },
+    { key: '2', label: '2 personas' },
+    { key: '4', label: '4 personas' },
+    { key: 'mas4', label: 'Más de 4' },
   ]
 
   const [step, setStep] = useState<1 | 2>(1)
@@ -463,7 +463,7 @@ export default function VideoUploader() {
           </p>
           <div className="grid grid-cols-2 gap-2">
             {SERVINGS_OPTIONS.map(s => (
-              <Chip key={s.key} label={s.label} emoji={s.emoji}
+              <Chip key={s.key} label={s.label}
                 active={servings === s.key} onClick={() => setServings(p => p === s.key ? '' : s.key)} />
             ))}
           </div>
