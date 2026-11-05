@@ -8,6 +8,7 @@ import type { RecipeMacros } from '@/lib/types'
 
 async function calculateMacros(description: string, servings: string | null): Promise<RecipeMacros | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY
+  console.log('[macros] key present:', !!apiKey, '| desc len:', description.trim().length)
   if (!apiKey || !description.trim()) return null
   try {
     const client = new Anthropic({ apiKey })
