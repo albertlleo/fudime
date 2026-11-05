@@ -23,11 +23,12 @@ async function calculateMacros(description: string, servings: string | null): Pr
     })
     const text = msg.content[0].type === 'text' ? msg.content[0].text : ''
     const match = text.match(/\{[^}]+\}/)
-    if (!match) return null
+    if (!match) { console.error('[macros] no JSON in response:', text); return null }
     const p = JSON.parse(match[0])
     if (typeof p.kcal !== 'number' || typeof p.protein !== 'number' || typeof p.fat !== 'number' || typeof p.carbs !== 'number') return null
     return { kcal: Math.round(p.kcal), protein: Math.round(p.protein), fat: Math.round(p.fat), carbs: Math.round(p.carbs) }
-  } catch {
+  } catch (e) {
+    console.error('[macros] error:', e)
     return null
   }
 }
