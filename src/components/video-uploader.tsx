@@ -65,6 +65,10 @@ export default function VideoUploader() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [servings, setServings] = useState('')
+  const [macroKcal, setMacroKcal] = useState('')
+  const [macroProtein, setMacroProtein] = useState('')
+  const [macroFat, setMacroFat] = useState('')
+  const [macroCarbs, setMacroCarbs] = useState('')
   const [categories, setCategories] = useState<string[]>([])
   const [diet, setDiet] = useState<string[]>([])
   const [cookTime, setCookTime] = useState('')
@@ -203,6 +207,8 @@ export default function VideoUploader() {
   const handleSubmit = async (publish: boolean) => {
     if (videoState.status !== 'done' || !title.trim()) return
     setSubmitting(true); setSubmitError(null)
+    const k = parseInt(macroKcal), p = parseInt(macroProtein), f = parseInt(macroFat), c = parseInt(macroCarbs)
+    const macros = (k > 0 && p > 0 && f > 0 && c > 0) ? { kcal: k, protein: p, fat: f, carbs: c } : null
     const result = await createRecipe({
       title, description,
       videoUrl: videoState.videoUrl,
@@ -212,6 +218,7 @@ export default function VideoUploader() {
       diet: diet.map(d => d.toLowerCase()),
       cookTime: cookTime || null,
       servings: servings || null,
+      macros,
       publish,
     })
     if (result?.error) { setSubmitError(result.error); setSubmitting(false) }
@@ -465,6 +472,34 @@ export default function VideoUploader() {
             {SERVINGS_OPTIONS.map(s => (
               <Chip key={s.key} label={s.label}
                 active={servings === s.key} onClick={() => setServings(p => p === s.key ? '' : s.key)} />
+            ))}
+          </div>
+        </div>
+
+        {/* Macros */}
+        <div className="px-4 py-4" style={{ borderBottom: '1px solid var(--brown-100)' }}>
+          <p className="text-[11px] font-bold uppercase tracking-widest mb-0.5" style={{ color: 'var(--brown-400)' }}>
+            Macros por ración
+            <span className="ml-1.5 font-normal normal-case text-[11px]" style={{ color: 'var(--brown-300)' }}>opcional</span>
+          </p>
+          <p className="text-[11px] mb-3" style={{ color: 'var(--brown-300)' }}>Rellena los 4 para que aparezcan en el vídeo</p>
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { label: 'KCAL', value: macroKcal, set: setMacroKcal, placeholder: '350' },
+              { label: 'PROTEÍNA (g)', value: macroProtein, set: setMacroProtein, placeholder: '25' },
+              { label: 'GRASAS (g)', value: macroFat, set: setMacroFat, placeholder: '12' },
+              { label: 'HIDRATOS (g)', value: macroCarbs, set: setMacroCarbs, placeholder: '40' },
+            ] as const).map(({ label, value, set, placeholder }) => (
+              <div key={label} className="rounded-2xl px-3 py-2.5" style={{ background: '#fff', border: '1.5px solid var(--brown-100)' }}>
+                <p className="text-[9px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--brown-400)' }}>{label}</p>
+                <input
+                  type="number" inputMode="numeric" min="0" value={value}
+                  onChange={e => set(e.target.value)}
+                  placeholder={placeholder}
+                  className="w-full text-[18px] font-black bg-transparent focus:outline-none"
+                  style={{ color: 'var(--brown-900)', caretColor: '#f59e0b' }}
+                />
+              </div>
             ))}
           </div>
         </div>
