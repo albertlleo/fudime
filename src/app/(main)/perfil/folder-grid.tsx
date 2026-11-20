@@ -156,7 +156,7 @@ export default function FolderGrid({ folders: initialFolders }: { folders: Folde
                   onClick={e => handleFolderClick(folder, e)}
                   className="block rounded-2xl overflow-hidden transition-opacity active:opacity-70"
                   style={{ border: '1.5px solid var(--brown-100)', opacity: editMode ? 0.85 : 1 }}>
-                  <div className="relative w-full" style={{ paddingTop: '75%' }}>
+                  <div className="relative w-full" style={{ paddingTop: '125%' }}>
                     {displayCover
                       ? <img src={displayCover} alt="" className="absolute inset-0 w-full h-full object-cover" />
                       : <div className="absolute inset-0 flex items-center justify-center text-3xl" style={{ background: 'var(--brown-100)' }}>📁</div>

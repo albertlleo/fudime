@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import RecipeGrid from '@/components/recipe-grid'
+import RecipeSearchGrid from '@/components/recipe-search-grid'
 import BackButton from '@/components/back-button'
 import type { RecipeWithCreator } from '@/lib/types'
 
@@ -55,7 +55,7 @@ export default async function GuardadosCategoriaPage({ params }: { params: Promi
         </div>
       </div>
 
-      <RecipeGrid
+      <RecipeSearchGrid
         recipes={list}
         emptyIcon="🔖"
         emptyTitle="Sin recetas guardadas"

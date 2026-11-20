@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import SearchInput from '@/components/search-input'
 import RecipeGrid from '@/components/recipe-grid'
 import TrendingCard from '@/components/trending-card'
+import BackButton from '@/components/back-button'
 import Link from 'next/link'
 import VerifiedBadge from '@/components/verified-badge'
 import type { RecipeWithCreator, User } from '@/lib/types'
@@ -73,9 +74,12 @@ export default async function BuscarPage({
 
       {/* Header */}
       <div className="px-5 pt-14 pb-8">
-        <h1 className="text-2xl font-black mb-4" style={{ color: 'var(--brown-900)' }}>
-          {isTrending ? '🔥 Tendencias' : 'Buscar'}
-        </h1>
+        <div className="flex items-center gap-3 mb-4">
+          <BackButton fallback="/" />
+          <h1 className="text-2xl font-black" style={{ color: 'var(--brown-900)' }}>
+            {isTrending ? '🔥 Tendencias' : 'Buscar'}
+          </h1>
+        </div>
         <SearchInput defaultValue={q ?? ''} />
         {isFiltered && (
           <div className="flex items-center justify-between mt-2">

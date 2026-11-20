@@ -3,6 +3,7 @@ export const CATEGORIES = [
   'Pasta', 'Arroces', 'Verduras', 'Carne y aves', 'Pescado y marisco',
   'Plant Based', 'Huevos y tortillas', 'Panadería', 'Masas y hojaldres',
   'Comida rápida', 'Postres y dulces', 'Salsas y aliños', 'Bebidas',
+  'Internacional', 'Patatas',
 ] as const
 
 export const CAT_EMOJIS: Record<string, string> = {
@@ -11,6 +12,7 @@ export const CAT_EMOJIS: Record<string, string> = {
   'carne y aves': '🍗', 'pescado y marisco': '🐟', 'plant based': '🌿',
   'huevos y tortillas': '🍳', 'panadería': '🍞', 'masas y hojaldres': '🥐',
   'comida rápida': '🍔', 'postres y dulces': '🍰', 'salsas y aliños': '🫙', 'bebidas': '🥤',
+  'internacional': '🌍', 'patatas': '🥔',
 }
 
 export const DIETS = [

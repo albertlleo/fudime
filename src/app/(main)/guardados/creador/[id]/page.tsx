@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import RecipeGrid from '@/components/recipe-grid'
+import RecipeSearchGrid from '@/components/recipe-search-grid'
 import BackButton from '@/components/back-button'
 import VerifiedBadge from '@/components/verified-badge'
 import type { RecipeWithCreator } from '@/lib/types'
@@ -65,7 +65,7 @@ export default async function GuardadosCreadorPage({ params }: { params: Promise
         </div>
       </div>
 
-      <RecipeGrid
+      <RecipeSearchGrid
         recipes={list}
         emptyIcon="🔖"
         emptyTitle="Sin recetas guardadas"
